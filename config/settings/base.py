@@ -56,6 +56,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
+    "data_records.apps.DataRecordsConfig",
+    "gardens.apps.GardensConfig",
+    "collectors.apps.CollectorsConfig",
+    "data_collections.apps.DataCollectionsConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
