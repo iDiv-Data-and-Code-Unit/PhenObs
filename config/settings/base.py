@@ -56,10 +56,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
-    "data_records.apps.DataRecordsConfig",
-    "gardens.apps.GardensConfig",
-    "collectors.apps.CollectorsConfig",
-    "data_collections.apps.DataCollectionsConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -79,7 +75,11 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "phenobs.users.apps.UsersConfig",
-    # Your stuff: custom apps go here
+    "data_records.apps.DataRecordsConfig",
+    "gardens.apps.GardensConfig",
+    "collectors.apps.CollectorsConfig",
+    "data_collections.apps.DataCollectionsConfig",
+    "species_garden.apps.SpeciesGardenConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

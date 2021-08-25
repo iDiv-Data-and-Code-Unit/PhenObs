@@ -9,7 +9,7 @@ from gardens.models import Garden
 class DataCollection(models.Model):
     garden = models.ForeignKey(Garden, on_delete=models.DO_NOTHING)
     date = models.DateTimeField(default=datetime.now, blank=True)
-    doy = models.IntegerField()
+    doy = models.IntegerField()  # Why we have date and doy both at the same time?
     species = models.CharField(max_length=100)
     collector = models.ForeignKey(Collector, on_delete=models.DO_NOTHING)
 
