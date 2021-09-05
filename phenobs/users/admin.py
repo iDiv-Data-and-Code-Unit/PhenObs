@@ -4,8 +4,14 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from phenobs.users.forms import UserChangeForm, UserCreationForm
+from phenobs.users.models import Organization
 
 User = get_user_model()
+
+
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ("name",)
 
 
 @admin.register(User)
@@ -15,7 +21,19 @@ class UserAdmin(auth_admin.UserAdmin):
     add_form = UserCreationForm
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (
+            _("Personal info"),
+            {
+                "fields": (
+                    "name",
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "status",
+                    "organization",
+                )
+            },
+        ),
         (
             _("Permissions"),
             {

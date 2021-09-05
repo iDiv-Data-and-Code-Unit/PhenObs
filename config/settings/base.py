@@ -75,11 +75,11 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "phenobs.users.apps.UsersConfig",
-    "data_records.apps.DataRecordsConfig",
-    "gardens.apps.GardensConfig",
-    "collectors.apps.CollectorsConfig",
-    "data_collections.apps.DataCollectionsConfig",
-    "species_garden.apps.SpeciesGardenConfig",
+    "phenobs.observations.apps.ObservationsConfig",
+    "phenobs.gardens.apps.GardensConfig",
+    "phenobs.plants.apps.PlantsConfig",
+    "phenobs.species.apps.SpeciesConfig",
+    "phenobs.images.apps.ImagesConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
