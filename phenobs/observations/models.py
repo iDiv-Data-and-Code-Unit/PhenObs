@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime
 
 # from django.contrib.auth.models import User
 from django.db import models
+
+from config.settings.base import DATE_INPUT_FORMATS
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -12,8 +14,10 @@ class Collection(models.Model):
     """Collection of observations done in a specific garden on the given date and time."""
 
     garden = models.ForeignKey(Garden, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(
-        default=datetime.now, help_text="Date and time of collection"
+    timestamp = models.DateField(
+        default=date.today(),
+        input_formats=DATE_INPUT_FORMATS,
+        help_text="Date and time of collection",
     )
     doy = models.IntegerField(help_text="Day of year")
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -29,10 +33,10 @@ class Record(models.Model):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
     timestamp_entry = models.DateTimeField(
-        default=datetime.now, help_text="Date and time of record entry"
+        default=datetime.now(), help_text="Date and time of record entry"
     )
     timestamp_edit = models.DateTimeField(
-        default=datetime.now, help_text="Date and time of record edit"
+        default=datetime.now(), help_text="Date and time of record edit"
     )
     editor = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
@@ -40,9 +44,10 @@ class Record(models.Model):
     young_leaves_unfolding = models.BooleanField(null=True)
     flowers_open = models.BooleanField(null=True)
     peak_flowering = models.BooleanField(null=True)
-    flowering_intensity = models.IntegerField(blank=True)
+    flowering_intensity = models.IntegerField(null=True)
     ripe_fruits = models.BooleanField(null=True)
     senescence = models.BooleanField(null=True)
+    senescence_intensity = models.IntegerField(null=True)
     maintenance = models.TextField(blank=True)
     remarks = models.TextField(blank=True)
 

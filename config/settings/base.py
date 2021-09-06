@@ -273,5 +273,6 @@ ACCOUNT_ADAPTER = "phenobs.users.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "phenobs.users.adapters.SocialAccountAdapter"
 
 
-# Your stuff...
+# DATE FORMAT
 # ------------------------------------------------------------------------------
+DATE_INPUT_FORMATS = ["%dd/%mm/%YYYY"]
