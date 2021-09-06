@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.db import models
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
+from ..users.models import User
 
 
 class Collection(models.Model):

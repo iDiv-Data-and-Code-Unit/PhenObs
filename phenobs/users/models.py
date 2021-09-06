@@ -9,6 +9,10 @@ class Organization(Model):
 
     name = CharField(_("Name of Organization"), blank=True, max_length=255)
 
+    def __str__(self) -> str:
+        """Returns name of the organization"""
+        return self.name
+
 
 class User(AbstractUser):
     """Default user for PhenObs."""
@@ -20,7 +24,7 @@ class User(AbstractUser):
     status = CharField(
         _("Status of Member"),
         max_length=255,
-        choices=(("stuff", "stuff"), ("student", "student")),
+        choices=(("staff", "staff"), ("student", "student")),
     )
     organization = ForeignKey(
         Organization,

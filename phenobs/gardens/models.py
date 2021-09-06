@@ -1,5 +1,7 @@
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.db import models
+
+from ..users.models import User
 
 
 class Garden(models.Model):
