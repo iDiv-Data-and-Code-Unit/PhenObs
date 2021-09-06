@@ -1,20 +1,20 @@
 from django.contrib import admin
 
-from .models import DataCollection, DataRecord
+from .models import Collection, Record
 
 
-@admin.register(DataCollection)
-class DataCollectionAdmin(admin.ModelAdmin):
-    """Registers DataCollection model in Django Admin with the given configuration."""
+@admin.register(Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    """Registers Collection model in Django Admin with the given configuration."""
 
-    list_display = ("id", "garden", "timestamp", "user")
+    list_display = ("id", "garden", "timestamp", "creator")
     search_fields = ("id", "garden", "user")
     list_per_page = 10
 
 
-@admin.register(DataRecord)
-class DataRecordAdmin(admin.ModelAdmin):
-    """Registers DataRecord model in Django Admin with the given configuration."""
+@admin.register(Record)
+class RecordAdmin(admin.ModelAdmin):
+    """Registers Record model in Django Admin with the given configuration."""
 
     list_display = (
         "id",

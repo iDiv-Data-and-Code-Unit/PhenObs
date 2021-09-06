@@ -11,11 +11,14 @@ User = get_user_model()
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
+    """Registers the Organization model in Django Admin with the given configuration."""
+
     list_display = ("name",)
 
 
 @admin.register(User)
 class UserAdmin(auth_admin.UserAdmin):
+    """Registers the User model in Django Admin with the given configuration."""
 
     form = UserChangeForm
     add_form = UserCreationForm

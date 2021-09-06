@@ -5,7 +5,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Organization(Model):
-    name = CharField(_("Name of Ogranization"), blank=True, max_length=255)
+    """Organization the user is a member of."""
+
+    name = CharField(_("Name of Organization"), blank=True, max_length=255)
 
 
 class User(AbstractUser):
@@ -29,7 +31,7 @@ class User(AbstractUser):
     )
 
 
-def get_absolute_url(self):
+def get_absolute_url(self) -> str:
     """Get url for user's detail view.
 
     Returns:
