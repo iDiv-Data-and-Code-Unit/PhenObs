@@ -5,6 +5,8 @@ from .models import DataCollection, DataRecord
 
 @admin.register(DataCollection)
 class DataCollectionAdmin(admin.ModelAdmin):
+    """Registers DataCollection model in Django Admin with the given configuration."""
+
     list_display = ("id", "garden", "timestamp", "user")
     search_fields = ("id", "garden", "user")
     list_per_page = 10
@@ -12,6 +14,8 @@ class DataCollectionAdmin(admin.ModelAdmin):
 
 @admin.register(DataRecord)
 class DataRecordAdmin(admin.ModelAdmin):
+    """Registers DataRecord model in Django Admin with the given configuration."""
+
     list_display = (
         "id",
         "collection",
