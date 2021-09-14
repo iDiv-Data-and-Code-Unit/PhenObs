@@ -3,22 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PhenObs's documentation!
+PhenObs Docs
 ======================================================================
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    :caption: Contents:
 
-   howto
-   pycharm/configuration
-   users
+   gardens
+   images
+   observations
+   plants
+   species
 
 
-
-Indices and tables
+Search
 ==================
-
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

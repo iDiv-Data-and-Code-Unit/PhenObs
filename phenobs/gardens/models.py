@@ -5,7 +5,16 @@ from ..users.models import User
 
 
 class Garden(models.Model):
-    """Garden being monitored by PhenObs."""
+    """Garden being monitored by PhenObs.
+
+    Attributes:
+        name (str): Name of the garden
+        latitude (double): Latitude of the garden
+        longitude (double): Longitude of the garden
+        auth_groups (list): User groups with access to the garden
+        auth_users (list): Users with access to the garden
+
+    """
 
     name = models.CharField(max_length=100, unique=True, blank=False, null=False)
     latitude = models.DecimalField(

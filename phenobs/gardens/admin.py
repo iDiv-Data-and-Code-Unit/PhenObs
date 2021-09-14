@@ -2,23 +2,25 @@ from django.contrib import admin
 
 from .models import Garden
 
+# TODO: Get rid of redundant descriptions
+
 
 @admin.register(Garden)
 class GardenAdmin(admin.ModelAdmin):
     """Registers Garden model in Django Admin with the given configuration."""
 
-    list_display = ("id", "name", "longitude", "latitude")
+    list_display = ("id", "name", "latitude", "longitude")
+    list_display_links = ("id", "name")
 
     fieldsets = (
-        ("Name", {"fields": ("name",), "description": "Name of the garden"}),
+        ("Name", {"fields": ("name",)}),
         (
             "Coordinates",
             {
                 "fields": (
                     "latitude",
                     "longitude",
-                ),
-                "description": "Coordinates",
+                )
             },
         ),
         (
@@ -28,7 +30,7 @@ class GardenAdmin(admin.ModelAdmin):
                     "auth_groups",
                     "auth_users",
                 ),
-                "description": "Users and groups with access",
+                "classes": ("wide",),
             },
         ),
     )

@@ -271,8 +271,3 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_ADAPTER = "phenobs.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "phenobs.users.adapters.SocialAccountAdapter"
-
-
-# DATE FORMAT
-# ------------------------------------------------------------------------------
-DATE_INPUT_FORMATS = ["%dd/%mm/%YYYY"]

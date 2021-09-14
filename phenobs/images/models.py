@@ -4,7 +4,14 @@ from ..observations.models import Record
 
 
 class Image(models.Model):
-    """Image taken for the associated record."""
+    """Image taken for the associated record.
+
+    Attributes:
+        record (Record): Associated record
+        image (File): Image file
+        description (str): Description of the image
+
+    """
 
     record = models.ForeignKey(
         Record, on_delete=models.CASCADE, help_text="Associated data record"

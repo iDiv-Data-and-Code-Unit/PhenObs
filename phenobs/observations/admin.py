@@ -7,7 +7,8 @@ from .models import Collection, Record
 class CollectionAdmin(admin.ModelAdmin):
     """Registers Collection model in Django Admin with the given configuration."""
 
-    list_display = ("id", "garden", "timestamp", "creator")
+    list_display = ("id", "garden", "date", "creator")
+    list_display_links = ("id", "date")
     search_fields = ("id", "garden", "user")
     list_per_page = 10
 
@@ -19,12 +20,11 @@ class RecordAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "collection",
-        "timestamp_entry",
         "timestamp_edit",
         "editor",
-        "maintenance",
         "remarks",
         "done",
     )
+    list_display_links = ("id", "collection", "timestamp_edit")
     search_fields = ("id", "collection", "editor", "maintenance", "remarks", "done")
     list_per_page = 10

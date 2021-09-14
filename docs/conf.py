@@ -16,10 +16,12 @@ import django
 
 if os.getenv("READTHEDOCS", default=False) == "True":
     sys.path.insert(0, os.path.abspath(".."))
+
     os.environ["DJANGO_READ_DOT_ENV_FILE"] = "True"
     os.environ["USE_DOCKER"] = "no"
 else:
     sys.path.insert(0, os.path.abspath(".."))
+    # sys.path.insert(0, os.path.abspath(os.path.join('..', 'phenobs')))
 os.environ["DATABASE_URL"] = "sqlite:///readthedocs.db"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 django.setup()
@@ -54,7 +56,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
