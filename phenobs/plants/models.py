@@ -5,7 +5,7 @@ from ..species.models import Species
 
 
 class Plant(models.Model):
-    """Plant in the specific garden with a specific order.
+    """An individual plant in a garden.
 
     Attributes:
         garden (Garden): Garden, where the plant is located at

@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+import os
 from pathlib import Path
 
 import environ
@@ -71,6 +72,7 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "pwa",
 ]
 
 LOCAL_APPS = [
@@ -271,3 +273,28 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_ADAPTER = "phenobs.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "phenobs.users.adapters.SocialAccountAdapter"
+
+# django-pwa
+# ------------------------------------------------------------------------------
+PWA_SERVICE_WORKER_PATH = os.path.join(ROOT_DIR, "staticfiles/js", "serviceworker.js")
+PWA_APP_NAME = "PhenObs"
+PWA_APP_DESCRIPTION = "PhenObs"
+PWA_APP_THEME_COLOR = "#000000"
+PWA_APP_BACKGROUND_COLOR = "#ffffff"
+PWA_APP_DISPLAY = "standalone"
+PWA_APP_SCOPE = "/"
+PWA_APP_ORIENTATION = "any"
+PWA_APP_START_URL = "/"
+PWA_APP_STATUS_BAR_COLOR = "default"
+PWA_APP_ICONS = [
+    {"src": "static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
+]
+PWA_APP_ICONS_APPLE = [{"src": "static/images/PhenObs_Logo.png", "sizes": "160x160"}]
+PWA_APP_SPLASH_SCREEN = [
+    {
+        "src": "static/images/PhenObs_Splash.png",
+        "media": "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
+    }
+]
+PWA_APP_DIR = "ltr"
+PWA_APP_LANG = "en-US"

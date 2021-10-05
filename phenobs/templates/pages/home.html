@@ -1,1 +1,35 @@
 {% extends "base.html" %}
+
+{% block content %}
+  <form id="form">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" id="name" placeholder="name">
+    </div>
+    <div class="form-group">
+      <label for="select">Select</label>
+      <select class="form-control" id="select">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="multiselect">Multiple select</label>
+      <select multiple class="form-control" id="multiselect">
+        <option value="0">Berlin</option>
+        <option value="1">Halle</option>
+        <option value="2">Jena</option>
+        <option value="3">Leipzig</option>
+        <option value="4">Erfurt</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="textarea">Textarea</label>
+      <textarea class="form-control" id="textarea" rows="3"></textarea>
+    </div>
+    <input type="submit" class="btn btn-secondary" value="Save offline">
+  </form>
+{% endblock content %}

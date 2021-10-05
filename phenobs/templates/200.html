@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Success (200){% endblock %}
+
+{% block content %}
+<h1>Success (200)</h1>
+
+<p>{% if exception %}{{ exception }}{% else %}OK{% endif %}</p>
+{% endblock content %}
