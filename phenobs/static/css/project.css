@@ -1,4 +1,16 @@
 /* These styles are generated from project.scss. */
+table {
+    display: block;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+    min-height: 100px;
+    max-height: 200px;
+}
+
+label, p {
+  font-size: 14pt;
+}
 
 .alert-debug {
   color: black;
@@ -10,4 +22,133 @@
   color: #b94a48;
   background-color: #f2dede;
   border-color: #eed3d7;
+}
+
+.nav-item.active a.nav-link.current-nav-link {
+  font-weight: bold;
+  color: #707070;
+}
+
+.nav-shadow {
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+}
+
+.custom-jumbotron {
+  background: rgba(0, 0, 0, 0);
+  border: 1px solid #BBBBBB;
+  border-radius: 20px;
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+}
+
+.wide-button {
+  background: transparent;
+  border: 1px solid #BBBBBB;
+  border-radius: 20px;
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  font-size: 14pt;
+  height: 100px;
+}
+
+.wide-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.wide-button:focus {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.narrow-button {
+  background: transparent;
+  border: 1px solid #BBBBBB;
+  border-radius: 30px;
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  font-size: 14pt;
+  height: 50px;
+}
+
+.narrow-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.narrow-button:focus {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+
+
+#cancel-btn {
+  background: rgba(200, 0, 0, 0.6);
+}
+
+#cancel-btn:hover {
+  background: rgba(180, 0, 0, 0.7);
+}
+
+#cancel-btn:focus {
+  background: rgba(130, 0, 0, 0.8);
+}
+
+
+#cancel-obs-btn {
+  border: 1px solid rgb(200, 0, 0);
+  color: rgb(200, 0, 0);
+}
+
+#cancel-obs-btn:hover {
+  background: rgba(180, 0, 0, 0.2);
+}
+
+#cancel-obs-btn:focus {
+  background: rgba(130, 0, 0, 0.2);
+}
+
+
+#done-btn {
+  background: rgba(0, 205, 0, 0.6);
+}
+
+#done-btn:hover {
+  background: rgba(0, 180, 0, 0.7);
+}
+
+#done-btn:focus {
+  background: rgba(0, 130, 0, 0.8);
+}
+
+
+
+#save-btn {
+  border: 1px solid rgb(0, 205, 0);
+  color: rgb(0, 205, 0);
+}
+
+#save-btn:hover {
+  background: rgba(0, 180, 0, 0.2);
+}
+
+#save-btn:focus {
+  background: rgba(0, 130, 0, 0.2);
+}
+
+
+
+.custom-dropdown {
+  background: transparent;
+  border: 1px solid #BBBBBB;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  font-size: 13pt;
+  height: 35px;
+  margin-left: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.custom-textarea {
+  height: 100px;
 }

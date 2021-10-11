@@ -1,35 +1,56 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-  <form id="form">
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" class="form-control" id="name" placeholder="name">
-    </div>
-    <div class="form-group">
-      <label for="select">Select</label>
-      <select class="form-control" id="select">
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="multiselect">Multiple select</label>
-      <select multiple class="form-control" id="multiselect">
-        <option value="0">Berlin</option>
-        <option value="1">Halle</option>
-        <option value="2">Jena</option>
-        <option value="3">Leipzig</option>
-        <option value="4">Erfurt</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="textarea">Textarea</label>
-      <textarea class="form-control" id="textarea" rows="3"></textarea>
-    </div>
-    <input type="submit" class="btn btn-secondary" value="Save offline">
-  </form>
+
+  {% include '../partial/last_observation.html' %}
+
+  <div class="justify-content-start">
+    <!-- TODO: add onclick events for buttons -->
+    <button class="wide-button mr-3 mb-3 px-4 col-12 col-md-5 col-lg-4 col-xl-3" onclick="location.href='/observations'">
+      <div class="d-inline">
+        <img class="pr-2" src="{% static 'images/all_collections.png' %}" height="60" alt=""/>
+        All collections
+      </div>
+    </button>
+
+    <button class="wide-button px-4 col-12 col-md-5 col-lg-4 col-xl-3" onclick="location.href='{% url 'observations:add' %}'">
+      <div class="d-inline">
+        <img class="pr-2" src="{% static 'images/add_collection.png' %}" height="50" alt=""/>
+        Add collection
+      </div>
+    </button>
+  </div>
+
+{#  <form id="form">#}
+{#    <div class="form-group">#}
+{#      <label for="name">Name</label>#}
+{#      <input type="text" class="form-control" id="name" placeholder="name">#}
+{#    </div>#}
+{#    <div class="form-group">#}
+{#      <label for="select">Select</label>#}
+{#      <select class="form-control" id="select">#}
+{#        <option>1</option>#}
+{#        <option>2</option>#}
+{#        <option>3</option>#}
+{#        <option>4</option>#}
+{#        <option>5</option>#}
+{#      </select>#}
+{#    </div>#}
+{#    <div class="form-group">#}
+{#      <label for="multiselect">Multiple select</label>#}
+{#      <select multiple class="form-control" id="multiselect">#}
+{#        <option value="0">Berlin</option>#}
+{#        <option value="1">Halle</option>#}
+{#        <option value="2">Jena</option>#}
+{#        <option value="3">Leipzig</option>#}
+{#        <option value="4">Erfurt</option>#}
+{#      </select>#}
+{#    </div>#}
+{#    <div class="form-group">#}
+{#      <label for="textarea">Textarea</label>#}
+{#      <textarea class="form-control" id="textarea" rows="3"></textarea>#}
+{#    </div>#}
+{#    <input type="submit" class="btn btn-secondary" value="Save offline">#}
+{#  </form>#}
 {% endblock content %}

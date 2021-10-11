@@ -1,3 +1,15 @@
+let today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const yyyy = today.getFullYear();
+
+today = yyyy + '-' + mm + '-' + dd;
+document.getElementById('datepicker').value = today;
+
+$('#cancel-obs-btn').click(() => {
+    $('#form').addClass('d-none');
+})
+
 let form = document.getElementById('form');
 
 $.ajax({
@@ -5,14 +17,14 @@ $.ajax({
     timeout: 10000,
     error: function(jqXHR) {
         if(jqXHR.status==0) {
-            form.children[4].addEventListener('click', cacheForm);
+            // form.children[4].addEventListener('click', cacheForm);
         }
     },
     success: function() {
-        form.children[4].classList.remove('btn-secondary')
-        form.children[4].classList.add('btn-success');
-        form.children[4].value = "Save";
-        loadFromCache();
+        // form.children[4].classList.remove('btn-secondary')
+        // form.children[4].classList.add('btn-success');
+        // form.children[4].value = "Save";
+        // loadFromCache();
     }
 });
 

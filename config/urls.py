@@ -17,7 +17,7 @@ urlpatterns = [
         ),
     ),
     path(
-        "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
+        "observations/", include("phenobs.observations.urls", namespace="observations")
     ),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),

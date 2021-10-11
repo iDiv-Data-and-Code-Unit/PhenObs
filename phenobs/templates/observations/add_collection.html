@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  {% include '../partial/last_observation.html' %}
+  <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
+    <h1>Add a collection</h1>
+
+    <div class="row justify-content-between px-3 mt-4">
+      <div class="col-md-6 col-lg-3">
+        <input type="date" class="wide-button px-lg-3 col-12" placeholder="dd-mm-yyyy" id="datepicker"/>
+      </div>
+      <div class="col-md-6 mt-3 mt-md-0 col-lg-3">
+        <button class="wide-button px-lg-4 px-md-5 col-12" disabled><strong>Garden</strong> Berlin</button>
+      </div>
+      <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
+        <button class="wide-button px-lg-4 px-md-5 col-12" disabled><strong>Creator</strong> Steve White</button>
+      </div>
+      <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
+        <button class="wide-button col-12" onclick="document.getElementById('form').classList.remove('d-none');">
+          <img src="{% static 'images/add_observation.png' %}" height="20" class="px-1 pb-1"/>  Add an observation
+        </button>
+      </div>
+    </div>
+
+    <form id="form" class="p-4 custom-jumbotron mx-3 mt-4 d-none">
+      <h2>Add an observation</h2>
+
+      <div class="form-group pt-4">
+        <label for="plant" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Plant</label>
+
+        <select name="plant" id="plant" class="custom-dropdown col-3">
+          <option value="plant-1">Plant - 1</option>
+          <option value="plant-2">Plant - 2</option>
+          <option value="plant-3">Plant - 3</option>
+          <option value="plant-4">Plant - 4</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="initial-vegetative-growth" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Initial vegetative growth</label>
+
+        <select name="initial-vegetative-growth" id="initial-vegetative-growth" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="young-leaves-unfolding" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Young leaves unfolding</label>
+
+        <select name="young-leaves-unfolding" id="young-leaves-unfolding" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="flowers-opening" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Flowers opening</label>
+
+        <select name="flowers-opening" id="flowers-opening" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="peak-flowering" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Peak flowering</label>
+
+        <select name="peak-flowering" id="peak-flowering" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="flowering-intensity" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Flowering intensity</label>
+        <input type="number" id="flowering-intensity" name="flowering-intensity" min="0" max="100" class="custom-dropdown col-3">
+      </div>
+
+      <div class="form-group">
+        <label for="ripe-fruits" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Ripe fruits</label>
+
+        <select name="ripe-fruits" id="ripe-fruits" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="senescence" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Senescence</label>
+
+        <select name="senescence" id="senescence" class="custom-dropdown col-3">
+          <option value="y">yes</option>
+          <option value="u">unsure</option>
+          <option value="m">missed</option>
+          <option value="no">no</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="senescence-intensity" class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Senescence intensity</label>
+        <input type="number" id="senescence-intensity" name="senescence-intensity" min="0" max="100" class="custom-dropdown col-3">
+      </div>
+
+      <div class="form-group">
+        <div class="row pl-3">
+          <label class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Maintenance</label>
+          <div class="col-6 col-md-4 col-lg-3 pl-4">
+            <input type="checkbox" class=""> Cut partly
+            <br />
+            <input type="checkbox" class=""> Cut total
+            <br />
+            <input type="checkbox" class=""> Covered natural
+            <br />
+            <input type="checkbox" class=""> Covered artificial
+            <br />
+            <input type="checkbox" class=""> Transplanted
+            <br />
+            <input type="checkbox" class=""> Removed
+            <br />
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="form-group">
+        <div class="row pl-3">
+          <label class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Remarks</label>
+            <textarea id="remarks" name="remarks" class="col-6 col-md-3 ml-4 custom-dropdown custom-textarea">
+            </textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="row pl-3">
+          <label class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Peak flowering estimation</label>
+            <input type="date" class="custom-dropdown px-lg-3 col-6 col-md-3" placeholder="dd-mm-yyyy" id="peak-flowering-estimation"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="row pl-3">
+          <label class="col-xl-3 col-lg-4 col-md-5 col-7 pl-0">Done</label>
+            <input type="checkbox" class="ml-4">
+        </div>
+      </div>
+
+      <div class="row justify-content-end px-3">
+        <input type="button" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mr-0 mr-sm-3" id="cancel-obs-btn" value="Cancel">
+        <input type="submit" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mt-3 mt-sm-0" id="save-btn" value="Save">
+      </div>
+    </form>
+
+    <br />
+    <p class="text-center pt-4"><em>No observations added yet</em></p>
+    <hr>
+
+    <div class="row justify-content-end p-3 p-md-3 p-lg-4">
+      <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 mt-md-0 text-white" id="cancel-btn">Cancel</button>
+      <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 ml-md-3 mt-md-0 text-white" id="done-btn">(0/27) Done</button>
+    </div>
+
+
+  </div>
+
+{% endblock content %}

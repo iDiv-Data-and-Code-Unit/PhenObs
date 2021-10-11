@@ -1,7 +1,7 @@
 var staticCacheName = "django-pwa-v" + new Date().getTime();
 var filesToCache = [
     '/',
-    '/about/',
+    '/observations/',
     '/offline/',
     '/static/css/project.css',
     '/static/css/bootstrap.min.css',
@@ -11,7 +11,9 @@ var filesToCache = [
     '/static/js/popper.min.js',
     '/static/js/project.js',
     '/static/images/PhenObs_Logo.png',
-    '/static/images/PhenObs_Splash.png'
+    '/static/images/PhenObs_Splash.png',
+    '/static/images/all_collections.png',
+    '/static/images/add_collection.png'
 ];
 
 // Cache on install
