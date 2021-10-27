@@ -1,17 +1,4 @@
 /* These styles are generated from project.scss. */
-table {
-    display: block;
-    overflow-x: auto;
-    overflow-y: auto;
-    white-space: nowrap;
-    min-height: 100px;
-    max-height: 200px;
-}
-
-label, p {
-  font-size: 14pt;
-}
-
 .alert-debug {
   color: black;
   background-color: white;
@@ -24,15 +11,40 @@ label, p {
   border-color: #eed3d7;
 }
 
+
+
+table {
+    display: block;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+    min-height: 100px;
+    max-height: 200px;
+}
+
+
+
+label, p {
+  font-size: 14pt;
+}
+
+
+
+
+
+
 .nav-item.active a.nav-link.current-nav-link {
   font-weight: bold;
-  color: #707070;
 }
+
+
 
 .nav-shadow {
   -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
 }
+
+
 
 .custom-jumbotron {
   background: rgba(0, 0, 0, 0);
@@ -41,6 +53,8 @@ label, p {
   -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
 }
+
+
 
 .wide-button {
   background: transparent;
@@ -60,10 +74,12 @@ label, p {
   background: rgba(0, 0, 0, 0.2);
 }
 
+
+
 .narrow-button {
   background: transparent;
   border: 1px solid #BBBBBB;
-  border-radius: 30px;
+  border-radius: 15px;
   -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   font-size: 14pt;
@@ -80,6 +96,82 @@ label, p {
 
 
 
+.custom-dropdown {
+  background: transparent;
+  border: 1px solid #BBBBBB;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+  font-size: 13pt;
+  height: 35px;
+  margin-left: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+
+.custom-multiselect {
+  margin-left: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+
+.custom-dropdown.no-margin-left {
+  margin-left: 0;
+}
+
+
+
+.custom-textarea {
+  height: 100px;
+}
+
+
+
+.plant-row {
+  border-bottom: 1px solid #9c9c9c;
+  cursor: pointer;
+  height: 30px
+}
+
+.plant-row:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+
+
+.disabled-btn {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.disabled-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+
+
+.old-data-btn {
+  background: #fffa91;
+  border: 1px solid #9e9a44;
+}
+
+.old-data-btn:hover {
+  background: #ccc97e;
+}
+
+.old-data-btn:focus {
+  background: #a8a668;
+}
+
+/*.gray-text {*/
+/*  color: #707070;*/
+/*}*/
+
+
+
 #cancel-btn {
   background: rgba(200, 0, 0, 0.6);
 }
@@ -91,6 +183,7 @@ label, p {
 #cancel-btn:focus {
   background: rgba(130, 0, 0, 0.8);
 }
+
 
 
 #cancel-obs-btn {
@@ -105,6 +198,7 @@ label, p {
 #cancel-obs-btn:focus {
   background: rgba(130, 0, 0, 0.2);
 }
+
 
 
 #done-btn {
@@ -132,23 +226,4 @@ label, p {
 
 #save-btn:focus {
   background: rgba(0, 130, 0, 0.2);
-}
-
-
-
-.custom-dropdown {
-  background: transparent;
-  border: 1px solid #BBBBBB;
-  border-radius: 5px;
-  -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
-  box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
-  font-size: 13pt;
-  height: 35px;
-  margin-left: 25px;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.custom-textarea {
-  height: 100px;
 }

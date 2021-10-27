@@ -2,20 +2,20 @@
 {% load static %}
 
 {% block content %}
-  {% include '../partial/last_observation.html' %}
+  {% include 'observations/last_observation.html' %}
   <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
     <div class="row justify-content-between">
-      <h1 class="col-md-6 col-lg-7 col-xl-8">All collections</h1>
+      <h1 class="col-9 col-md-6 col-lg-7 col-xl-8 gray-text">All collections</h1>
       <!-- TODO: add onclick events for buttons -->
-      <button class="narrow-button px-4 col-12 col-md-5 col-lg-4 col-xl-3 mx-md-4" onclick="location.href='{% url 'observations:add' %}'">
-        <div class="d-inline">
+      <button class="narrow-button pl-2 px-sm-3 col-2 mx-auto col-md-5 col-lg-4 col-xl-3 mx-md-4" onclick="location.href='{% url 'observations:add' %}'">
+        <div class="d-inline gray-text">
           <img class="pr-2" src="{% static 'images/add_collection.png' %}" height="35" alt=""/>
-          Add collection
+          <span class="d-none d-md-inline">Add collection</span>
         </div>
       </button>
     </div>
 
-    <table class="table table-borderless">
+    <table class="table table-borderless gray-text">
       <thead>
         <tr>
           <th scope="col">Date</th>
@@ -23,10 +23,12 @@
         </tr>
       </thead>
       <tbody>
+        {% for collection in collections %}
         <tr>
-          <th scope="row">01.04.2020</th>
-          <td>Steve White</td>
+          <th scope="row">{{ collection.date.day }}.{{ collection.date.month }}.{{ collection.date.year }}</th>
+          <td>{{ collection.creator }}</td>
         </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>

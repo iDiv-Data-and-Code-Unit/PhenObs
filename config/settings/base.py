@@ -289,7 +289,9 @@ PWA_APP_STATUS_BAR_COLOR = "default"
 PWA_APP_ICONS = [
     {"src": "static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
 ]
-PWA_APP_ICONS_APPLE = [{"src": "static/images/PhenObs_Logo.png", "sizes": "160x160"}]
+PWA_APP_ICONS_APPLE = [
+    {"src": "static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
+]
 PWA_APP_SPLASH_SCREEN = [
     {
         "src": "static/images/PhenObs_Splash.png",
