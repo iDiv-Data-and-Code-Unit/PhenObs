@@ -15,4 +15,5 @@ urlpatterns = [
         views.add,
         name="add",
     ),
+    path("add/<int:plant_id>/", views.add_observation, name="add_observation"),
 ]

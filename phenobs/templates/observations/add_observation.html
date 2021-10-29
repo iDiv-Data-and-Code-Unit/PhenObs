@@ -1,114 +1,27 @@
-<form id="form" class="p-4 mx-3 mt-4 d-none gray-text">
-  <h2>Add an observation</h2>
+{% extends "observations/add_collection.html" %}
 
-  <div class="form-group pt-4">
-    <label for="plant" class="col-xl-3 col-lg-4 col-md-5 col-sm-7 col-12 pl-0">Plant</label>
+{% block observation %}
+  <form id="form" class="p-4 mx-3 mt-4 gray-text">
+    <h2>Add an observation</h2>
 
-    <select name="plant" id="plant" class="custom-dropdown col-md-3 col-10">
-      {#  TODO: add highlighting for the plants that are done  #}
-      {% for plant in plants %}
-        <option value="{{ plant.garden_name }}-{{ plant.order }}">{{ plant }}</option>
-      {% endfor %}
-    </select>
-
-  </div>
-
-  {% for id in ids %}
-  <div class="form-group">
-    <label for="{{ id.id }}" class="col-xl-3 col-lg-4 col-md-5 col-12 pl-0">{{ id.label }}</label>
-    {% if 'intensity' in id.id %}
-      <input type="number" id="{{ id.id }}" name="{{ id.id }}" min="0" max="100" class="custom-dropdown col-md-3 col-5">
-    {% else %}
-      <select name="{{ id.id }}" id="{{ id.id }}" class="custom-dropdown col-md-3 col-5">
-        <option value="y">yes</option>
-        <option value="u">unsure</option>
-        <option value="m">missed</option>
-        <option value="no">no</option>
-      </select>
-    {% endif %}
-
-    <button type="button" class="custom-dropdown no-margin-left old-data-btn col-md-3 col-5" data-toggle="modal" data-target="#{{ id.id }}-modal">
-      old
-    </button>
-
-  </div>
-  {% endfor %}
-
-  <div class="form-group">
-    <div class="row pl-3">
-      <label class="col-xl-3 col-lg-4 col-md-5 col-sm-7 col-12 pl-0">Maintenance</label>
-      <div class="col-md-3 col-5 custom-multiselect">
-        <input type="checkbox" class=""> Cut partly
-        <br />
-        <input type="checkbox" class=""> Cut total
-        <br />
-        <input type="checkbox" class=""> Covered natural
-        <br />
-        <input type="checkbox" class=""> Covered artificial
-        <br />
-        <input type="checkbox" class=""> Transplanted
-        <br />
-        <input type="checkbox" class=""> Removed
-        <br />
-      </div>
-      <button type="button" class="custom-dropdown no-margin-left old-data-btn col-md-3 col-5" data-toggle="modal" style="margin-left: 5px" data-target="#maintenance-modal">
-        old
-      </button>
-
-    </div>
-
-  </div>
-
-  <div class="form-group">
-    <div class="row pl-3">
-      <label class="col-xl-3 col-lg-4 col-md-5 col-sm-5 col-12 pl-0">Remarks</label>
-        <textarea id="remarks" name="remarks" class="col-10 col-sm-7 col-md-4 col-lg-3 ml-4 custom-dropdown custom-textarea">
-        </textarea>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="row pl-3">
-      <label class="col-xl-3 col-lg-4 col-md-5 col-sm-6 col-12 pl-0">Peak flowering estimation</label>
-        <input type="date" class="custom-dropdown px-lg-3 col-sm-6 col-10 col-md-4 col-lg-3" placeholder="dd-mm-yyyy" id="peak-flowering-estimation"/>
-    </div>
-  </div>
-
-  <div class="row justify-content-end px-3">
-    <input type="button" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mr-0 mr-sm-3" id="cancel-obs-btn" value="Cancel">
-    <input type="submit" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mt-3 mt-sm-0" id="save-btn" value="Save">
-  </div>
-</form>
-
-{% for id in ids %}
-<div class="modal fade" id="{{ id.id }}-modal" tabindex="-1" aria-labelledby="{{ id.id }}-label" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="{{ id.id }}-label">{{ id.label }}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        {% if 'intensity' in id.id %}
-          <div class="form-group">
-            <input type="number" id="{{ id.id }}-old" name="{{ id.id }}-old" min="0" max="100" class="custom-dropdown col-md-3 col-10">
-          </div>
-        {% else %}
-          <select name="{{ id.id }}-old" id="{{ id.id }}-old" class="custom-dropdown col-md-3 col-5">
-            <option value="y">yes</option>
-            <option value="u">unsure</option>
-            <option value="m">missed</option>
-            <option value="no">no</option>
-          </select>
-        {% endif %}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+    <div class="form-group row px-sm-1 px-md-3 pt-4">
+      <label for="plant" class="col-10 col-md-5 col-lg-4 pl-0">Plant</label>
+      <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
+        <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0">
+          {#  TODO: add highlighting for the plants that are done  #}
+          {% for plant in plants %}
+            {% if current is plant %}
+              <option value="{{ plant.garden_name }}-{{ plant.order }}" selected>{{ plant }}</option>
+            {% else %}
+              <option value="{{ plant.garden_name }}-{{ plant.order }}">{{ plant }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <div class="col d-none d-sm-block"></div>
       </div>
     </div>
-  </div>
-</div>
-{% endfor %}
+
+    {% include 'observations/observation_form.html' %}
+  </form>
+  {% include 'observations/modals.html' %}
+{% endblock observation %}
