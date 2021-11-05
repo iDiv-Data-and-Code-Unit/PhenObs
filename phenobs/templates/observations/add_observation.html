@@ -1,13 +1,13 @@
 {% extends "observations/add_collection.html" %}
 
 {% block observation %}
-  <form id="form" class="p-4 mx-3 mt-4 gray-text">
+  <form id="form" class="px-sm-1 px-md-3 mx-3 mt-4 gray-text">
     <h2>Add an observation</h2>
 
     <div class="form-group row px-sm-1 px-md-3 pt-4">
       <label for="plant" class="col-10 col-md-5 col-lg-4 pl-0">Plant</label>
       <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
-        <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0">
+        <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0 new-value-btn">
           {#  TODO: add highlighting for the plants that are done  #}
           {% for plant in plants %}
             {% if current is plant %}
@@ -17,7 +17,9 @@
             {% endif %}
           {% endfor %}
         </select>
-        <div class="col d-none d-sm-block"></div>
+        <div class="col text-center lead">
+          <strong>{{ last_collection.date }}</strong>
+        </div>
       </div>
     </div>
 

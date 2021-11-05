@@ -1,9 +1,11 @@
+{# TODO: Make modals reusable #}
+
 {% for id in ids %}
 <div class="modal fade" id="{{ id.id }}-modal" tabindex="-1" aria-labelledby="{{ id.id }}-label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="{{ id.id }}-label">{{ id.label }} - {{ last_collection.date.day }}.{{ last_collection.date.month }}.{{ last_collection.date.year }}</h5>
+        <h5 class="modal-title" id="{{ id.id }}-label">{{ id.label }} - {{ last_collection.date }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -35,24 +37,24 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="maintenance-label">Maintenance - {{ last_collection.date.day }}.{{ last_collection.date.month }}.{{ last_collection.date.year }}</h5>
+        <h5 class="modal-title" id="maintenance-label">Maintenance - {{ last_collection.date }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <div class="custom-multiselect col mr-2" name="maintenance">
-          <input type="checkbox" {% if 'cut_partly' in record.maintenance %} checked {% endif %} class="" > Cut partly
+          <input type="checkbox" id="cut-partly-old" {% if 'cut_partly' in record.maintenance %} checked {% endif %} class="" > Cut partly
           <br />
-          <input type="checkbox" {% if 'cut_total' in record.maintenance %} checked {% endif %} class=""> Cut total
+          <input type="checkbox" id="cut-total-old" {% if 'cut_total' in record.maintenance %} checked {% endif %} class=""> Cut total
           <br />
-          <input type="checkbox" {% if 'covered_natural' in record.maintenance %} checked {% endif %} class=""> Covered natural
+          <input type="checkbox" id="covered-natural-old" {% if 'covered_natural' in record.maintenance %} checked {% endif %} class=""> Covered natural
           <br />
-          <input type="checkbox" {% if 'covered_artificial' in record.maintenance %} checked {% endif %} class=""> Covered artificial
+          <input type="checkbox" id="covered-artificial-old" {% if 'covered_artificial' in record.maintenance %} checked {% endif %} class=""> Covered artificial
           <br />
-          <input type="checkbox" {% if 'transplanted' in record.maintenance %} checked {% endif %} class=""> Transplanted
+          <input type="checkbox" id="transplanted-old" {% if 'transplanted' in record.maintenance %} checked {% endif %} class=""> Transplanted
           <br />
-          <input type="checkbox" {% if 'removed' in record.maintenance %} checked {% endif %} class=""> Removed
+          <input type="checkbox" id="removed-old" {% if 'removed' in record.maintenance %} checked {% endif %} class=""> Removed
           <br />
         </div>
       </div>
@@ -68,7 +70,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="remarks-label">Remarks - {{ last_collection.date.day }}.{{ last_collection.date.month }}.{{ last_collection.date.year }}</h5>
+        <h5 class="modal-title" id="remarks-label">Remarks - {{ last_collection.date }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -89,7 +91,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="peak-flowering-estimation-label">Peak flowering estimation - {{ last_collection.date.day }}.{{ last_collection.date.month }}.{{ last_collection.date.year }}</h5>
+        <h5 class="modal-title" id="peak-flowering-estimation-label">Peak flowering estimation - {{ last_collection.date }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

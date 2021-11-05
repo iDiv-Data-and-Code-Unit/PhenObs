@@ -33,7 +33,7 @@ label, p {
 
 
 
-.nav-item.active a.nav-link.current-nav-link {
+.active {
   font-weight: bold;
 }
 
@@ -52,6 +52,13 @@ label, p {
   border-radius: 20px;
   -webkit-box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
+}
+
+
+
+.home-jumbotron {
+  background: rgb(121,65,217);
+  background: linear-gradient(90deg, rgba(121,65,217,1) 0%, rgba(1,115,123,1) 100%);
 }
 
 
@@ -109,6 +116,10 @@ label, p {
   padding-right: 10px;
 }
 
+.custom-dropdown:focus {
+  outline: none;
+}
+
 
 
 .custom-multiselect {
@@ -152,17 +163,30 @@ label, p {
 
 
 .old-data-btn {
-  background: #fffa91;
-  border: 1px solid #9e9a44;
+  background: #e8e8e8;
+  border: 1px solid #d4d4d4;
 }
 
 .old-data-btn:hover {
-  background: #ccc97e;
+  background: #d1d1d1;
+}
+
+.old-data-btn:active {
+  background: #c2c2c2;
+  outline: none;
 }
 
 .old-data-btn:focus {
-  background: #a8a668;
+  outline: none;
 }
+
+
+
+.new-value-btn {
+  border: solid 1px #ab47bc;
+}
+
+
 
 /*.gray-text {*/
 /*  color: #707070;*/

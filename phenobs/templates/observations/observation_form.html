@@ -3,13 +3,13 @@
   <label for="{{ id.id }}" class="col-10 col-md-5 col-lg-4 pl-0">{{ id.label }}</label>
   <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
     {% if 'intensity' in id.id %}
-      <input type="number" id="{{ id.id }}" name="{{ id.id }}" min="0" max="100" class="custom-dropdown no-margin-left col mr-3">
+      <input type="number" id="{{ id.id }}" name="{{ id.id }}" min="0" max="100" disabled class="custom-dropdown no-margin-left col mr-3 new-value-btn disabled-btn">
     {% else %}
-      <select name="{{ id.id }}" id="{{ id.id }}" class="custom-dropdown no-margin-left col mr-3">
+      <select name="{{ id.id }}" id="{{ id.id }}" class="custom-dropdown no-margin-left col mr-3 new-value-btn">
         <option value="y">yes</option>
         <option value="u">unsure</option>
         <option value="m">missed</option>
-        <option value="no">no</option>
+        <option value="no" selected>no</option>
       </select>
     {% endif %}
 
@@ -25,21 +25,21 @@
 </div>
 {% endfor %}
 
-<div class="form-group row px-3">
+<div class="form-group row px-sm-1 px-md-3">
   <label for="maintenance" class="col-10 col-md-5 col-lg-4 pl-0">Maintenance</label>
   <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
     <div class="custom-multiselect col mr-2" name="maintenance">
-      <input type="checkbox" class="" > Cut partly
+      <input type="checkbox" class="" id="cut-partly"> Cut partly
       <br />
-      <input type="checkbox" class=""> Cut total
+      <input type="checkbox" class="" id="cut-total"> Cut total
       <br />
-      <input type="checkbox" class=""> Covered natural
+      <input type="checkbox" class="" id="covered-natural"> Covered natural
       <br />
-      <input type="checkbox" class=""> Covered artificial
+      <input type="checkbox" class="" id="covered-artificial"> Covered artificial
       <br />
-      <input type="checkbox" class=""> Transplanted
+      <input type="checkbox" class="" id="transplanted"> Transplanted
       <br />
-      <input type="checkbox" class=""> Removed
+      <input type="checkbox" class="" id="removed"> Removed
       <br />
     </div>
     <button type="button" class="custom-dropdown no-margin-left old-data-btn col text-truncate" data-toggle="modal" data-target="#maintenance-modal">
@@ -48,28 +48,44 @@
   </div>
 </div>
 
-<div class="form-group row px-3">
+<div class="form-group row px-sm-1 px-md-3">
   <label class="col-10 col-md-5 col-lg-4 pl-0">Remarks</label>
   <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
-    <textarea id="remarks" name="remarks" class="col mr-3 custom-dropdown no-margin-left custom-textarea">
-    </textarea>
-    <button type="button" class="custom-dropdown no-margin-left old-data-btn col text-truncate" data-toggle="modal" data-target="#remarks-modal">
+    <textarea id="remarks" name="remarks" class="col mr-lg-3 custom-dropdown no-margin-left custom-textarea new-value-btn"></textarea>
+    <button type="button" class="custom-dropdown no-margin-left old-data-btn col text-truncate d-none d-lg-block" data-toggle="modal" data-target="#remarks-modal">
       {{ record.remarks }}
     </button>
   </div>
+  <label class="col-10 col-md-5 col-lg-4 pl-0"></label>
+  <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6 mt-3 mt-lg-0">
+    <button type="button" class="custom-dropdown no-margin-left old-data-btn col text-truncate d-lg-none" data-toggle="modal" data-target="#remarks-modal">
+        {{ record.remarks }}
+    </button>
+  </div>
+
 </div>
 
-<div class="form-group row px-3">
+<div class="form-group row px-sm-1 px-md-3 d-xl-flex d-none">
   <label class="col-10 col-md-5 col-lg-4 pl-0">Peak flowering estimation</label>
   <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
-      <input type="date" class="custom-dropdown no-margin-left col mr-3" placeholder="dd-mm-yyyy" id="peak-flowering-estimation"/>
+      <input type="date" class="custom-dropdown no-margin-left col mr-3 new-value-btn" placeholder="dd-mm-yyyy" id="peak-flowering-estimation"/>
       <button type="button" class="custom-dropdown no-margin-left old-data-btn col text-truncate" data-toggle="modal" data-target="#peak-flowering-estimation-modal">
         {{ record.peak_flowering_estimation }}
       </button>
   </div>
 </div>
 
+<div class="form-group row px-sm-1 px-md-3">
+  <label class="col-10 col-md-5 col-lg-4 pl-0">No observation possible</label>
+  <div class="d-flex col-12 col-lg-7 col-xl-6">
+    <div class="custom-multiselect col mr-2" name="maintenance">
+        <input type="checkbox" class="" id="no-observation">
+    </div>
+  </div>
+</div>
+
 <div class="row justify-content-end px-3">
-  <input type="button" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mr-0 mr-sm-3" id="cancel-obs-btn" value="Cancel">
-  <input type="submit" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mt-3 mt-sm-0" id="save-btn" value="Save">
+  <input href="" type="button" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mr-0 mr-sm-3" id="cancel-obs-btn" value="Cancel">
+  <input type="hidden" id="next-page" value="{% url 'observations:add_observation' order=order|add:"1" %}">
+  <input type="button" class="wide-button col-12 col-sm-5 col-md-3 col-lg-2 mt-3 mt-sm-0" id="next-btn" value="Next">
 </div>

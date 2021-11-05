@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block observations_active %}active{% endblock observations_active %}
+
 {% block content %}
   {% include 'observations/last_observation.html' %}
   <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
@@ -25,9 +27,9 @@
       <tbody>
         {% for collection in collections %}
         <tr>
-          {#     TODO: add 'humanize' to manage dates     #}
-          <th scope="row">{{ collection.date.day }}.{{ collection.date.month }}.{{ collection.date.year }}</th>
+          <th scope="row">{{ collection.date }}</th>
           <td>{{ collection.creator }}</td>
+          {#     TODO: add buttons for edit; add state (local/online/unfinished)     #}
         </tr>
         {% endfor %}
       </tbody>

@@ -1,4 +1,4 @@
-var staticCacheName = "django-pwa-v03";
+var staticCacheName = "django-pwa-v04";
 var filesToCache = [
     '/',
     '/observations/',
@@ -11,6 +11,7 @@ var filesToCache = [
     '/static/js/jquery-3.3.1.min.js',
     '/static/js/popper.min.js',
     '/static/js/project.js',
+    '/static/js/caching.js',
     '/static/images/PhenObs_Logo.png',
     '/static/images/PhenObs_Splash.png',
     '/static/images/PhenObs_Logo_Rounded_512px.png',

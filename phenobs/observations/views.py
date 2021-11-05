@@ -53,9 +53,9 @@ def add(request):
     return render(request, "observations/add_collection.html", context)
 
 
-def add_observation(request, plant_id):
+def add_observation(request, order):
     context = get_context(request)
-    plant = Plant.objects.filter(id=plant_id).get()
+    plant = Plant.objects.filter(order=order, garden_id=context["garden"].id).get()
     last_collection = Collection.objects.order_by("date").last()
     record = Record.objects.filter(collection_id=last_collection.id).get()
 
@@ -97,5 +97,6 @@ def add_observation(request, plant_id):
     context["record"] = record
     context["last_collection"] = last_collection
     context["current"] = plant
+    context["order"] = order
 
     return render(request, "observations/add_observation.html", context)

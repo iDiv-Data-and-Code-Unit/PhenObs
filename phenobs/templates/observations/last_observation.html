@@ -1,20 +1,22 @@
+{# TODO: Rename the file #}
+
 <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4 gray-text d-xl-block d-none">
   <h1>Plants</h1>
   <p>{{ garden }}</p>
 
   {% for plant in plants %}
   <div class="container">
-    <a class="plant-row row mb-2" data-toggle="collapse" data-target="#{{ plant.garden_name }}-table" role="button" aria-expanded="false" aria-controls="{{ plant.garden_name }}-table">
+    <a class="plant-row row mb-2" data-toggle="collapse" data-target="#{{ plant.garden_name }}-{{ plant.order }}-table" role="button" aria-expanded="{% if order == plant.order %}true{% else %}false{% endif %}" aria-controls="{{ plant.garden_name }}-{{ plant.order }}-table">
       {{ plant.garden_name }} - {{ plant.order }}
     </a>
   </div>
 
-  <div class="collapse" id="{{ plant.garden_name }}-table">
+  <div class="collapse {% if order == plant.order %}show{% endif %}" id="{{ plant.garden_name }}-{{ plant.order }}-table">
     <div class="card card-body">
       <table class="table table-borderless gray-text">
         <thead class="">
           <tr class="">
-            <th scope="col">Plant</th>
+            <th scope="col">Date</th>
             <th scope="col">IVG</th>
             <th scope="col">YLU</th>
             <th scope="col">Flower open</th>
@@ -29,7 +31,7 @@
         <tbody>
           {% for record in records %}
             <tr>
-                <th scope="row">{{ record.record.plant.garden_name }}</th>
+                <th scope="row">{{ record.record.timestamp_entry.date}}</th>
                 {% for value in record.columns %}
                   {% if value == 'y' %}
                     <td><em>{{ 'yes' }}</em></td>

@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block home_active %}active{% endblock home_active %}
+
+
 {% block content %}
 
-  {% include 'observations/last_observation.html' %}
+  <div class="jumbotron-fluid custom-jumbotron home-jumbotron text-white p-3 p-md-3 p-lg-4 my-4">
+    <h1 class="display-2"><strong>{{ garden }}</strong></h1>
+    <h1 class="display-4">{{ date }}</h1>
+    <br />
+    <h1 class="display-4 text-right"><strong>{{ user }}</strong></h1>
+  </div>
 
   <div class="justify-content-start">
     <!-- TODO: add onclick events for buttons -->
