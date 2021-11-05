@@ -11,7 +11,7 @@ def get_context(request):
     garden = Garden.objects.filter(auth_users=request.user).get()
 
     recs = Record.objects.filter(collection_id=last_collection.id)
-    plants = Plant.objects.order_by("order").filter(garden_id=last_collection.garden_id)
+    plants = Plant.objects.order_by("order").filter(garden_id=garden.id).all()
     records = []
 
     for record in recs:

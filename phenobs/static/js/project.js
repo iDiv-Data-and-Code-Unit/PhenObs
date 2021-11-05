@@ -1,6 +1,7 @@
 import { cacheCollection, cacheRecord } from "./caching.js";
 
 let collectionId = null;
+let allPlants = parseInt(document.getElementById('all-plants').innerText);
 
 // Select today's date by default for Collection Date
 let collectionDate = document.getElementById('collection-date');
@@ -48,13 +49,13 @@ let inputs = [
 
 // Create the object
 if (collectionDate) {
-    collectionId = cacheCollection();
-    cacheRecord(collectionId);
+    collectionId = cacheCollection(0);
+    cacheRecord(collectionId, false);
 
     // Add a change listener to each field
     inputs.forEach(function (field) {
         field.addEventListener("change", function () {
-            cacheRecord(collectionId);
+            cacheRecord(collectionId, false);
             let intensity = null;
 
             // Require intensity values to be entered if the respective field value is yes
@@ -101,8 +102,7 @@ if (noObservationPossible) {
     });
 }
 
-function checkDefault(link) {
-  const collection = JSON.parse(localStorage.getItem("collection-" + collectionId));
+function checkDefault(collection, link) {
   const current = collection["records"][document.getElementById("plant").value];
   let defaultFlag = true;
 
@@ -117,6 +117,16 @@ function checkDefault(link) {
   }
 }
 
-document.getElementById('next-btn').addEventListener("click", () => {
-    checkDefault(document.getElementById('next-page').value)
+let nextBtn = document.getElementById('next-btn');
+let doneSoFar = document.getElementById('done-so-far');
+const collection = JSON.parse(localStorage.getItem("collection-" + collectionId));
+
+doneSoFar.innerText = collection["done-so-far"].length;
+
+nextBtn.addEventListener("click", () => {
+    checkDefault(collection, document.getElementById('next-page').value);
+    cacheRecord(collectionId, true);
 })
+
+if (collection["done-so-far"].length == parseInt(allPlants) - 1)
+    nextBtn.value = "Save";

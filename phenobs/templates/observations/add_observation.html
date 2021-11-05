@@ -9,6 +9,7 @@
       <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
         <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0 new-value-btn">
           {#  TODO: add highlighting for the plants that are done  #}
+          <input type="hidden" id="current" value="{{ order }}">
           {% for plant in plants %}
             {% if current is plant %}
               <option value="{{ plant.garden_name }}-{{ plant.order }}" selected>{{ plant }}</option>
