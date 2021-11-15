@@ -9,6 +9,7 @@
 
   <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4 gray-text">
     <h1>Add a collection</h1>
+    <input type="hidden" id="collection-id" value="{{ new_collection_id }}">
 
     <div class="row justify-content-between px-3 mt-4">
       <div class="col-md-6 col-lg-3">
@@ -21,7 +22,7 @@
         <button class="wide-button px-lg-4 px-md-5 col-12 disabled-btn" disabled><strong>Creator</strong> <span id="creator">{{ user }}</span></button>
       </div>
       <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
-        <button class="wide-button col-12 gray-text" onclick="location.href='{% url 'observations:add_observation' order=1 %}'">
+        <button class="wide-button col-12 gray-text" onclick="location.href='{% url 'observations:add' %}'">
           <img src="{% static 'images/add_observation.png' %}" height="20" class="px-1 pb-1"/>  Add an observation
         </button>
       </div>

@@ -5,7 +5,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="{{ id.id }}-label">{{ id.label }} - {{ last_collection.date }}</h5>
+        <h5 class="modal-title" id="{{ id.id }}-label">{{ id.label }} - <span id="{{ id.label }}-date"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -13,14 +13,14 @@
       <div class="modal-body">
         {% if 'intensity' in id.id %}
           <div class="form-group">
-            <input type="number" id="{{ id.id }}-old" name="{{ id.id }}-old" min="0" max="100" class="custom-dropdown col-md-3 col-10" value="{{ id.value }}">
+            <input type="number" id="{{ id.id }}-old" name="{{ id.id }}-old" min="0" max="100" class="custom-dropdown col-md-3 col-10" value="">
           </div>
         {% else %}
           <select name="{{ id.id }}-old" id="{{ id.id }}-old" class="custom-dropdown col-md-3 col-5">
-            <option value="y" {% if "y" in id.value %} selected {% endif %}>yes</option>
-            <option value="u" {% if "u" in id.value %} selected {% endif %}>unsure</option>
-            <option value="m" {% if "m" in id.value %} selected {% endif %}>missed</option>
-            <option value="no" {% if "no" in id.value %} selected {% endif %}>no</option>
+            <option value="y">yes</option>
+            <option value="u">unsure</option>
+            <option value="m">missed</option>
+            <option value="no">no</option>
           </select>
         {% endif %}
       </div>
@@ -37,24 +37,24 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="maintenance-label">Maintenance - {{ last_collection.date }}</h5>
+        <h5 class="modal-title" id="maintenance-label">Maintenance - <span id="maintenance-label-date"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <div class="custom-multiselect col mr-2" name="maintenance">
-          <input type="checkbox" id="cut-partly-old" {% if 'cut_partly' in record.maintenance %} checked {% endif %} class="" > Cut partly
+          <input type="checkbox" id="cut-partly-old" class="" > <span id="cut-partly-old-label">Cut partly</span>
           <br />
-          <input type="checkbox" id="cut-total-old" {% if 'cut_total' in record.maintenance %} checked {% endif %} class=""> Cut total
+          <input type="checkbox" id="cut-total-old" class=""> <span id="cut-total-old-label">Cut total</span>
           <br />
-          <input type="checkbox" id="covered-natural-old" {% if 'covered_natural' in record.maintenance %} checked {% endif %} class=""> Covered natural
+          <input type="checkbox" id="covered-natural-old" class=""> <span id="covered-natural-old-label">Covered natural</span>
           <br />
-          <input type="checkbox" id="covered-artificial-old" {% if 'covered_artificial' in record.maintenance %} checked {% endif %} class=""> Covered artificial
+          <input type="checkbox" id="covered-artificial-old" class=""> <span id="covered-artificial-old-label">Covered artificial</span>
           <br />
-          <input type="checkbox" id="transplanted-old" {% if 'transplanted' in record.maintenance %} checked {% endif %} class=""> Transplanted
+          <input type="checkbox" id="transplanted-old" class=""> <span id="transplanted-old-label">Transplanted</span>
           <br />
-          <input type="checkbox" id="removed-old" {% if 'removed' in record.maintenance %} checked {% endif %} class=""> Removed
+          <input type="checkbox" id="removed-old" class=""> <span id="removed-old-label">Removed</span>
           <br />
         </div>
       </div>
@@ -70,39 +70,14 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="remarks-label">Remarks - {{ last_collection.date }}</h5>
+        <h5 class="modal-title" id="remarks-label">Remarks - <span id="remarks-label-date"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <textarea id="remarks-old" name="remarks" class="col mr-3 custom-dropdown no-margin-left custom-textarea">{{ record.remarks }}
+        <textarea id="remarks-old" name="remarks" class="col mr-3 custom-dropdown no-margin-left custom-textarea">
         </textarea>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="peak-flowering-estimation-modal" tabindex="-1" aria-labelledby="peak-flowering-estimation-label" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="peak-flowering-estimation-label">Peak flowering estimation - {{ last_collection.date }}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group row px-3">
-          <label class="col-10 col-md-5 col-lg-4 pl-0">Peak flowering estimation</label>
-          <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
-              <input type="date" class="custom-dropdown no-margin-left col mr-3" placeholder="dd-mm-yyyy" id="peak-flowering-estimation-old" value="{{ remarks.peak_flowering_estimation }}"/>
-          </div>
-        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

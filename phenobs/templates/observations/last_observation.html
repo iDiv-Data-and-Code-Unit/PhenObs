@@ -10,7 +10,7 @@
       {{ plant.garden_name }} - {{ plant.order }}
     </a>
   </div>
-
+  {# TODO: fix BlueLavender-2 issue rendering wrong values in the table #}
   <div class="collapse {% if order == plant.order %}show{% endif %}" id="{{ plant.garden_name }}-{{ plant.order }}-table">
     <div class="card card-body">
       <table class="table table-borderless gray-text">

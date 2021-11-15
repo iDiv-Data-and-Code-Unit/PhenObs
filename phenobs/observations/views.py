@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 
 from ..gardens.models import Garden
@@ -6,9 +7,9 @@ from .models import Collection, Record
 
 
 def get_context(request):
-    last_collection = Collection.objects.order_by("date").last()
-    collections = Collection.objects.all()
     garden = Garden.objects.filter(auth_users=request.user).get()
+    collections = Collection.objects.filter(garden=garden).all()
+    last_collection = Collection.objects.filter(garden=garden).order_by("date").last()
 
     recs = Record.objects.filter(collection_id=last_collection.id)
     plants = Plant.objects.order_by("order").filter(garden_id=garden.id).all()
@@ -32,6 +33,8 @@ def get_context(request):
         )
 
     context = {
+        "last_collection": last_collection,
+        "new_collection_id": last_collection.id + 1,
         "garden": garden,
         "collections": collections,
         "records": records,
@@ -43,60 +46,83 @@ def get_context(request):
 
 def all(request):
     context = get_context(request)
-
     return render(request, "observations/observations.html", context)
 
 
 def add(request):
     context = get_context(request)
-
-    return render(request, "observations/add_collection.html", context)
-
-
-def add_observation(request, order):
-    context = get_context(request)
-    plant = Plant.objects.filter(order=order, garden_id=context["garden"].id).get()
-    last_collection = Collection.objects.order_by("date").last()
-    record = Record.objects.filter(collection_id=last_collection.id).get()
-
     context["ids"] = [
-        {
-            "id": "initial-vegetative-growth",
-            "label": "Initial vegetative growth",
-            "value": record.initial_vegetative_growth,
-        },
-        {
-            "id": "young-leaves-unfolding",
-            "label": "Young leaves unfolding",
-            "value": record.young_leaves_unfolding,
-        },
-        {
-            "id": "flowers-opening",
-            "label": "Flowers opening",
-            "value": record.flowers_open,
-        },
-        {
-            "id": "peak-flowering",
-            "label": "Peak flowering",
-            "value": record.peak_flowering,
-        },
-        {
-            "id": "flowering-intensity",
-            "label": "Flowering intensity",
-            "value": record.flowering_intensity,
-        },
-        {"id": "ripe-fruits", "label": "Ripe fruits", "value": record.ripe_fruits},
-        {"id": "senescence", "label": "Senescence", "value": record.senescence},
-        {
-            "id": "senescence-intensity",
-            "label": "Senescence intensity",
-            "value": record.senescence_intensity,
-        },
+        {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
+        {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
+        {"id": "flowers-opening", "label": "Flowers opening"},
+        {"id": "peak-flowering", "label": "Peak flowering"},
+        {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
+        {"id": "flowering-intensity", "label": "Flowering intensity"},
+        {"id": "ripe-fruits", "label": "Ripe fruits"},
+        {"id": "senescence", "label": "Senescence"},
+        {"id": "senescence-intensity", "label": "Senescence intensity"},
     ]
 
-    context["record"] = record
-    context["last_collection"] = last_collection
-    context["current"] = plant
-    context["order"] = order
-
     return render(request, "observations/add_observation.html", context)
+
+
+def new(request):
+    garden = Garden.objects.filter(auth_users=request.user).get()
+    all_plants = (
+        Plant.objects.order_by("order").filter(garden=garden, active=True).all()
+    )
+    last_collection = Collection.objects.filter(garden=garden).order_by("date").last()
+    fat_context = get_context(request)
+    plants = []
+    records = {}
+
+    # If no collection is found, then return NULL
+    if last_collection is None:
+        return JsonResponse(None)
+
+    # Structuring last observation values to JSON
+    for record in fat_context["records"]:
+        records[
+            record["record"].plant.garden_name + "-" + str(record["record"].plant.order)
+        ] = {
+            "plant": record["record"].plant.garden_name
+            + "-"
+            + str(record["record"].plant.order),
+            "initial-vegetative-growth": record["record"].initial_vegetative_growth,
+            "young-leaves-unfolding": record["record"].young_leaves_unfolding,
+            "flowers-opening": record["record"].flowers_open,
+            "peak-flowering": record["record"].peak_flowering,
+            "flowering-intensity": record["record"].flowering_intensity,
+            "ripe-fruits": record["record"].ripe_fruits,
+            "senescence": record["record"].senescence,
+            "senescence-intensity": record["record"].senescence_intensity,
+            "covered-artificial": "covered_artificial" in record["record"].maintenance,
+            "covered-natural": "covered_natural" in record["record"].maintenance,
+            "cut-partly": "cut_partly" in record["record"].maintenance,
+            "cut-total": "cut_total" in record["record"].maintenance,
+            "transplanted": "transplanted" in record["record"].maintenance,
+            "removed": "removed" in record["record"].maintenance,
+            "remarks": record["record"].remarks,
+            "peak-flowering-estimation": record["record"].peak_flowering_estimation,
+        }
+    # Last collection all details
+    last_collection_json = {
+        "collection-id": fat_context["last_collection"].id,
+        "collection-date": fat_context["last_collection"].date,
+        "creator": fat_context["last_collection"].creator.name,
+        "garden": fat_context["last_collection"].garden.name,
+        "records": records,
+    }
+    # Plant list for the garden
+    for plant in all_plants:
+        plants.append({"name": plant.garden_name, "order": plant.order})
+    # Necessary information for the new collection
+    new_collection = {
+        "collection-id": last_collection.id + 1,
+        "creator": request.user.username,
+        "garden": garden.name,
+        "last-collection": last_collection_json,
+        "plants": plants,
+    }
+
+    return JsonResponse(new_collection)

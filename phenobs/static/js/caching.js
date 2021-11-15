@@ -1,24 +1,69 @@
-export function cacheCollection() {
-    let id = JSON.parse(localStorage.getItem('last-id'));
-    id = (typeof(id) == 'number') ? id + 1 : 0;
-    // localStorage.setItem("last-id", JSON.stringify(id));        TODO: Do this when the collection is finished and uploaded
+let previousCollection = null;
 
-    // Create the collection in the object
-    // TODO: add the orders into done-so-far
-    const collection = {
-        "collection-date": document.getElementById("collection-date").value,
-        "garden": document.getElementById("garden").innerText,
-        "creator": document.getElementById("creator").innerText,
-        "done-so-far": [],
-        "records": {}
-    };
-
-    localStorage.setItem("collection-" + id, JSON.stringify(collection));
-    return id;
+function setPreviousCollection(data) {
+    previousCollection = data;
+}
+function getPreviousCollection() {
+    return previousCollection;
 }
 
-export function recordDone(collectionId) {
+function cacheFirstTime() {
+    let collections = {
+        'done': {},
+        'unfinished': {}
+    };
 
+    localStorage.setItem(
+        "collections",
+        JSON.stringify(collections)
+    );
+
+    return collections;
+}
+
+export function cacheCollection() {
+    if (previousCollection == null)
+        tryOnline(lastCollectionOnline, lastCollectionOffline);
+    else {
+        let collections = JSON.parse(
+            localStorage.getItem("collections")
+        );
+
+        if (collections == null)
+            collections = cacheFirstTime();
+
+        // Create the collection in the object
+        // TODO: add the orders into done-so-far
+
+        const newID = previousCollection["collection-id"] + 1;
+        const newCollectionID = "collection-" + newID.toString();
+
+        const oldID = previousCollection["collection-id"];
+        const oldCollectionID = "collection-" + oldID.toString();
+
+        let collection = {
+            "collection-id": newID,
+            "collection-date": document.getElementById("collection-date").value,
+            "garden": document.getElementById("garden").innerText,
+            "creator": document.getElementById("creator").innerText,
+            "remaining": [],
+            "records": {}
+        };
+
+        let plants = JSON.parse(
+            localStorage.getItem("plantList")
+        );
+
+        for (let i = 0; i < plants.length; i++) {
+            collection["remaining"].push(plants[i].order);
+        }
+
+        collections["unfinished"][newCollectionID] = collection;
+
+        localStorage.setItem("collections", JSON.stringify(collections));
+
+        cacheRecord(newCollectionID, false);
+    }
 }
 
 export function cacheRecord(collectionId, isDone) {
@@ -58,17 +103,34 @@ export function cacheRecord(collectionId, isDone) {
     record['done'] = isDone;
 
     // Get the old cached object
-    let updatedCollection = JSON.parse(
-        localStorage.getItem("collection-" + collectionId)
+    let collections = JSON.parse(
+        localStorage.getItem("collections")
     );
 
-    if (isDone && updatedCollection["done-so-far"].findIndex(val => val == record["plant"]) == -1)
-        updatedCollection["done-so-far"].push(record["plant"]);
+    let updatedCollection = collections["unfinished"][collectionId];
+    let remaining = updatedCollection["remaining"];
+
+    if (isDone) {
+        let plants = document.getElementById("plant");
+        let order = null;
+
+        for (let plant in plants) {
+            if (plant.selected)
+                order = plant.name;
+        }
+
+        let index = remaining.indexOf(parseInt(order));
+        remaining.splice(index, 1);
+    }
+
     // Update the cached object
     updatedCollection["records"][record["plant"]] = record;
     // Cache the updated object
+
+    collections["unfinished"][collectionId] = updatedCollection;
+
     localStorage.setItem(
-        "collection-" + collectionId, JSON.stringify(updatedCollection)
+        "collections", JSON.stringify(collections)
     );
 }
 
@@ -85,4 +147,84 @@ export function loadFromCache() {
     for (let i = 0; i < data.multiselect.length; i++) {
         multiselect.children[i].selected = data.multiselect[i];
     }
+}
+
+
+export function updatePlantList() {
+    tryOnline(updatePlantListOnline, updatePlantListOffline);
+}
+
+
+export function updatePlantListOnline() {
+    $.ajax({
+        type: "GET",
+        url: '/observations/plant_list',
+        dataType: "json",
+        success: function(data) {
+            localStorage.setItem(
+                "plantList", JSON.stringify(data["plants"])
+            );
+            cacheCollection();
+        },
+        error: function() {
+            alert('Error occurred');
+        }
+    });
+}
+
+
+export function updatePlantListOffline() {
+    cacheCollection();
+}
+
+
+export function lastCollectionOnline() {
+    $.ajax({
+        type: "GET",
+        url: '/observations/last-collection',
+        dataType: "json",
+        success: function(data) {
+            let collections = JSON.parse(
+                localStorage.getItem("collections")
+            );
+            collections["done"]["collection-" + data["collection-id"].toString()] = data;
+            localStorage.setItem(
+                "collections", JSON.stringify(collections)
+            );
+
+            setPreviousCollection(data);
+            cacheCollection();
+        },
+        error: function() {
+            alert('Error occurred');
+        }
+    });
+}
+
+
+export function lastCollectionOffline() {
+    let collections = JSON.parse(
+        localStorage.getItem("collections")
+    );
+    let doneCollections = Object.keys(collections["done"]);
+    setPreviousCollection(collections["done"][doneCollections[doneCollections["length"] - 1]]);
+
+    cacheCollection();
+}
+
+// Checking internet connection
+function tryOnline(online, offline) {
+    $.ajax({
+        url: "/200",
+        timeout: 10000,
+        error: function (jqXHR) {
+            if (jqXHR.status == 0) {
+                console.log(jqXHR.statusMessage)
+                offline();
+            }
+        },
+        success: function () {
+            online();
+        }
+    });
 }

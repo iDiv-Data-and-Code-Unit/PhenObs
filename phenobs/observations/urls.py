@@ -15,5 +15,9 @@ urlpatterns = [
         views.add,
         name="add",
     ),
-    path("add/<int:order>/", views.add_observation, name="add_observation"),
+    path(
+        "new/",
+        views.new,
+        name="new",
+    ),
 ]
