@@ -10,10 +10,10 @@
         <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0 new-value-btn">
           {#  TODO: add highlighting for the plants that are done  #}
           {% for plant in plants %}
-              <option value="{{ plant.garden_name }}-{{ plant.order }}" name="{{ plant.order }}">{{ plant }}</option>
+              <option value="{{ plant.garden_name }}-{{ plant.order }}" name="{{ plant.garden_name }}" id="{{ plant.order }}">{{ plant }}</option>
           {% endfor %}
         </select>
-        <div class="col text-center lead">
+        <div class="col text-center lead" id="last-obs-date">
           <strong>{{ last_collection.date }}</strong>
         </div>
       </div>

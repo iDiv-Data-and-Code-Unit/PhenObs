@@ -14,7 +14,18 @@ export function fillInModalDates(id) {
 
 export function fillInOldData(lastCollection, plant) {
     // Get the elements to be filled in
-    let old_record = lastCollection["records"][plant];
+    let old_record = null;
+    // console.log(plant)
+    // Check if the record exists for the plant
+    if (plant in lastCollection["records"]){
+        toggleButtons(false);
+        old_record = lastCollection["records"][plant];
+    }
+    else {
+        toggleButtons(true);
+        return;
+    }
+
     let old_dropdowns = $('select[id*="-old"]');
     let old_intensities = $('input[type="number"][id*="-old"]')
     let old_checkboxes = $('input[type="checkbox"][id*="-old"]');
@@ -39,7 +50,18 @@ export function fillInOldData(lastCollection, plant) {
 }
 
 export function fillInButtons(lastCollection, plant) {
-    let old_record = lastCollection["records"][plant];
+    let old_record = null;
+
+    // Check if the record exists for the plant
+    if (plant in lastCollection["records"]) {
+        toggleButtons(false);
+        old_record = lastCollection["records"][plant];
+    }
+    else{
+        toggleButtons(true);
+        return;
+    }
+
     let old_checkboxes = $('input[type="checkbox"][id*="-old"]');
     let buttons = $('button[id*="-button"]');
     // For maintenance
@@ -92,4 +114,8 @@ export function toggleButtons(hideFlag) {
         else
             buttons[i].classList.remove("d-none");
     }
+    if (hideFlag)
+        document.getElementById('last-obs-date').classList.add('d-none');
+    else
+        document.getElementById('last-obs-date').classList.remove('d-none');
 }

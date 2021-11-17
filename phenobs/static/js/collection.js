@@ -7,7 +7,7 @@ function setCollectionId(id) {
     collectionId = id;
 }
 
-function getCollectionId() {
+export function getCollectionId() {
     return collectionId;
 }
 
@@ -15,28 +15,44 @@ function setLastCollectionId(id) {
     lastCollectionId = id;
 }
 
-function getLastCollectionId() {
+export function getLastCollectionId() {
     return lastCollectionId;
 }
+
+// Initializes collections item in the local storage
+function initCollections() {
+    let collections = {
+        'done': {},
+        'unfinished': {}
+    };
+
+    localStorage.setItem(
+        "collections", JSON.stringify(collections)
+    );
+
+    return collections;
+}
+
 // get necessary information from the server and create an empty collection
 export function emptyCollection() {
     $.ajax({
         url: "/observations/new",
         error: function (jqXHR) {
-
+            alert()
         },
         success: function (data) {
             createEmptyCollection(data);
             selectPlant(
-                0,
-                data["last-collection"]["collection-" + data["last-collection"]["collection-id"]],
-                data["collection-" + data["collection-id"]]
+                1,
+                getLastCollectionId(),
+                getCollectionId()
             );
         }
     });
 }
 // create an empty collection with default observation values
 function createEmptyCollection(data) {
+    // todo: check if the data is null or not
     let lastCollection = data["last-collection"];
     let plants = data["plants"];
 
@@ -60,9 +76,10 @@ function createEmptyCollection(data) {
      */
     for (let i = 0; i < plants.length; i++) {
         newCollection["remaining"].push(plants[i].order);
-        newCollection[plants[i].name + "-" + plants[i].order] = {
+        newCollection["records"][plants[i].name + "-" + plants[i].order] = {
             "name": plants[i].name,
             "order": plants[i].order,
+            "plant": plants[i].name + "-" + plants[i].order,
             "initial-vegetative-growth": "no",
             "young-leaves-unfolding": "no",
             "flowers-opening": "no",
@@ -88,6 +105,9 @@ function createEmptyCollection(data) {
     let collections = JSON.parse(
         localStorage.getItem("collections")
     );
+    // Check if the collections item has been initialized
+    if (collections == null)
+        collections = initCollections();
     // Add the last collection to the "done" list
     collections["done"]["collection-" + lastCollection["collection-id"]] = lastCollection;
     // Add the new collection to the "unfinished" list
