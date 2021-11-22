@@ -1,4 +1,4 @@
-var staticCacheName = "django-pwa-v04";
+var staticCacheName = "django-pwa-v05";
 var filesToCache = [
     '/',
     '/observations/',
@@ -11,13 +11,18 @@ var filesToCache = [
     '/static/js/jquery-3.3.1.min.js',
     '/static/js/popper.min.js',
     '/static/js/project.js',
-    '/static/js/caching.js',
+    '/static/js/add.js',
+    '/static/js/observation.js',
+    '/static/js/collection.js',
+    '/static/js/modals.js',
+    '/static/js/add.js',
     '/static/images/PhenObs_Logo.png',
     '/static/images/PhenObs_Splash.png',
     '/static/images/PhenObs_Logo_Rounded_512px.png',
     '/static/images/all_collections.png',
     '/static/images/add_collection.png',
-    '/static/images/add_observation.png'
+    '/static/images/add_observation.png',
+    '/static/images/loading.gif'
 ];
 
 // Cache on install

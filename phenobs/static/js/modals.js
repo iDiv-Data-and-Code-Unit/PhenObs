@@ -1,12 +1,8 @@
-export function fillInModalDates(id) {
-    // Get the last collection from local storage
-    let collections = JSON.parse(
-        localStorage.getItem("collections")
-    );
-    let lastCollection = collections["done"][id];
+export function fillInModalDates(lastCollection) {
     // Get all the spans with date values in the modal titles
     let modals = $('span[id*="-date"]');
     // Add the last collection dates
+    // TODO: make the dates more human readable (LongDate)
     for (let j = 0; j < modals.length; j++) {
         modals[j].innerText = lastCollection["collection-date"];
     }

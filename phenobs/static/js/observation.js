@@ -1,4 +1,5 @@
 import { fillInOldData, fillInModalDates, fillInButtons } from "./modals.js";
+import { getCollections } from "./collection.js";
 
 export function getFields() {
     return {
@@ -9,35 +10,28 @@ export function getFields() {
     };
 }
 
-export function selectPlant(order, lastCollectionId, currentCollectionId) {
-    let collections = JSON.parse(
-        localStorage.getItem("collections")
-    );
-    // Get the last collection from local storage
-    let lastCollection = collections["done"][lastCollectionId];
-    // Get the current collection
-    let collection = collections["unfinished"][currentCollectionId];
-
+export function selectPlant(order, lastCollectionId, currentCollectionId, collections) {
     // Read values from JSON into fields
     let plants = document.getElementById('plant');
     let fields = getFields();
     // Choose the current plant from local storage
-    let record = null;
-    for (let key in collection["records"]) {
-        // console.log(key)
-        // console.log(collection["records"][key])
-        // console.log(collection["records"][key]["order"])
-        // console.log(order)
-        if (collection["records"][key]["order"] == order)
-            record = collection["records"][key];
-    }
+    let record = collections["unfinished"][currentCollectionId]["records"][plants.children[order - 1].value];
+
     // Set the plant
     plants.selectedIndex = order - 1;
 
-    if (plants.selectedIndex == 0 || !collection["remaining"].length) {
+    if (order === 1) {
         $('#prev-btn').addClass("d-none");
     } else {
         $('#prev-btn').removeClass("d-none");
+    }
+
+    console.log(order, Object.keys(collections["unfinished"][currentCollectionId]['records']).length)
+
+    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length) {
+        $('#next-btn').addClass("d-none");
+    } else {
+        $('#next-btn').removeClass("d-none");
     }
 
     // Set the dropdowns
@@ -53,20 +47,21 @@ export function selectPlant(order, lastCollectionId, currentCollectionId) {
     }
     // Set the checkboxes
     for (let i = 0; i < fields["checkboxes"].length; i++) {
-        fields["checkboxes"][i].value = record[fields["checkboxes"][i].id];
+        fields["checkboxes"][i].checked = record[fields["checkboxes"][i].id];
     }
 
     // Set the textarea
-    fields["textarea"].value = record["remarks"];
+    fields["textarea"][0].value = record["remarks"];
     // Call button and modal filling functions
-    fillInOldData(lastCollection, record["plant"]);
+    fillInOldData(collections["done"][lastCollectionId], record["plant"]);
     fillInModalDates(lastCollectionId);
-    fillInButtons(lastCollection, record["plant"]);
+    fillInButtons(collections["done"][lastCollectionId], record["plant"]);
     // Cache the record
-    cacheRecord(currentCollectionId, record["done"]);
+    cacheRecord(currentCollectionId, record["done"], getCollections());
+    noObservationPossible(record["no-observation"]);
 }
 
-export function selectNextPlant(order, lastCollectionId, collectionId) {
+export function selectNextPlant(order, lastCollectionId, collectionId, collections) {
     let valid = true;
     $('[required]').each(function() {
         if ($(this).is(':invalid') || !$(this).val()) {
@@ -76,76 +71,60 @@ export function selectNextPlant(order, lastCollectionId, collectionId) {
     });
     if (!valid) alert("Please fill all fields!");
     else {
-        let collections = JSON.parse(
-            localStorage.getItem("collections")
-        );
+        cacheRecord(collectionId, true, getCollections());
         let int_order = parseInt(order);
         // Select the next plant
-        if (collections["unfinished"][collectionId]["remaining"].indexOf(int_order + 1) > -1)
-            selectPlant(int_order + 1, lastCollectionId, collectionId);
-        // Select a remaining plant
-        else if (collections["unfinished"][collectionId]["remaining"].length > 0)
-            selectPlant(collections["unfinished"][collectionId]["remaining"][0], lastCollectionId, collectionId);
-        else
-            alert("Collection is ready to be saved");
+        selectPlant(int_order + 1, lastCollectionId, collectionId, collections);
     }
 }
 
-export function selectPreviousPlant(order, lastCollectionId, collectionId) {
+export function selectPreviousPlant(order, lastCollectionId, collectionId, collections) {
     let valid = true;
     $('[required]').each(function() {
         if ($(this).is(':invalid') || !$(this).val()) {
             $(this).focus();
+            console.log(this);
             valid = false;
         }
     });
     if (!valid) alert("Please fill all fields!");
     else {
-        let collections = JSON.parse(
-            localStorage.getItem("collections")
-        );
+        cacheRecord(collectionId, true, getCollections());
         let int_order = parseInt(order);
-        // Select the next plant
-        if (collections["unfinished"][collectionId]["remaining"].indexOf(int_order - 1) > -1)
-            selectPlant(int_order - 1, lastCollectionId, collectionId);
+        selectPlant(int_order - 1, lastCollectionId, collectionId, collections);
     }
 }
 
-export function checkDefault(lastCollectionId, collectionId, flag) {
-    console.log(collectionId);
-    let collections = JSON.parse(
-        localStorage.getItem("collections")
-    );
-    let collection = collections["unfinished"][collectionId];
-    let current = collection["records"][document.getElementById("plant").value];
+export function checkDefault(lastCollectionId, collectionId, flag, collections) {
+    let current = collections["unfinished"][collectionId]["records"][document.getElementById("plant").value];
     let defaultFlag = true;
     // Check the values
-    for (let i = 0; i < current.length; i++) {
-        if (current[i] == 'y' ||
-            current[i] == 'u' ||
-            current[i] == 'm' ||
-            current[i] == true)
+    for (let key in current) {
+        if (current[key] === 'y' ||
+            current[key] === 'u' ||
+            current[key] === 'm' ||
+            current[key] === true) {
             defaultFlag = false;
+        }
     }
     // Check if the values are default
-    if (defaultFlag) {
+    if (defaultFlag && !current["done"]) {
         if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
-            cacheRecord(collectionId, true);
             if (flag)
-                selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId);
+                selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
             else
-                selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId);
+                selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
         }
     } else {
-        cacheRecord(collectionId, true);
         if (flag)
-            selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId);
+            selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
         else
-            selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId);
+            selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
     }
 }
 
-export function cacheRecord(collectionId, isDone) {
+export function cacheRecord(collectionId, isDone, collections) {
+    let collection = collections["unfinished"][collectionId];
     // Current record to be cached
     let record = {}
     // IDs of the elements to be cached
@@ -168,7 +147,8 @@ export function cacheRecord(collectionId, isDone) {
             "covered-natural",
             "covered-artificial",
             "transplanted",
-            "removed"
+            "removed",
+            "no-observation"
         ]
     };
 
@@ -179,54 +159,49 @@ export function cacheRecord(collectionId, isDone) {
     ids['checked'].forEach(function(id) {
        record[id] = document.getElementById(id).checked
     });
-    record['done'] = isDone;
 
     const plants = document.getElementById("plant");
+    record['done'] = (isDone) ? isDone : collection["records"][plants.children[plants.selectedIndex].value]["done"];
     record['name'] = plants.children[plants.selectedIndex].name;
-    record['order'] =  plants.children[plants.selectedIndex].id;
-
-    // Get the collections
-    let collections = JSON.parse(
-        localStorage.getItem("collections")
-    );
-    let collection = collections["unfinished"][collectionId];
+    record['order'] =  plants.selectedIndex + 1;
 
     // Check if the plant is finished
     if (isDone) {
-        console.log(isDone);
-        let remaining = collection["remaining"];
         let plants = document.getElementById("plant");
-        let doneBtn = $("#done-btn");
-
         // Remove the order from the remaining orders list
-        const index = remaining.indexOf(plants.selectedIndex + 1);
+        const index = collection["remaining"].indexOf(plants.selectedIndex + 1);
         // If the element is already finished
         if (index > -1)
-            remaining.splice(index, 1);
-        // Check if there remains only 1 plant, then rename "Next" to "Finish"
-        // If there exists no plant, then disable the button
-        if (remaining.length === 1)
-            $('#next-btn').val("Finish");
-        else if (!remaining.length) {
-            $('#next-btn').prop('disabled', true);
-            doneBtn.prop("disabled", false);
-        }
-        else {
-            $('#next-btn').val("Next");
-            doneBtn.prop("disabled", true);
-        }
+            collection["remaining"].splice(index, 1);
         // Highlight the plant in the dropdown
         $('option[id='+ (plants.selectedIndex + 1).toString() +']').addClass("done-plant");
-        // Update the "Done" button to show updated progress
-        doneBtn.val(
-            (collection["records"].length - remaining.length) +
-            "/" +
-            collection["records"].length +
-            " Done"
-        );
     }
 
-    // Update the collection
+    // Done collection button
+    let doneBtn = $("#done-btn");
+    // If there exists no plant, then disable the button
+    if (!collection["remaining"].length) {
+        doneBtn.prop("disabled", false);
+        doneBtn.addClass("text-white");
+        doneBtn.removeClass("text-black");
+        doneBtn.addClass("done-btn-ready");
+    } else {
+        doneBtn.prop("disabled", true);
+        doneBtn.addClass("text-black");
+        doneBtn.removeClass("text-white");
+        doneBtn.removeClass("done-btn-ready");
+    }
+    // Update the "Done" button to show updated progress
+    doneBtn.text(
+        (Object.keys(collection["records"]).length - collection["remaining"].length) +
+        "/" +
+        Object.keys(collection["records"]).length +
+        " Done"
+    );
+
+    if (!collection["remaining"].length && !collection["records"][record["plant"]]["done"] && isDone)
+        alert("Collection is ready to be saved");
+
     collection["records"][record["plant"]] = record;
     // Update the collections
     collections["unfinished"][collectionId] = collection;
@@ -256,22 +231,27 @@ export function noObservationPossible(flag) {
 }
 
 export function requireIntensities() {
-    if ($('#senescence').val() == 'y' && !$('#senescence').prop('disabled')) {
-        $('#senescence-intensity').prop('disabled', false);
-        $('#senescence-intensity').prop('required', true);
-        $('#senescence-intensity').removeClass('disabled-btn');
+    let senescence = $('#senescence');
+    let senescenceIntensity = $('#senescence-intensity');
+    let flowersOpening = $('#flowers-opening');
+    let floweringIntensity = $('#flowering-intensity');
+
+    if (senescence.val() == 'y' && !senescence.prop('disabled')) {
+        senescenceIntensity.prop('disabled', false);
+        senescenceIntensity.prop('required', true);
+        senescenceIntensity.removeClass('disabled-btn');
     } else {
-        $('#senescence-intensity').addClass('disabled-btn');
-        $('#senescence-intensity').prop('disabled', true);
-        $('#senescence-intensity').prop('required', false);
+        senescenceIntensity.addClass('disabled-btn');
+        senescenceIntensity.prop('disabled', true);
+        senescenceIntensity.prop('required', false);
     }
-    if ($('#flowers-opening').val() == 'y' && !$('#flowers-opening').prop('disabled')) {
-        $('#flowering-intensity').prop('disabled', false);
-        $('#flowering-intensity').prop('required', true);
-        $('#flowering-intensity').removeClass('disabled-btn');
+    if (flowersOpening.val() == 'y' && !flowersOpening.prop('disabled')) {
+        floweringIntensity.prop('disabled', false);
+        floweringIntensity.prop('required', true);
+        floweringIntensity.removeClass('disabled-btn');
     } else {
-        $('#flowering-intensity').addClass('disabled-btn');
-        $('#flowering-intensity').prop('disabled', true);
-        $('#flowering-intensity').prop('required', false);
+        floweringIntensity.addClass('disabled-btn');
+        floweringIntensity.prop('disabled', true);
+        floweringIntensity.prop('required', false);
     }
 }
