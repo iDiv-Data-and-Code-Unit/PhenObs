@@ -15,7 +15,6 @@ var filesToCache = [
     '/static/js/observation.js',
     '/static/js/collection.js',
     '/static/js/modals.js',
-    '/static/js/add.js',
     '/static/images/PhenObs_Logo.png',
     '/static/images/PhenObs_Splash.png',
     '/static/images/PhenObs_Logo_Rounded_512px.png',
