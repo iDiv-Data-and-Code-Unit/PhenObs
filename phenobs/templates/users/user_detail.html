@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block nav %}
+  {% include 'nav.html' %}
+{% endblock nav %}
+
 {% block title %}User: {{ object.username }}{% endblock %}
 
 {% block content %}

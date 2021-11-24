@@ -1,6 +1,7 @@
 {% extends "account/base.html" %}
 
 {% load i18n %}
+{% load static %}
 {% load account socialaccount %}
 {% load crispy_forms_tags %}
 
@@ -8,40 +9,36 @@
 
 {% block inner %}
 
-<h1>{% translate "Sign In" %}</h1>
+<style>
+  html, body {
+    background: rgb(90,142,155);
+    background:
+      radial-gradient(circle, rgba(90,142,155,1) 0%,
+      rgba(122,190,169,1) 9%, rgba(125,201,175,1) 10%,
+      rgba(158,255,194,1) 17%, rgba(98,165,144,1) 52%,
+      rgba(90,150,143,1) 69%, rgba(80,131,142,1) 90%,
+      rgba(88,138,152,1) 95%, rgba(91,141,156,1) 100%);
+    background-repeat: no-repeat;
+    height: 100%;
+    background-size: 300%;
+  }
+</style>
 
-{% get_providers as socialaccount_providers %}
+<div class="login-jumbotron">
+  <div class="col-8 mx-auto">
+    <img src="{% static 'images/PhenObs_Logo_Transparent.png' %}" class="col" width="200">
+  </div>
 
-{% if socialaccount_providers %}
-<p>{% blocktranslate with site.name as site_name %}Please sign in with one
-of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-for a {{ site_name }} account and sign in below:{% endblocktranslate %}</p>
+  <form class="login px-md-4 px-lg-5" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {{ form|crispy }}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
 
-<div class="socialaccount_ballot">
-
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </ul>
-
-  <div class="login-or">{% translate 'or' %}</div>
-
+    <button class="primaryAction btn btn-primary col" type="submit">{% translate "Login" %}</button>
+{#  <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% translate "Forgot Password?" %}</a>#}
+  </form>
 </div>
-
-{% include "socialaccount/snippets/login_extra.html" %}
-
-{% else %}
-<p>{% blocktranslate %}If you have not created an account yet, then please
-<a href="{{ signup_url }}">sign up</a> first.{% endblocktranslate %}</p>
-{% endif %}
-
-<form class="login" method="POST" action="{% url 'account_login' %}">
-  {% csrf_token %}
-  {{ form|crispy }}
-  {% if redirect_field_value %}
-  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-  {% endif %}
-  <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% translate "Forgot Password?" %}</a>
-  <button class="primaryAction btn btn-primary" type="submit">{% translate "Sign In" %}</button>
-</form>
 
 {% endblock %}

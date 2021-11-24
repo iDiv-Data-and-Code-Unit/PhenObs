@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from ..gardens.models import Garden
@@ -45,25 +45,31 @@ def get_context(request):
 
 
 def all(request):
-    context = get_context(request)
-    return render(request, "observations/observations.html", context)
+    if request.user.is_authenticated:
+        context = get_context(request)
+        return render(request, "observations/observations.html", context)
+    else:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
 
 def add(request):
-    context = get_context(request)
-    context["ids"] = [
-        {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
-        {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
-        {"id": "flowers-opening", "label": "Flowers opening"},
-        {"id": "peak-flowering", "label": "Peak flowering"},
-        {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
-        {"id": "flowering-intensity", "label": "Flowering intensity"},
-        {"id": "ripe-fruits", "label": "Ripe fruits"},
-        {"id": "senescence", "label": "Senescence"},
-        {"id": "senescence-intensity", "label": "Senescence intensity"},
-    ]
+    if request.user.is_authenticated:
+        context = get_context(request)
+        context["ids"] = [
+            {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
+            {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
+            {"id": "flowers-opening", "label": "Flowers opening"},
+            {"id": "peak-flowering", "label": "Peak flowering"},
+            {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
+            {"id": "flowering-intensity", "label": "Flowering intensity"},
+            {"id": "ripe-fruits", "label": "Ripe fruits"},
+            {"id": "senescence", "label": "Senescence"},
+            {"id": "senescence-intensity", "label": "Senescence intensity"},
+        ]
 
-    return render(request, "observations/add_observation.html", context)
+        return render(request, "observations/add_observation.html", context)
+    else:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
 
 def new(request):

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block nav %}
+  {% include 'nav.html' %}
+{% endblock nav %}
+
 {% block observations_active %}active{% endblock observations_active %}
 
 {% block custom_javascript %}
