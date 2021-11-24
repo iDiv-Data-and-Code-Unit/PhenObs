@@ -72,7 +72,7 @@ export function emptyCollection(fields, change, caching) {
 function createEmptyCollection(data, collections) {
     // Check if the collections item has been initialized
     if (collections == null) {
-        createEmptyCollection(data, initCollections());
+        return createEmptyCollection(data, initCollections());
     } else {
         // todo: check if the data is null or not
         collections["unfinished"]["collection-" + data["collection-id"]] = {

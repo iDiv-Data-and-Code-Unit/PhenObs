@@ -28,8 +28,11 @@ export function selectPlant(order, lastCollectionId, currentCollectionId, collec
 
     console.log(order, Object.keys(collections["unfinished"][currentCollectionId]['records']).length)
 
-    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length) {
+    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length && order !== 1) {
         $('#next-btn').addClass("d-none");
+    } else if (Object.keys(collections["unfinished"][currentCollectionId]['records']).length === 1) {
+        $('#next-btn').removeClass("d-none");
+        $('#next-btn').val("Finish");
     } else {
         $('#next-btn').removeClass("d-none");
     }
@@ -54,7 +57,7 @@ export function selectPlant(order, lastCollectionId, currentCollectionId, collec
     fields["textarea"][0].value = record["remarks"];
     // Call button and modal filling functions
     fillInOldData(collections["done"][lastCollectionId], record["plant"]);
-    fillInModalDates(lastCollectionId);
+    fillInModalDates(collections["done"][lastCollectionId]);
     fillInButtons(collections["done"][lastCollectionId], record["plant"]);
     // Cache the record
     cacheRecord(currentCollectionId, record["done"], getCollections());
