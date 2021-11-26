@@ -62,11 +62,11 @@ function cachingListeners() {
 
     // Add event listener for done collection button
     document.getElementById("cancel-btn")
-        .addEventListener("click", () => collectionDone(getCollectionId(), getCollections()));
+        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections()));
 
     // Add event listener for cancel collection button
     document.getElementById("done-btn")
-        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections()));
+        .addEventListener("click", () => collectionDone(getCollectionId(), getCollections()));
 
     // Add event listener for #flowers-opening
     document.getElementById("flowers-opening")

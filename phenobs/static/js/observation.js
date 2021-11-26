@@ -13,6 +13,8 @@ export function getFields() {
 export function selectPlant(order, lastCollectionId, currentCollectionId, collections) {
     // Read values from JSON into fields
     let plants = document.getElementById('plant');
+    if (order > plants.children.length)
+        return;
     let fields = getFields();
     // Choose the current plant from local storage
     let record = collections["unfinished"][currentCollectionId]["records"][plants.children[order - 1].value];
@@ -28,11 +30,8 @@ export function selectPlant(order, lastCollectionId, currentCollectionId, collec
 
     console.log(order, Object.keys(collections["unfinished"][currentCollectionId]['records']).length)
 
-    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length && order !== 1) {
-        $('#next-btn').addClass("d-none");
-    } else if (Object.keys(collections["unfinished"][currentCollectionId]['records']).length === 1) {
-        $('#next-btn').removeClass("d-none");
-        $('#next-btn').val("Finish");
+    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length) {
+        $('#next-btn').val("Finish")
     } else {
         $('#next-btn').removeClass("d-none");
     }
@@ -163,14 +162,15 @@ export function cacheRecord(collectionId, isDone, collections) {
        record[id] = document.getElementById(id).checked
     });
 
-    const plants = document.getElementById("plant");
-    record['done'] = (isDone) ? isDone : collection["records"][plants.children[plants.selectedIndex].value]["done"];
+    let plants = document.getElementById("plant");
+    record['done'] = (isDone) ?
+        isDone :
+        collection["records"][plants.children[plants.selectedIndex].value]["done"];
     record['name'] = plants.children[plants.selectedIndex].name;
-    record['order'] =  plants.selectedIndex + 1;
+    record['order'] = plants.selectedIndex + 1;
 
     // Check if the plant is finished
     if (isDone) {
-        let plants = document.getElementById("plant");
         // Remove the order from the remaining orders list
         const index = collection["remaining"].indexOf(plants.selectedIndex + 1);
         // If the element is already finished

@@ -140,7 +140,21 @@ export function cancelCollection(id, collections) {
 }
 // upload the collection
 export function collectionDone(id, collections) {
-    let collection = collections["unfinished"][id];
-    // try pass and upload the collection
-    // todo: add a new url for uploading the collection
+    $.ajax({
+        url: "/observations/upload/",
+        data: JSON.stringify(collections["unfinished"][id]),
+        method: "POST",
+        error: function (jqXHR) {
+            alert("Could not establish a connection with database.");
+        },
+        beforeSend: function(){
+            $("body").addClass("loading");
+        },
+        complete: function(){
+            $("body").removeClass("loading");
+        },
+        success: function (data) {
+            alert("Collection successfully uploaded!");
+        }
+    });
 }

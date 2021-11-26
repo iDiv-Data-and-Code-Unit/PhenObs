@@ -1,8 +1,14 @@
+import json
+from datetime import date, datetime
+
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
+from ..users.models import User
 from .models import Collection, Record
 
 
@@ -132,3 +138,72 @@ def new(request):
     }
 
     return JsonResponse(new_collection)
+
+
+@csrf_exempt
+def upload(request):
+    if request.method == "POST" and request.user.is_authenticated:
+        data = json.loads(request.body)
+        collection_date = datetime.strptime(data["collection-date"], "%Y-%m-%d")
+        doy = collection_date.date() - date(collection_date.year, 1, 1)
+
+        # TODO: Fix bugs related to retrieving from front-end
+
+        # Create and save the new collection
+        collection = Collection(
+            garden=Garden.objects.filter(name=data["garden"]).get(),
+            date=collection_date.date(),
+            doy=doy.days,
+            creator=User.objects.filter(username=data["creator"]).get(),
+        )
+        collection.save()
+
+        # Create and save each observation/record
+        for key in data["records"]:
+            record = data["records"][key]
+            timestamp = timezone.now()
+            new_record = Record(
+                collection=Collection.objects.filter(
+                    creator=User.objects.filter(username=data["creator"]).get()
+                ).last(),
+                plant=Plant.objects.filter(
+                    order=record["order"],
+                    garden_id=Garden.objects.filter(name=data["garden"]).get().id,
+                ).get(),
+                timestamp_entry=timestamp,
+                timestamp_edit=timestamp,
+                editor=User.objects.filter(username=data["creator"]).get(),
+                initial_vegetative_growth=record["initial-vegetative-growth"],
+                young_leaves_unfolding=record["young-leaves-unfolding"],
+                flowers_open=record["flowers-opening"],
+                peak_flowering=record["peak-flowering"],
+                flowering_intensity=None
+                if (len(record["flowering-intensity"]) == 0)
+                else int(record["flowering-intensity"]),
+                ripe_fruits=record["ripe-fruits"],
+                senescence=record["senescence"],
+                senescence_intensity=None
+                if (len(record["senescence-intensity"]) == 0)
+                else int(record["senescence-intensity"]),
+                maintenance=[
+                    "cut_partly"
+                    if (record["cut-partly"])
+                    else None,  # TODO: check if True/False works well (for all)
+                    "cut_total" if (record["cut-total"]) else None,
+                    "covered_natural" if (record["covered-natural"]) else None,
+                    "covered_artificial" if (record["covered-artificial"]) else None,
+                    "transplanted" if (record["transplanted"]) else None,
+                    "removed" if (record["removed"]) else None,
+                ],
+                remarks=record["remarks"],
+                peak_flowering_estimation=record["peak-flowering-estimation"],
+                done=record["done"],
+            )
+            new_record.save()
+
+        return JsonResponse("OK", safe=False)
+    return JsonResponse("ERROR", safe=False)
+
+
+# TODO: add edit path to change older values
+# def edit(request):

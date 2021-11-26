@@ -20,4 +20,9 @@ urlpatterns = [
         views.new,
         name="new",
     ),
+    path(
+        "upload/",
+        views.upload,
+        name="upload",
+    ),
 ]

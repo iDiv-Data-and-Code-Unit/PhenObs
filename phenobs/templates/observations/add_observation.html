@@ -3,7 +3,8 @@
 {% block observation %}
   <div class="overlay"></div>
 
-  <form id="form" class="px-sm-1 px-md-3 mx-3 mt-4 gray-text">
+  <form id="form" class="px-sm-1 px-md-3 mx-3 mt-4 gray-text" >
+  {% csrf_token %}
     <h2>Add an observation</h2>
 
     <div class="form-group row px-sm-1 px-md-3 pt-4">
