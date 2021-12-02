@@ -273,6 +273,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_ADAPTER = "phenobs.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "phenobs.users.adapters.SocialAccountAdapter"
+LOGIN_REDIRECT_URL = "/"
 
 # django-pwa
 # ------------------------------------------------------------------------------

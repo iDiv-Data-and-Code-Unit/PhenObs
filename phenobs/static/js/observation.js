@@ -10,7 +10,7 @@ export function getFields() {
     };
 }
 
-export function selectPlant(order, lastCollectionId, currentCollectionId, collections) {
+export function selectPlant(order, lastCollectionId, currentCollectionId, collections, collectionType) {
     // Read values from JSON into fields
     let plants = document.getElementById('plant');
     if (order > plants.children.length)

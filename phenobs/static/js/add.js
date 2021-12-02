@@ -62,7 +62,7 @@ function cachingListeners() {
 
     // Add event listener for done collection button
     document.getElementById("cancel-btn")
-        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections()));
+        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections(), "unfinished"));
 
     // Add event listener for cancel collection button
     document.getElementById("done-btn")

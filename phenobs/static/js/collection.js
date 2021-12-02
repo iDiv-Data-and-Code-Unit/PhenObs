@@ -135,8 +135,9 @@ export function cacheCollection(id, collections) {
     return setCollections(collections);
 }
 // cancel the current collection
-export function cancelCollection(id, collections) {
-    delete collections["unfinished"][id];
+export function cancelCollection(id, collections, collectionType) {
+    delete collections[collectionType][id];
+    setCollections(collections);
 }
 // upload the collection
 export function collectionDone(id, collections) {

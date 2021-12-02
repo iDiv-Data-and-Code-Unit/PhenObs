@@ -14,14 +14,13 @@
 
 
 table {
-    display: block;
-    overflow-x: auto;
-    overflow-y: auto;
-    white-space: nowrap;
-    min-height: 100px;
-    max-height: 200px;
+
 }
 
+tbody {
+  /*overflow-y: auto; !* Trigger vertical scroll    *!*/
+  /*overflow-x: hidden; !* Hide the horizontal scroll *!*/
+}
 
 
 label, p {
@@ -30,6 +29,13 @@ label, p {
 
 
 
+
+
+#all-collections {
+  overflow: auto;
+  min-height: 100px;
+  max-height: 300px;
+}
 
 
 

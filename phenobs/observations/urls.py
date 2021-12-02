@@ -25,4 +25,9 @@ urlpatterns = [
         views.upload,
         name="upload",
     ),
+    path(
+        "edit/<int:collection_id>/",
+        views.edit,
+        name="edit",
+    ),
 ]

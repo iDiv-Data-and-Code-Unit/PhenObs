@@ -186,9 +186,7 @@ def upload(request):
                 if (len(record["senescence-intensity"]) == 0)
                 else int(record["senescence-intensity"]),
                 maintenance=[
-                    "cut_partly"
-                    if (record["cut-partly"])
-                    else None,  # TODO: check if True/False works well (for all)
+                    "cut_partly" if (record["cut-partly"]) else None,
                     "cut_total" if (record["cut-total"]) else None,
                     "covered_natural" if (record["covered-natural"]) else None,
                     "covered_artificial" if (record["covered-artificial"]) else None,
@@ -199,11 +197,44 @@ def upload(request):
                 peak_flowering_estimation=record["peak-flowering-estimation"],
                 done=record["done"],
             )
+
             new_record.save()
 
         return JsonResponse("OK", safe=False)
     return JsonResponse("ERROR", safe=False)
 
 
-# TODO: add edit path to change older values
-# def edit(request):
+def edit(request, collection_id):
+    collection = Collection.objects.filter(id=collection_id).get()
+    records = Record.objects.filter(collection_id=collection_id).all()
+
+    for record in records:
+        records[record.plant.garden_name + "-" + str(record.plant.order)] = {
+            "plant": record.plant.garden_name + "-" + str(record.plant.order),
+            "initial-vegetative-growth": record.initial_vegetative_growth,
+            "young-leaves-unfolding": record.young_leaves_unfolding,
+            "flowers-opening": record.flowers_open,
+            "peak-flowering": record.peak_flowering,
+            "flowering-intensity": record.flowering_intensity,
+            "ripe-fruits": record.ripe_fruits,
+            "senescence": record.senescence,
+            "senescence-intensity": record.senescence_intensity,
+            "covered-artificial": "covered_artificial" in record.maintenance,
+            "covered-natural": "covered_natural" in record.maintenance,
+            "cut-partly": "cut_partly" in record.maintenance,
+            "cut-total": "cut_total" in record.maintenance,
+            "transplanted": "transplanted" in record.maintenance,
+            "removed": "removed" in record.maintenance,
+            "remarks": record.remarks,
+            "peak-flowering-estimation": record.peak_flowering_estimation,
+        }
+
+    context = {
+        "collection-id": collection_id,
+        "creator": collection.creator,
+        "garden": collection.garden.name,
+        "last-collection": None,
+        "records": records,
+    }
+
+    return render(request, "observations/edit_observation.html", context)

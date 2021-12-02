@@ -4,14 +4,14 @@
   <h1>Plants</h1>
   <p>{{ garden }}</p>
 
-  {% for plant in plants %}
+  {% for record in records %}
   <div class="container">
-    <a class="plant-row row mb-2" data-toggle="collapse" data-target="#{{ plant.garden_name }}-{{ plant.order }}-table" role="button" aria-expanded="{% if order == plant.order %}true{% else %}false{% endif %}" aria-controls="{{ plant.garden_name }}-{{ plant.order }}-table">
-      {{ plant.garden_name }} - {{ plant.order }}
+    <a class="plant-row row mb-2" data-toggle="collapse" data-target="#{{ record.record.plant.garden_name }}-{{ record.record.plant.order }}-table" role="button" aria-expanded="{% if order == record.record.plant.order %}true{% else %}false{% endif %}" aria-controls="{{ record.record.plant.garden_name }}-{{ record.record.plant.order }}-table">
+      {{ record.record.plant.garden_name }} - {{ record.record.plant.order }}
     </a>
   </div>
   {# TODO: fix BlueLavender-2 issue rendering wrong values in the table #}
-  <div class="collapse {% if order == plant.order %}show{% endif %}" id="{{ plant.garden_name }}-{{ plant.order }}-table">
+  <div class="collapse {% if order == record.record.plant.order %}show{% endif %}" id="{{ record.record.plant.garden_name }}-{{ record.record.plant.order }}-table">
     <div class="card card-body">
       <table class="table table-borderless gray-text">
         <thead class="">
@@ -29,26 +29,24 @@
         </thead>
 
         <tbody>
-          {% for record in records %}
-            <tr>
-                <th scope="row">{{ record.record.timestamp_entry.date}}</th>
-                {% for value in record.columns %}
-                  {% if value == 'y' %}
-                    <td><em>{{ 'yes' }}</em></td>
-                  {% elif value == 'm' %}
-                    <td><em>{{ 'missed' }}</em></td>
-                  {% elif value == 'u' %}
-                    <td><em>{{ 'unsure' }}</em></td>
-                  {% elif value == 'no' %}
-                    <td><em>{{ 'no' }}</em></td>
-                  {% elif not value %}
-                    <td><em>NULL</em></td>
-                  {% else %}
-                    <td><em>{{ value }}</em></td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-          {% endfor %}
+          <tr>
+              <th scope="row">{{ record.record.timestamp_entry.date}}</th>
+              {% for value in record.columns %}
+                {% if value == 'y' %}
+                  <td><em>{{ 'yes' }}</em></td>
+                {% elif value == 'm' %}
+                  <td><em>{{ 'missed' }}</em></td>
+                {% elif value == 'u' %}
+                  <td><em>{{ 'unsure' }}</em></td>
+                {% elif value == 'no' %}
+                  <td><em>{{ 'no' }}</em></td>
+                {% elif not value %}
+                  <td><em>NULL</em></td>
+                {% else %}
+                  <td><em>{{ value }}</em></td>
+                {% endif %}
+              {% endfor %}
+          </tr>
         </tbody>
 
       </table>

@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, UpdateView
 
+from config.views import home
+
 User = get_user_model()
 
 
@@ -42,4 +44,4 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
         return reverse("users:detail", kwargs={"username": self.request.user.username})
 
 
-user_redirect_view = UserRedirectView.as_view()
+user_redirect_view = home
