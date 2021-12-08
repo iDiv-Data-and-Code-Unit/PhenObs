@@ -90,7 +90,14 @@ def new(request):
 
     # If no collection is found, then return NULL
     if last_collection is None:
-        return JsonResponse(None)
+        return JsonResponse(
+            {
+                "creator": request.user.username,
+                "garden": garden.name,
+                "plants": plants,
+                "last-collection": None,
+            }
+        )
 
     # Structuring last observation values to JSON
     for record in fat_context["records"]:
@@ -117,6 +124,7 @@ def new(request):
             "remarks": record["record"].remarks,
             "peak-flowering-estimation": record["record"].peak_flowering_estimation,
         }
+    # records = format_records(fat_context["records"])
     # Last collection all details
     last_collection_json = {
         "collection-id": fat_context["last_collection"].id,
@@ -151,10 +159,10 @@ def upload(request):
 
         # Create and save the new collection
         collection = Collection(
-            garden=Garden.objects.filter(name=data["garden"]).get(),
+            garden=Garden.objects.filter(auth_users=request.user).get(),
             date=collection_date.date(),
             doy=doy.days,
-            creator=User.objects.filter(username=data["creator"]).get(),
+            creator=request.user.username,
         )
         collection.save()
 
@@ -204,11 +212,9 @@ def upload(request):
     return JsonResponse("ERROR", safe=False)
 
 
-def edit(request, collection_id):
-    collection = Collection.objects.filter(id=collection_id).get()
-    records = Record.objects.filter(collection_id=collection_id).all()
-
-    for record in records:
+def format_records(recs):
+    records = {}
+    for record in recs:
         records[record.plant.garden_name + "-" + str(record.plant.order)] = {
             "plant": record.plant.garden_name + "-" + str(record.plant.order),
             "initial-vegetative-growth": record.initial_vegetative_growth,
@@ -229,12 +235,47 @@ def edit(request, collection_id):
             "peak-flowering-estimation": record.peak_flowering_estimation,
         }
 
-    context = {
-        "collection-id": collection_id,
-        "creator": collection.creator,
-        "garden": collection.garden.name,
-        "last-collection": None,
-        "records": records,
-    }
+    return records
 
-    return render(request, "observations/edit_observation.html", context)
+
+def edit(request, collection_type, collection_id):
+    if request.user.is_authenticated:
+        context = get_context(request)
+
+        context["collection_type"] = collection_type
+        context["collection_id"] = collection_id
+        context["ids"] = [
+            {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
+            {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
+            {"id": "flowers-opening", "label": "Flowers opening"},
+            {"id": "peak-flowering", "label": "Peak flowering"},
+            {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
+            {"id": "flowering-intensity", "label": "Flowering intensity"},
+            {"id": "ripe-fruits", "label": "Ripe fruits"},
+            {"id": "senescence", "label": "Senescence"},
+            {"id": "senescence-intensity", "label": "Senescence intensity"},
+        ]
+        return render(request, "observations/edit_observation.html", context)
+    else:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
+
+
+def get(request, collection_id):
+    if request.user.is_authenticated:
+        collection = Collection.objects.filter(id=collection_id).get()
+        last_collection = Collection.objects.filter(date__lt=collection.date).last()
+
+        recs = Record.objects.filter(collection_id=collection_id).all()
+        records = format_records(recs)
+
+        context = {
+            "collection-id": collection_id,
+            "creator": collection.creator.name,
+            "garden": collection.garden.name,
+            "last-collection": last_collection.id,
+            "records": records,
+        }
+
+        return JsonResponse(context, safe=False)
+    return JsonResponse("ERROR", safe=False)
+    # return render(request, "observations/edit_observation.html", context)

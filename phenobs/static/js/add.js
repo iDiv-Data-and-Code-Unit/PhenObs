@@ -4,6 +4,7 @@ import {
     cancelCollection,
     collectionDone,
     getCollections,
+    getCollection,
     getCollectionId,
     getLastCollectionId
 } from './collection.js';
@@ -14,44 +15,50 @@ import {
     checkDefault,
     cacheRecord,
     noObservationPossible,
-    requireIntensities
+    requireIntensities, setupPlants
 } from './observation.js';
 
 // Set today on "#collection-date"
-setToday(new Date());
+setDate(new Date());
 // Create an empty collection
 emptyCollection(getFields, changeListeners, cachingListeners);
 
-function changeListeners(fields) {
+export function changeListeners(fields, collectionType, collectionId) {
     for (let key in fields) {
         for (let i = 0; i < fields[key].length; i++) {
             fields[key][i].addEventListener(
-                "change", () => cacheRecord(getCollectionId(), false, getCollections())
+                "change", () => {
+                    const plants = document.getElementById("plant");
+                    const isDone = getCollection(collectionType, collectionId)
+                        ["records"]
+                        [plants.children[plants.selectedIndex].value]["done"];
+                    cacheRecord(collectionType, collectionId, isDone);
+                }
             );
         }
     }
 }
 
-function setToday(today) {
+export function setDate(dateToSet) {
     // Set #collection-date today
     document.getElementById('collection-date').value =
-        `${today.getFullYear()}-` +
-        `${String(today.getMonth() + 1).padStart(2, '0')}-` +
-        `${String(today.getDate()).padStart(2, '0')}`;
+        `${dateToSet.getFullYear()}-` +
+        `${String(dateToSet.getMonth() + 1).padStart(2, '0')}-` +
+        `${String(dateToSet.getDate()).padStart(2, '0')}`;
 }
 
 // Add event listeners
-function cachingListeners() {
+export function cachingListeners(collectionType, collectionId) {
     document.getElementById('collection-date')
-        .addEventListener("change", () => cacheCollection(getCollectionId(), getCollections()));
+        .addEventListener("change", () => cacheCollection(collectionType, collectionId));
     // Add event listener for next and previous buttons
     document.getElementById("next-btn")
         .addEventListener("click",
-            () => checkDefault(getLastCollectionId(), getCollectionId(), true, getCollections())
+            () => checkDefault(collectionType, collectionId, true)
         );
     document.getElementById("prev-btn")
         .addEventListener("click",
-            () => checkDefault(getLastCollectionId(), getCollectionId(), false, getCollections())
+            () => checkDefault(collectionType, collectionId, false)
         );
 
     // Add event listener for #no-observation
@@ -62,11 +69,11 @@ function cachingListeners() {
 
     // Add event listener for done collection button
     document.getElementById("cancel-btn")
-        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections(), "unfinished"));
+        .addEventListener("click", () => cancelCollection(collectionType, collectionId));
 
     // Add event listener for cancel collection button
     document.getElementById("done-btn")
-        .addEventListener("click", () => collectionDone(getCollectionId(), getCollections()));
+        .addEventListener("click", () => collectionDone(collectionType, collectionId));
 
     // Add event listener for #flowers-opening
     document.getElementById("flowers-opening")
@@ -80,10 +87,9 @@ function cachingListeners() {
     document.getElementById("plant")
         .addEventListener("change",
             () => selectPlant(
-                document.getElementById("plant").selectedIndex + 1,
-                getLastCollectionId(),
-                getCollectionId(),
-                getCollections()
+                collectionType,
+                collectionId,
+                document.getElementById("plant").selectedIndex + 1
             )
         );
 }

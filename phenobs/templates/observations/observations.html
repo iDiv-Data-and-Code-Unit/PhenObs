@@ -26,48 +26,57 @@
     </div>
 
     <div class="mt-1" id="all-collections">
-      <table class="table table-borderless" id="all-collections-table">
+      <table class="table" id="unfinished-collections-table">
         <thead class="">
           <tr class="d-table-row">
             <th scope="col" class="text-left">Date</th>
             <th scope="col" class="text-left">Creator</th>
             <th scope="col" class="text-left">Status</th>
-            <th scope="col" class="text-left">Upload</th>
             <th scope="col" class="text-left">Edit</th>
             <th scope="col" class="text-left">Delete</th>
           </tr>
         </thead>
-        <tbody class="" id="all-collections-body">
-          {% for collection in collections %}
-          <tr class="d-table-row">
-            <th scope="row" class="text-left">{{ collection.date }}</th>
-            <td class="text-left">{{ collection.creator }}</td>
-            {#     TODO: add buttons for edit; add state (local/online/unfinished)     #}
-            <td>
-              <i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="{{ collection.id }}-online"></i>
-              <i class="bi bi-hdd-fill d-none" style="font-size: 1.5rem; color: green;" id="{{ collection.id }}-local"></i>
-              <i class="bi bi-exclamation-circle-fill d-none" style="font-size: 1.5rem; color: red;" id="{{ collection.id }}-unfinished"></i>
-            </td>
-            <td>
-              <a href="">
-                <i class="bi bi-cloud-upload-fill d-none" style="font-size: 1.5rem; color: blue;" id="{{ collection.id }}-upload"></i>
-              </a>
-            </td>
-            <td>
-              <a href="{% url 'observations:edit' collection_id=collection.id %}">
-                <i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: goldenrod;" id="{{ collection.id }}-edit"></i>
-              </a>
-            </td>
-            <td>
-              <a onclick="cancelCollection({{ collection.id }})">
-                <i class="bi bi-x-circle-fill" style="font-size: 1.5rem; color: red;" id="{{ collection.id }}-cancel"></i>
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
+        <tbody class="" id="unfinished-collections-body">
+          <h3>Unfinished</h3>
+          {#     Insert rows here     #}
         </tbody>
       </table>
+
+    <table class="table" id="done-collections-table">
+      <thead class="">
+        <tr class="d-table-row">
+          <th scope="col" class="text-left">Date</th>
+          <th scope="col" class="text-left">Creator</th>
+          <th scope="col" class="text-left">Status</th>
+          <th scope="col" class="text-left">Edit</th>
+          <th scope="col" class="text-left">Delete</th>
+        </tr>
+      </thead>
+      <tbody class="" id="done-collections-body">
+        <h3>Done</h3>
+        {#     Insert rows here     #}
+      </tbody>
+    </table>
+
+    <table class="table" id="ready-collections-table">
+      <thead class="">
+        <tr class="d-table-row">
+          <th scope="col" class="text-left">Date</th>
+          <th scope="col" class="text-left">Creator</th>
+          <th scope="col" class="text-left">Status</th>
+          <th scope="col" class="text-left">Upload</th>
+          <th scope="col" class="text-left">Edit</th>
+          <th scope="col" class="text-left">Delete</th>
+        </tr>
+      </thead>
+      <tbody class="" id="ready-collections-body">
+        <h3>Ready for upload</h3>
+        {#     Insert rows here     #}
+      </tbody>
+    </table>
+
     </div>
+
     <div class="align-items-center d-md-flex d-block">
       <div>
         <i class="bi bi-cloud-check-fill mr-2" style="font-size: 1.5rem; color: green;"></i>

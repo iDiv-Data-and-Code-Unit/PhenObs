@@ -1,85 +1,30 @@
-import {
-    cacheCollection,
-    collectionDone,
-    cancelCollection,
-    getCollections,
-    getCollectionId,
-    getLastCollectionId
-} from './collection.js';
+import {setDate, changeListeners, cachingListeners} from './add.js';
+import {getCollection, getCollections, setCollections} from "./collection.js";
+import {getFields, setupPlants} from "./observation.js";
 
-import {
-    getFields,
-    selectPlant,
-    checkDefault,
-    cacheRecord,
-    noObservationPossible,
-    requireIntensities
-} from './observation.js';
-
-changeListeners(getFields());
-
-function changeListeners(fields) {
-    for (let key in fields) {
-        for (let i = 0; i < fields[key].length; i++) {
-            fields[key][i].addEventListener(
-                "change", () => cacheRecord(getCollectionId(), true, getCollections())
-            );
-        }
-    }
+function getTypeAndId() {
+    const url = location.href;
+    const fullId = url.split('/');
+    const split = fullId[fullId.length - 1].split('-');
+    // Return collectionType and collectionId
+    return [split[0], split[1]];
 }
 
-function setDate(date) {
-    // Set #collection-date today
-    document.getElementById('collection-date').value =
-        `${date.getFullYear()}-` +
-        `${String(date.getMonth() + 1).padStart(2, '0')}-` +
-        `${String(date.getDate()).padStart(2, '0')}`;
+const typeAndId = getTypeAndId();
+let collectionType = typeAndId[0];
+const collectionId = parseInt(typeAndId[1]);
+
+if (collectionType === "online") {
+    let collection = getCollection("online", collectionId);
+    let collections = getCollections();
+
+    collections["edited"]["collections"][collectionId] = collection;
+    setCollections(collections);
+
+    collectionType = "edited";
 }
 
-// Add event listeners
-function cachingListeners() {
-    document.getElementById('collection-date')
-        .addEventListener("change", () => cacheCollection(getCollectionId(), getCollections()));
-    // Add event listener for next and previous buttons
-    document.getElementById("next-btn")
-        .addEventListener("click",
-            () => checkDefault(getLastCollectionId(), getCollectionId(), true, getCollections())
-        );
-    document.getElementById("prev-btn")
-        .addEventListener("click",
-            () => checkDefault(getLastCollectionId(), getCollectionId(), false, getCollections())
-        );
-
-    // Add event listener for #no-observation
-    document.getElementById("no-observation")
-        .addEventListener("change",
-            e => noObservationPossible(e.target.checked)
-        );
-
-    // Add event listener for done collection button
-    document.getElementById("cancel-btn")
-        .addEventListener("click", () => cancelCollection(getCollectionId(), getCollections(), "edited"));
-
-    // Add event listener for cancel collection button
-    document.getElementById("done-btn")
-        .addEventListener("click", () => collectionDone(getCollectionId(), getCollections()));
-
-    // Add event listener for #flowers-opening
-    document.getElementById("flowers-opening")
-        .addEventListener("change", () => requireIntensities());
-
-    // Add event listener for #senescence
-    document.getElementById("senescence")
-        .addEventListener("change", () => requireIntensities());
-
-    // Add event listener for #plant
-    document.getElementById("plant")
-        .addEventListener("change",
-            () => selectPlant(
-                document.getElementById("plant").selectedIndex + 1,
-                getLastCollectionId(),
-                getCollectionId(),
-                getCollections()
-            )
-        );
-}
+setDate(new Date(getCollection(collectionType, collectionId)["collection-date"]));
+setupPlants(collectionType, collectionId);
+changeListeners(getFields(), collectionType, collectionId);
+cachingListeners(collectionType, collectionId);

@@ -1,5 +1,5 @@
 import { fillInOldData, fillInModalDates, fillInButtons } from "./modals.js";
-import { getCollections } from "./collection.js";
+import { setCollections, setCollection, getCollections, getCollection } from "./collection.js";
 
 export function getFields() {
     return {
@@ -10,95 +10,124 @@ export function getFields() {
     };
 }
 
-export function selectPlant(order, lastCollectionId, currentCollectionId, collections, collectionType) {
+export function setupPlants(collectionType, collectionId) {
+    let collection = getCollection(collectionType, collectionId);
+    let lastCollection = getCollection("online", collection["last-collection-id"]);
+
+    let plants = document.getElementById('plant');
+
+    let lastCollectionDate = document.getElementById('last-collection-date');
+    lastCollectionDate.innerText = lastCollection["collection-date"];
+
+    for (let key in collection["records"]) {
+        const plant = collection["records"][key];
+
+        plants.innerHTML +=
+            '<option value="' +
+            plant["name"] +
+            '-' +
+            plant["order"] +
+            '" name="' +
+            plant["name"] +
+            '" id="' +
+            plant["order"] + '">' +
+            plant["name"] + '-' + plant["order"] +
+            '</option>';
+    }
+}
+
+// Fills in the form fields for a particular plant
+export function fillInFields(collectionType, collectionId, order) {
+    let collection = getCollection(collectionType, collectionId);
+    let lastCollection = getCollection("online", collection["last-collection-id"]);
+    let fields = getFields();
+
+    let plant = collection["records"][document.getElementById('plant').children[order - 1].value];
+
+    // Set the dropdowns
+    for (let i = 0; i < fields["dropdowns"].length; i++) {
+        for (let j = 0; j < fields["dropdowns"][i].children.length; j++) {
+            fields["dropdowns"][i].children[j].selected =
+                plant[fields["dropdowns"][i].id] === fields["dropdowns"][i].children[j].value;
+        }
+    }
+    // Set the intensities
+    for (let i = 0; i < fields["intensities"].length; i++) {
+        fields["intensities"][i].value = plant[fields["intensities"][i].id];
+    }
+    // Set the checkboxes
+    for (let i = 0; i < fields["checkboxes"].length; i++) {
+        fields["checkboxes"][i].checked = plant[fields["checkboxes"][i].id];
+    }
+
+    // Set the textarea
+    fields["textarea"][0].value = plant["remarks"];
+
+    // Call button and modal filling functions
+    fillInOldData(lastCollection, plant["plant"]);
+    fillInModalDates(lastCollection);
+    fillInButtons(lastCollection, plant["plant"]);
+    // Cache the record
+    cacheRecord(collectionType, collectionId, plant["done"], getCollections());
+    noObservationPossible(plant["no-observation"]);
+}
+
+export function selectPlant(collectionType, collectionId, order) {
+    fillInFields(collectionType, collectionId, order);
+
     // Read values from JSON into fields
     let plants = document.getElementById('plant');
     if (order > plants.children.length)
         return;
-    let fields = getFields();
-    // Choose the current plant from local storage
-    let record = collections["unfinished"][currentCollectionId]["records"][plants.children[order - 1].value];
 
     // Set the plant
     plants.selectedIndex = order - 1;
 
+    // Display/Hide "Previous" button
     if (order === 1) {
         $('#prev-btn').addClass("d-none");
     } else {
         $('#prev-btn').removeClass("d-none");
     }
 
-    console.log(order, Object.keys(collections["unfinished"][currentCollectionId]['records']).length)
-
-    if (order === Object.keys(collections["unfinished"][currentCollectionId]['records']).length) {
+    // Display/Rename "Next" button
+    if (order === Object.keys(getCollection(collectionType, collectionId)['records']).length) {
         $('#next-btn').val("Finish")
     } else {
         $('#next-btn').removeClass("d-none");
     }
-
-    // Set the dropdowns
-    for (let i = 0; i < fields["dropdowns"].length; i++) {
-        for (let j = 0; j < fields["dropdowns"][i].children.length; j++) {
-            fields["dropdowns"][i].children[j].selected =
-                record[fields["dropdowns"][i].id] == fields["dropdowns"][i].children[j].value;
-        }
-    }
-    // Set the intensities
-    for (let i = 0; i < fields["intensities"].length; i++) {
-        fields["intensities"][i].value = record[fields["intensities"][i].id];
-    }
-    // Set the checkboxes
-    for (let i = 0; i < fields["checkboxes"].length; i++) {
-        fields["checkboxes"][i].checked = record[fields["checkboxes"][i].id];
-    }
-
-    // Set the textarea
-    fields["textarea"][0].value = record["remarks"];
-    // Call button and modal filling functions
-    fillInOldData(collections["done"][lastCollectionId], record["plant"]);
-    fillInModalDates(collections["done"][lastCollectionId]);
-    fillInButtons(collections["done"][lastCollectionId], record["plant"]);
-    // Cache the record
-    cacheRecord(currentCollectionId, record["done"], getCollections());
-    noObservationPossible(record["no-observation"]);
 }
 
-export function selectNextPlant(order, lastCollectionId, collectionId, collections) {
-    let valid = true;
+function checkValid() {
     $('[required]').each(function() {
         if ($(this).is(':invalid') || !$(this).val()) {
             $(this).focus();
-            valid = false;
+            return false;
         }
     });
-    if (!valid) alert("Please fill all fields!");
+    return true;
+}
+
+export function selectNextPlant(collectionType, collectionId, order) {
+    if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(collectionId, true, getCollections());
-        let int_order = parseInt(order);
+        cacheRecord(collectionType, collectionId, true);
         // Select the next plant
-        selectPlant(int_order + 1, lastCollectionId, collectionId, collections);
+        selectPlant(collectionType, collectionId, parseInt(order) + 1);
     }
 }
 
-export function selectPreviousPlant(order, lastCollectionId, collectionId, collections) {
-    let valid = true;
-    $('[required]').each(function() {
-        if ($(this).is(':invalid') || !$(this).val()) {
-            $(this).focus();
-            console.log(this);
-            valid = false;
-        }
-    });
-    if (!valid) alert("Please fill all fields!");
+export function selectPreviousPlant(collectionType, collectionId, order) {
+    if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(collectionId, true, getCollections());
-        let int_order = parseInt(order);
-        selectPlant(int_order - 1, lastCollectionId, collectionId, collections);
+        cacheRecord(collectionType, collectionId, true);
+        // Select the previous plant
+        selectPlant(collectionType, collectionId, parseInt(order) - 1);
     }
 }
 
-export function checkDefault(lastCollectionId, collectionId, flag, collections) {
-    let current = collections["unfinished"][collectionId]["records"][document.getElementById("plant").value];
+export function checkDefault(collectionType, collectionId, nextFlag) {
+    let current = getCollection(collectionType, collectionId)["records"][document.getElementById("plant").value];
     let defaultFlag = true;
     // Check the values
     for (let key in current) {
@@ -109,24 +138,28 @@ export function checkDefault(lastCollectionId, collectionId, flag, collections) 
             defaultFlag = false;
         }
     }
+
+    const plants = document.getElementById('plant');
+    const order = plants.selectedIndex + 1;
+
     // Check if the values are default
     if (defaultFlag && !current["done"]) {
         if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
-            if (flag)
-                selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
+            if (nextFlag)
+                selectNextPlant(collectionType, collectionId, order);
             else
-                selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
+                selectPreviousPlant(collectionType, collectionId, order);
         }
     } else {
-        if (flag)
-            selectNextPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
+        if (nextFlag)
+            selectNextPlant(collectionType, collectionId, order);
         else
-            selectPreviousPlant(document.getElementById("plant").selectedIndex + 1, lastCollectionId, collectionId, collections);
+            selectPreviousPlant(collectionType, collectionId, order);
     }
 }
 
-export function cacheRecord(collectionId, isDone, collections) {
-    let collection = collections["unfinished"][collectionId];
+export function cacheRecord(collectionType, collectionId, isDone) {
+    let collection = getCollection(collectionType, collectionId);
     // Current record to be cached
     let record = {}
     // IDs of the elements to be cached
@@ -207,10 +240,7 @@ export function cacheRecord(collectionId, isDone, collections) {
 
     collection["records"][record["plant"]] = record;
     // Update the collections
-    collections["unfinished"][collectionId] = collection;
-    localStorage.setItem(
-        "collections", JSON.stringify(collections)
-    );
+    setCollection(collectionType, collection);
 }
 
 export function noObservationPossible(flag) {

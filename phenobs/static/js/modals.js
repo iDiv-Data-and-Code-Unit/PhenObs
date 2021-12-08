@@ -16,8 +16,7 @@ export function fillInOldData(lastCollection, plant) {
     if (plant in lastCollection["records"]){
         toggleButtons(false);
         old_record = lastCollection["records"][plant];
-    }
-    else {
+    } else {
         toggleButtons(true);
         return;
     }
@@ -30,8 +29,10 @@ export function fillInOldData(lastCollection, plant) {
     // Dropdowns
     for (let j = 0; j < old_dropdowns.length; j++)
         for (let i = 0; i < old_dropdowns[j].children.length; i++)
-            if (old_dropdowns[j].children[i].value ==
-                old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)])
+            if (
+                old_dropdowns[j].children[i].value ===
+                old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]
+            )
                 old_dropdowns[j].children[i].selected = true;
     // Intensities
     for (let j = 0; j < old_intensities.length; j++)
@@ -81,18 +82,18 @@ export function fillInButtons(lastCollection, plant) {
         else if (buttons[i].id.includes("large"))
             buttons[i].innerHTML = old_record["remarks"];
         // Maintenance checkboxes
-        else if (buttons[i].id == "maintenance-button")
+        else if (buttons[i].id === "maintenance-button")
             buttons[i].innerHTML = oldCheckboxesText;
         // Intensities, dropdowns, textareas
         else {
             let value = old_record[buttons[i].id.slice(0, buttons[i].id.length - 7)]
-            if (value == "y")
+            if (value === "y")
                 buttons[i].innerHTML = "yes";
-            else if (value == "u")
+            else if (value === "u")
                 buttons[i].innerHTML = "unsure";
-            else if (value == "m")
+            else if (value === "m")
                 buttons[i].innerHTML = "missed";
-            else if (value == "no")
+            else if (value === "no")
                 buttons[i].innerHTML = "no";
             else
                 buttons[i].innerHTML = value;

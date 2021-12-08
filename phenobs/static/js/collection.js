@@ -1,4 +1,4 @@
-import { selectPlant } from './observation.js'
+import {selectPlant, setupPlants} from './observation.js'
 
 let collectionId = null;
 let lastCollectionId = null;
@@ -9,7 +9,46 @@ export function getCollections() {
     );
 }
 
-function setCollections(collections) {
+// Get collection from either local storage or DB
+export function getCollection(collectionType, collectionId) {
+    console.log(collectionType)
+    console.log(collectionId)
+    console.log('-------------------')
+    // Check if it is an online collection and try retrieving
+    const collection = getCollections()[collectionType]["collections"][collectionId];
+
+    if (collectionType === "online")
+        if (collection == null)
+            $.ajax({
+                url: "/observations/get/" + collectionId.toString(),
+                error: function (jqXHR) {
+                    alert("Collection retrieval failed.\nError: " + jqXHR.toString());
+                    return null;
+                },
+                beforeSend: function(){
+                    $("body").addClass("loading");
+                },
+                complete: function(){
+                    $("body").removeClass("loading");
+                },
+                success: function (data) {
+                    return setCollection("online", data);
+                }
+            });
+
+    return collection;
+}
+
+export function setCollection(collectionType, collection) {
+    let collections = getCollections();
+
+    collections[collectionType]["collections"][collection["collection-id"]] = collection;
+
+    setCollections(collections);
+    return collection;
+}
+
+export function setCollections(collections) {
     localStorage.setItem(
         "collections", JSON.stringify(collections)
     );
@@ -33,11 +72,33 @@ export function getLastCollectionId() {
     return lastCollectionId;
 }
 
+function getNextId(collectionType) {
+    return getCollections()[collectionType]["next_id"];
+}
+
+function setNextId(collectionType) {
+    let collections = getCollections();
+    collections[collectionType]["next_id"]++;
+    return setCollections(collections);
+}
+
 // Initializes collections item in the local storage
 function initCollections() {
     return setCollections({
-        'done': {},
-        'unfinished': {}
+        'local': {
+            'collections': {},
+            'next_id': 1
+        },
+        'online': {
+            'collections': {},
+        },
+        'unfinished': {
+            'collections': {},
+            'next_id': 1
+        },
+        'edited': {
+            'collections': {}
+        }
     });
 }
 
@@ -46,20 +107,23 @@ export function emptyCollection(fields, change, caching) {
     $.ajax({
         url: "/observations/new",
         error: function (jqXHR) {
-            alert()
+            alert(jqXHR.responseText);
+            setCollections(createEmptyCollection(null, getCollections()));
         },
         beforeSend: function(){
             $("body").addClass("loading");
         },
         complete: function(){
             $("body").removeClass("loading");
-            change(fields());
-            caching();
+            const collectionId = getNextId("unfinished");
+
+            setupPlants("unfinished", collectionId);
+            change(fields(), "unfinished", collectionId);
+            caching("unfinished", collectionId);
             selectPlant(
-                1,
-                getLastCollectionId(),
-                getCollectionId(),
-                getCollections()
+                "unfinished",
+                collectionId,
+                1
             );
         },
         success: function (data) {
@@ -74,29 +138,57 @@ function createEmptyCollection(data, collections) {
     if (collections == null) {
         return createEmptyCollection(data, initCollections());
     } else {
-        // todo: check if the data is null or not
-        collections["unfinished"]["collection-" + data["collection-id"]] = {
+        const collectionId = getNextId("unfinished");
+
+        if (data == null) {
+            data = {
+                "last-collection": null,
+                "plants": null,
+            };
+        }
+
+        collections["unfinished"]["collections"][collectionId] = {
             "collection-date": document.getElementById("collection-date").value,
-            "collection-id": data["collection-id"],
-            "creator": data["creator"],
-            "garden": data["garden"],
+            "collection-id": collectionId,
+            "creator": ("creator" in data)
+                ? data["creator"]
+                : null,
+            "garden": ("garden" in data)
+                ? data["garden"]
+                : null,
+            // TODO: increase next_id after uploading collection
+            "last-collection-id": (data["last-collection"] == null)
+                ? null
+                : data['last-collection']["collection-id"],
             "remaining": [],
             "records": {}
         };
 
         // Store plantList in local storage
-        localStorage.setItem(
-            "plantList", JSON.stringify(data["plants"])
-        );
+        if (data["plants"] == null) {
+            alert("Plant list could not be retrieved");
+        } else {
+            localStorage.setItem(
+                "plantList", JSON.stringify(data["plants"])
+            );
+        }
         // Add the last collection to the "done" list
-        collections["done"]["collection-" + data["last-collection"]["collection-id"]] = data["last-collection"];
+        collections["online"]["collections"][data["last-collection"]["collection-id"]] = data["last-collection"];
         /*
         Add remaining indices
         Create default records
          */
         for (let i = 0; i < data["plants"].length; i++) {
-            collections["unfinished"]["collection-" + data["collection-id"]]["remaining"].push(data["plants"][i].order);
-            collections["unfinished"]["collection-" + data["collection-id"]]["records"][data["plants"][i].name + "-" + data["plants"][i].order] = {
+            collections["unfinished"]
+            ["collections"]
+            [collectionId]
+            ["remaining"].push(data["plants"][i].order);
+
+            collections["unfinished"]
+            ["collections"]
+            [collectionId]
+            ["records"]
+            [data["plants"][i].name + "-" + data["plants"][i].order] = {
                 "name": data["plants"][i].name,
                 "order": data["plants"][i].order,
                 "plant": data["plants"][i].name + "-" + data["plants"][i].order,
@@ -121,29 +213,30 @@ function createEmptyCollection(data, collections) {
             };
         }
         // Set the collection ID for the current collection
-        setCollectionId("collection-" + data["collection-id"]);
+        setCollectionId(collectionId);
         // Set the collection ID for the last collection
         setLastCollectionId("collection-" + data["last-collection"]["collection-id"]);
         // Store the collection in the local storage
-        return collections;
+        return setCollections(collections);
     }
 }
 // upload the cached collection if the date (or any other value) is changed
-export function cacheCollection(id, collections) {
-    collections["unfinished"][id]["collection-date"] = document.getElementById("collection-date").value;
-    // get the garden ???
-    return setCollections(collections);
+export function cacheCollection(collectionType, collectionId) {
+    let collection = getCollection(collectionType, collectionId);
+    collection["collection-date"] = document.getElementById("collection-date").value;
+    return setCollection(collectionType, collection);
 }
 // cancel the current collection
-export function cancelCollection(id, collections, collectionType) {
-    delete collections[collectionType][id];
+export function cancelCollection(collectionType, collectionId) {
+    const collections = getCollections();
+    delete collections[collectionType][collectionId];
     setCollections(collections);
 }
 // upload the collection
-export function collectionDone(id, collections) {
+export function collectionDone(collectionType, collectionId) {
     $.ajax({
         url: "/observations/upload/",
-        data: JSON.stringify(collections["unfinished"][id]),
+        data: JSON.stringify(getCollection(collectionType, collectionId)),
         method: "POST",
         error: function (jqXHR) {
             alert("Could not establish a connection with database.");
@@ -154,7 +247,7 @@ export function collectionDone(id, collections) {
         complete: function(){
             $("body").removeClass("loading");
         },
-        success: function (data) {
+        success: function () {
             alert("Collection successfully uploaded!");
         }
     });
