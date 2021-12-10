@@ -4,14 +4,12 @@ export function fillInModalDates(lastCollection) {
     // Add the last collection dates
     // TODO: make the dates more human readable (LongDate)
     for (let j = 0; j < modals.length; j++) {
-        modals[j].innerText = lastCollection["collection-date"];
+        modals[j].innerText = lastCollection["date"];
     }
 }
 
 export function fillInOldData(lastCollection, plant) {
-    // Get the elements to be filled in
     let old_record = null;
-    // console.log(plant)
     // Check if the record exists for the plant
     if (plant in lastCollection["records"]){
         toggleButtons(false);
@@ -21,6 +19,7 @@ export function fillInOldData(lastCollection, plant) {
         return;
     }
 
+    // Get the elements to be filled in
     let old_dropdowns = $('select[id*="-old"]');
     let old_intensities = $('input[type="number"][id*="-old"]')
     let old_checkboxes = $('input[type="checkbox"][id*="-old"]');
@@ -39,9 +38,10 @@ export function fillInOldData(lastCollection, plant) {
         old_intensities[j].value =
             old_record[old_intensities[j].id.slice(0, old_intensities[j].id.length - 4)];
     // Checkboxes
-    for (let j = 0; j < old_checkboxes.length; j++)
+    for (let j = 0; j < old_checkboxes.length; j++) {
         old_checkboxes[j].checked =
             old_record[old_checkboxes[j].id.slice(0, old_checkboxes[j].id.length - 4)];
+    }
     // Textarea
     old_textarea[0].innerText = old_record["remarks"];
 }

@@ -10,39 +10,42 @@ export function getFields() {
     };
 }
 
-export function setupPlants(collectionType, collectionId) {
-    let collection = getCollection(collectionType, collectionId);
-    let lastCollection = getCollection("online", collection["last-collection-id"]);
+export function setupPlants(id) {
+    let collection = getCollection(id);
+    let lastCollection = getCollection(collection['last-collection-id']);
 
     let plants = document.getElementById('plant');
 
     let lastCollectionDate = document.getElementById('last-collection-date');
-    lastCollectionDate.innerText = lastCollection["collection-date"];
+    lastCollectionDate.innerText = lastCollection["date"];
 
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
 
         plants.innerHTML +=
             '<option value="' +
-            plant["name"] +
-            '-' +
-            plant["order"] +
+            plant["plant"] +
             '" name="' +
             plant["name"] +
             '" id="' +
             plant["order"] + '">' +
-            plant["name"] + '-' + plant["order"] +
+            plant["plant"] +
             '</option>';
     }
+
+    plants.selectedIndex = 0;
 }
 
 // Fills in the form fields for a particular plant
-export function fillInFields(collectionType, collectionId, order) {
-    let collection = getCollection(collectionType, collectionId);
-    let lastCollection = getCollection("online", collection["last-collection-id"]);
+export function fillInFields(id, order) {
+    let collection = getCollection(id);
+    let lastCollection = getCollection(collection['last-collection-id']);
     let fields = getFields();
 
-    let plant = collection["records"][document.getElementById('plant').children[order - 1].value];
+    let plants = document.getElementById('plant');
+    let plant = collection["records"][plants.children[order - 1].id];
+
+    plants.selectedIndex = order - 1;
 
     // Set the dropdowns
     for (let i = 0; i < fields["dropdowns"].length; i++) {
@@ -64,24 +67,17 @@ export function fillInFields(collectionType, collectionId, order) {
     fields["textarea"][0].value = plant["remarks"];
 
     // Call button and modal filling functions
-    fillInOldData(lastCollection, plant["plant"]);
+    fillInOldData(lastCollection, plant["order"]);
     fillInModalDates(lastCollection);
-    fillInButtons(lastCollection, plant["plant"]);
+    fillInButtons(lastCollection, plant["order"]);
     // Cache the record
-    cacheRecord(collectionType, collectionId, plant["done"], getCollections());
+    cacheRecord(id, plant['done']);
     noObservationPossible(plant["no-observation"]);
 }
 
-export function selectPlant(collectionType, collectionId, order) {
-    fillInFields(collectionType, collectionId, order);
-
-    // Read values from JSON into fields
-    let plants = document.getElementById('plant');
-    if (order > plants.children.length)
-        return;
-
-    // Set the plant
-    plants.selectedIndex = order - 1;
+export function selectPlant(id, order) {
+    let collection = getCollection(id);
+    fillInFields(id, order);
 
     // Display/Hide "Previous" button
     if (order === 1) {
@@ -91,7 +87,7 @@ export function selectPlant(collectionType, collectionId, order) {
     }
 
     // Display/Rename "Next" button
-    if (order === Object.keys(getCollection(collectionType, collectionId)['records']).length) {
+    if (collection['remaining'].length === 1 && collection['remaining'][0] === order) {
         $('#next-btn').val("Finish")
     } else {
         $('#next-btn').removeClass("d-none");
@@ -108,26 +104,26 @@ function checkValid() {
     return true;
 }
 
-export function selectNextPlant(collectionType, collectionId, order) {
+export function selectNextPlant(id, order) {
     if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(collectionType, collectionId, true);
+        cacheRecord(id, true);
         // Select the next plant
-        selectPlant(collectionType, collectionId, parseInt(order) + 1);
+        selectPlant(id, parseInt(order) + 1);
     }
 }
 
-export function selectPreviousPlant(collectionType, collectionId, order) {
+export function selectPreviousPlant(id, order) {
     if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(collectionType, collectionId, true);
+        cacheRecord(id, true);
         // Select the previous plant
-        selectPlant(collectionType, collectionId, parseInt(order) - 1);
+        selectPlant(id, parseInt(order) - 1);
     }
 }
 
-export function checkDefault(collectionType, collectionId, nextFlag) {
-    let current = getCollection(collectionType, collectionId)["records"][document.getElementById("plant").value];
+export function checkDefault(id, nextFlag) {
+    let current = getCollection(id)["records"][document.getElementById("plant").id];
     let defaultFlag = true;
     // Check the values
     for (let key in current) {
@@ -146,20 +142,20 @@ export function checkDefault(collectionType, collectionId, nextFlag) {
     if (defaultFlag && !current["done"]) {
         if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
             if (nextFlag)
-                selectNextPlant(collectionType, collectionId, order);
+                selectNextPlant(id, order);
             else
-                selectPreviousPlant(collectionType, collectionId, order);
+                selectPreviousPlant(id, order);
         }
     } else {
         if (nextFlag)
-            selectNextPlant(collectionType, collectionId, order);
+            selectNextPlant(id, order);
         else
-            selectPreviousPlant(collectionType, collectionId, order);
+            selectPreviousPlant(id, order);
     }
 }
 
-export function cacheRecord(collectionType, collectionId, isDone) {
-    let collection = getCollection(collectionType, collectionId);
+export function cacheRecord(id, isDone) {
+    let collection = getCollection(id);
     // Current record to be cached
     let record = {}
     // IDs of the elements to be cached
@@ -198,7 +194,7 @@ export function cacheRecord(collectionType, collectionId, isDone) {
     let plants = document.getElementById("plant");
     record['done'] = (isDone) ?
         isDone :
-        collection["records"][plants.children[plants.selectedIndex].value]["done"];
+        collection["records"][plants.children[plants.selectedIndex].id]["done"];
     record['name'] = plants.children[plants.selectedIndex].name;
     record['order'] = plants.selectedIndex + 1;
 
@@ -235,12 +231,12 @@ export function cacheRecord(collectionType, collectionId, isDone) {
         " Done"
     );
 
-    if (!collection["remaining"].length && !collection["records"][record["plant"]]["done"] && isDone)
+    if (!collection["remaining"].length && !collection["records"][record["order"]]["done"] && isDone)
         alert("Collection is ready to be saved");
 
-    collection["records"][record["plant"]] = record;
+    collection["records"][record["order"]] = record;
     // Update the collections
-    setCollection(collectionType, collection);
+    setCollection(collection);
 }
 
 export function noObservationPossible(flag) {
