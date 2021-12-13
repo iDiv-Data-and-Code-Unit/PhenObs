@@ -10,10 +10,9 @@ export function getFields() {
     };
 }
 
-export function setupPlants(id) {
-    let collection = getCollection(id);
-    let lastCollection = getCollection(collection['last-collection-id']);
-
+export async function setupPlants(id) {
+    const collection = await getCollection(id);
+    let lastCollection = await getCollection(collection['last-collection-id']);
     let plants = document.getElementById('plant');
 
     let lastCollectionDate = document.getElementById('last-collection-date');
@@ -22,14 +21,18 @@ export function setupPlants(id) {
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
 
+        console.log(key, plant['name'], plant['order']);
+
         plants.innerHTML +=
             '<option value="' +
-            plant["plant"] +
+            plant["name"] + '-' +
+            plant["order"] +
             '" name="' +
             plant["name"] +
             '" id="' +
             plant["order"] + '">' +
-            plant["plant"] +
+            plant["name"] + '-' +
+            plant["order"] +
             '</option>';
     }
 
@@ -37,21 +40,28 @@ export function setupPlants(id) {
 }
 
 // Fills in the form fields for a particular plant
-export function fillInFields(id, order) {
-    let collection = getCollection(id);
-    let lastCollection = getCollection(collection['last-collection-id']);
+export async function fillInFields(id, order) {
+    console.log('fillIn');
+    const collection = await getCollection(id);
+    const lastCollection = await getCollection(collection['last-collection-id']);
     let fields = getFields();
 
     let plants = document.getElementById('plant');
-    let plant = collection["records"][plants.children[order - 1].id];
 
     plants.selectedIndex = order - 1;
+
+    console.log(plants)
+
+    let plant = collection["records"][parseInt(plants.children[order - 1].id)];
 
     // Set the dropdowns
     for (let i = 0; i < fields["dropdowns"].length; i++) {
         for (let j = 0; j < fields["dropdowns"][i].children.length; j++) {
-            fields["dropdowns"][i].children[j].selected =
-                plant[fields["dropdowns"][i].id] === fields["dropdowns"][i].children[j].value;
+            if (plant[fields["dropdowns"][i].id] == null)
+                fields["dropdowns"][i].children[j].selected = 3;
+            else
+                fields["dropdowns"][i].children[j].selected =
+                    plant[fields["dropdowns"][i].id] === fields["dropdowns"][i].children[j].value;
         }
     }
     // Set the intensities
@@ -64,20 +74,20 @@ export function fillInFields(id, order) {
     }
 
     // Set the textarea
-    fields["textarea"][0].value = plant["remarks"];
+    $('#remarks').val(plant["remarks"])
 
     // Call button and modal filling functions
     fillInOldData(lastCollection, plant["order"]);
     fillInModalDates(lastCollection);
     fillInButtons(lastCollection, plant["order"]);
     // Cache the record
-    cacheRecord(id, plant['done']);
+    await cacheRecord(id, plant['done']);
     noObservationPossible(plant["no-observation"]);
 }
 
-export function selectPlant(id, order) {
-    let collection = getCollection(id);
-    fillInFields(id, order);
+export async function selectPlant(id, order) {
+    let collection = await getCollection(id);
+    await fillInFields(id, order);
 
     // Display/Hide "Previous" button
     if (order === 1) {
@@ -104,26 +114,28 @@ function checkValid() {
     return true;
 }
 
-export function selectNextPlant(id, order) {
+export async function selectNextPlant(id, order) {
     if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(id, true);
+        await cacheRecord(id, true);
         // Select the next plant
-        selectPlant(id, parseInt(order) + 1);
+        await selectPlant(id, parseInt(order) + 1);
     }
 }
 
-export function selectPreviousPlant(id, order) {
+export async function selectPreviousPlant(id, order) {
     if (!checkValid()) alert("Please fill all fields!");
     else {
-        cacheRecord(id, true);
+        await cacheRecord(id, true);
         // Select the previous plant
-        selectPlant(id, parseInt(order) - 1);
+        await selectPlant(id, parseInt(order) - 1);
     }
 }
 
-export function checkDefault(id, nextFlag) {
-    let current = getCollection(id)["records"][document.getElementById("plant").id];
+export async function checkDefault(id, nextFlag) {
+    let collection = await getCollection(id);
+    const plants = document.getElementById('plant');
+    let current = await collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
     let defaultFlag = true;
     // Check the values
     for (let key in current) {
@@ -135,33 +147,32 @@ export function checkDefault(id, nextFlag) {
         }
     }
 
-    const plants = document.getElementById('plant');
     const order = plants.selectedIndex + 1;
 
     // Check if the values are default
     if (defaultFlag && !current["done"]) {
         if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
             if (nextFlag)
-                selectNextPlant(id, order);
+                await selectNextPlant(id, order);
             else
-                selectPreviousPlant(id, order);
+                await selectPreviousPlant(id, order);
         }
     } else {
         if (nextFlag)
-            selectNextPlant(id, order);
+            await selectNextPlant(id, order);
         else
-            selectPreviousPlant(id, order);
+            await selectPreviousPlant(id, order);
     }
 }
 
-export function cacheRecord(id, isDone) {
-    let collection = getCollection(id);
+export async function cacheRecord(id, isDone) {
+    let collection = await getCollection(id);
+    let plants = document.getElementById("plant");
     // Current record to be cached
-    let record = {}
+    let record = await collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
     // IDs of the elements to be cached
     const ids = {
         "values": [
-            "plant",
             "initial-vegetative-growth",
             "young-leaves-unfolding",
             "flowers-opening",
@@ -191,12 +202,9 @@ export function cacheRecord(id, isDone) {
        record[id] = document.getElementById(id).checked
     });
 
-    let plants = document.getElementById("plant");
     record['done'] = (isDone) ?
         isDone :
-        collection["records"][plants.children[plants.selectedIndex].id]["done"];
-    record['name'] = plants.children[plants.selectedIndex].name;
-    record['order'] = plants.selectedIndex + 1;
+        record["done"];
 
     // Check if the plant is finished
     if (isDone) {
@@ -236,7 +244,7 @@ export function cacheRecord(id, isDone) {
 
     collection["records"][record["order"]] = record;
     // Update the collections
-    setCollection(collection);
+    await setCollection(collection);
 }
 
 export function noObservationPossible(flag) {
@@ -244,7 +252,7 @@ export function noObservationPossible(flag) {
     // Disabled/Enable the fields if the flag is True/False
     for (let key in fields) {
         for (let i = 0; i < fields[key].length; i++) {
-            if (fields[key][i].id != 'no-observation') {
+            if (fields[key][i].id !== 'no-observation') {
                 fields[key][i].disabled = flag;
                 fields[key][i].required = false;
             }
@@ -252,8 +260,8 @@ export function noObservationPossible(flag) {
     }
 
     // Enable "Remarks" and require it if necessary
-    fields["textarea"][0].disabled = false;
-    fields["textarea"][0].required = flag;
+    document.getElementById('remarks').disabled = false;
+    document.getElementById('remarks').required = flag;
 
     // Check intensity requirement
     requireIntensities();
@@ -265,7 +273,7 @@ export function requireIntensities() {
     let flowersOpening = $('#flowers-opening');
     let floweringIntensity = $('#flowering-intensity');
 
-    if (senescence.val() == 'y' && !senescence.prop('disabled')) {
+    if (senescence.val() === 'y' && !senescence.prop('disabled')) {
         senescenceIntensity.prop('disabled', false);
         senescenceIntensity.prop('required', true);
         senescenceIntensity.removeClass('disabled-btn');
@@ -274,7 +282,7 @@ export function requireIntensities() {
         senescenceIntensity.prop('disabled', true);
         senescenceIntensity.prop('required', false);
     }
-    if (flowersOpening.val() == 'y' && !flowersOpening.prop('disabled')) {
+    if (flowersOpening.val() === 'y' && !flowersOpening.prop('disabled')) {
         floweringIntensity.prop('disabled', false);
         floweringIntensity.prop('required', true);
         floweringIntensity.removeClass('disabled-btn');

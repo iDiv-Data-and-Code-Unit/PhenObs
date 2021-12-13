@@ -1,37 +1,114 @@
 import {selectPlant, setupPlants} from './observation.js'
 
+let collectionId = null;
+
+export function getCollectionId() {
+    return collectionId;
+}
+
+function setCollectionId(id) {
+    collectionId = id;
+}
+
 // Gets the locally stored collections
-export function getCollections() {
-    return JSON.parse(
+export async function getCollections() {
+    return await JSON.parse(
         localStorage.getItem("collections")
     );
 }
 
 // Get collection from local storage
-export function getCollection(id) {
-    return getCollections()[id];
+export async function getCollection(id) {
+    let collections = await getCollections();
+    if (collections != null)
+        return collections[id];
+    return null;
+}
+
+export async function insertCollection(collection, isOnline) {
+    let collections = await getCollections();
+
+    if (collections == null)
+        collections = {};
+
+    collections[collection['id']] = {
+        'id': collection['id'],
+        'date': collection['date'],
+        'creator': collection['creator'],
+        'garden': collection['garden'],
+        'last-collection-id': collection['last-collection']['id'],
+        'edited': false,
+        'finished': isOnline,
+        'uploaded': isOnline,
+        'records': {},
+        'remaining': []
+    };
+
+    // Add the last collection to the list
+    collections[collection['last-collection']['id']] = collection['last-collection'];
+    collections[collection['last-collection']['id']]['edited'] = false;
+    collections[collection['last-collection']['id']]['finished'] = true;
+    collections[collection['last-collection']['id']]['uploaded'] = true;
+
+    /*
+    Add remaining indices
+    Create default records
+     */
+    for (let key in collection['records']) {
+        const current = collection['records'][key];
+
+        // Create a new instance for the given plant in the local storage
+        collections[collection['id']]['records'][current['order']] = {
+            "id": current['id'],
+            "name": current['name'],
+            "order": current['order'],
+            "plant": current['name'] + "-" + current['order'],
+            "initial-vegetative-growth": (current['initial-vegetative-growth'] == null) ? "no" : current['initial-vegetative-growth'],
+            "young-leaves-unfolding": (current['young-leaves-unfolding'] == null) ? "no" : current['young-leaves-unfolding'],
+            "flowers-opening": (current['flowers-opening'] == null) ? "no" : current['flowers-opening'],
+            "peak-flowering": (current['peak-flowering'] == null) ? "no" : current['peak-flowering'],
+            "peak-flowering-estimation": (current['peak-flowering-estimation'] == null) ? "no" : current['peak-flowering-estimation'],
+            "flowering-intensity": current['flowering-intensity'],
+            "ripe-fruits": (current['ripe-fruits'] == null) ? "no" : current['ripe-fruits'],
+            "senescence": (current['senescence'] == null) ? "no" : current['senescence'],
+            "senescence-intensity": current['senescence-intensity'],
+            "remarks": current['remarks'],
+            "cut-partly": current['cut-partly'],
+            "cut-total": current['cut-total'],
+            "covered-natural": current['covered-natural'],
+            "covered-artificial": current['covered-artificial'],
+            "removed": current['removed'],
+            "transplanted": current['transplanted'],
+            "no-observation": false,
+            "done": isOnline
+        };
+    }
+
+    await setCollections(collections);
+    return collection;
 }
 
 // Sets a single collection in local storage
-export function setCollection(collection) {
-    let collections = getCollections();
+export async function setCollection(collection) {
+    let collections = await getCollections();
     collections[collection["id"]] = collection;
     setCollections(collections);
     return collection;
 }
 
 // Sets all collections in local storage
-export function setCollections(collections) {
-    localStorage.setItem(
+export async function setCollections(collections) {
+    await localStorage.setItem(
         "collections", JSON.stringify(collections)
     );
     return collections;
 }
 
 // Get necessary information from the server and create an empty collection
-export function emptyCollection(fields, change, caching) {
-    $.ajax({
-        url: "/observations/new",
+export async function emptyCollection(fields, change, caching) {
+    await $.ajax({
+        url: "/observations/new/",
+        method: "POST",
         error: function (jqXHR) {
             alert(jqXHR.response);
             setCollections(createEmptyCollection(null, getCollections()));
@@ -39,104 +116,52 @@ export function emptyCollection(fields, change, caching) {
         beforeSend: function(){
             $("body").addClass("loading");
         },
-        complete: function(){
+        complete: function(data){
+            console.log(getCollectionId());
             $("body").removeClass("loading");
-            setupPlants(id);
-            change(fields(), "unfinished", collectionId);
-            caching("unfinished", collectionId);
-            selectPlant(
-                "unfinished",
-                collectionId,
-                1
-            );
         },
-        success: function (data) {
-            setCollections(createEmptyCollection(data, getCollections()));
+        success: async function (data) {
+            await setCollections(createEmptyCollection(data, await getCollections()));
         }
     });
 
+    await setupPlants(getCollectionId())
+        .finally(() => selectPlant(parseInt(getCollectionId()), 1))
+        .finally(change(fields(), parseInt(getCollectionId()), false))
+        .then(() => caching(parseInt(getCollectionId())));
 }
 // Create an empty collection with default observation values
-function createEmptyCollection(data, collections) {
+async function createEmptyCollection(data, collections) {
     // Check if the collections item has been initialized
     if (collections == null) {
         return createEmptyCollection(data, {});
     } else {
-        collections[data['id']] = {
-            'id': data['id'],
-            'date': data['date'],
-            'creator': data['creator'],
-            'garden': data['garden'],
-            'last-collection-id': data['last-collection']['id'],
-            'edited': false,
-            'finished': false,
-            'uploaded': false,
-            'remaining': [],
-            'records': {}
-        };
-
-        // Add the last collection to the list
-        collections[data['last-collection']['id']] = data['last-collection'];
-        collections[data['last-collection']['id']]['edited'] = false;
-        collections[data['last-collection']['id']]['finished'] = true;
-        collections[data['last-collection']['id']]['uploaded'] = true;
-
-        /*
-        Add remaining indices
-        Create default records
-         */
-        for (let i = 0; i < data["records"].length; i++) {
-            const current = data['records'][i];
-
-            // Create a new instance for the given plant in the local storage
-            collections[data['id']]['records'][current['order']] = {
-                "id": current['id'],
-                "name": current['name'],
-                "order": current['order'],
-                "plant": current['name'] + "-" + current['order'],
-                "initial-vegetative-growth": current['initial-vegetative-growth'],
-                "young-leaves-unfolding": current['young-leaves-unfolding'],
-                "flowers-opening": current['flowers-opening'],
-                "peak-flowering": current['peak-flowering'],
-                "peak-flowering-estimation": current['peak-flowering-estimation'],
-                "flowering-intensity": current['flowering-intensity'],
-                "ripe-fruits": current['ripe-fruits'],
-                "senescence": current['senescence'],
-                "senescence-intensity": current['senescence-intensity'],
-                "remarks": current['remarks'],
-                "cut-partly": current['cut-partly'],
-                "cut-total": current['cut-total'],
-                "covered-natural": current['covered-natural'],
-                "covered-artificial": current['covered-artificial'],
-                "removed": current['removed'],
-                "transplanted": current['transplanted'],
-                "no-observation": false,
-                "done": false
-            };
-            // Add the order of the plant into remaining indices list
-            collections[data['id']]["remaining"].push(current['order']);
-        }
-
-        // Update the collections in local storage
-        return setCollections(collections);
+        console.log(data)
+        console.log(data);
+        setCollectionId(data['id']);
+        await insertCollection(data, false);
+        let collection = await getCollection(data['id']);
+        for (let key in collection['records'])
+            collection["remaining"].push(collection['records'][key]['order']);
+        await setCollection(collection);
     }
 }
 
 // Update a collection if the date (or any other value) is changed
-export function updateCollection(id) {
-    let collection = getCollection(id);
+export async function updateCollection(id) {
+    let collection = await getCollection(id);
     collection["date"] = document.getElementById("collection-date").value;
-    return setCollection(collection);
+    return await setCollection(collection);
 }
 // Delete a collection from local storage
-export function deleteCollection(id) {
-    const collections = getCollections();
+export async function deleteCollection(id) {
+    const collections = await getCollections();
     delete collections[id];
-    return setCollections(collections);
+    return await setCollections(collections);
 }
 // Upload a collection
-export function uploadCollection(id) {
-    $.ajax({
+export async function uploadCollection(id) {
+    await $.ajax({
         url: "/observations/upload/",
         data: JSON.stringify(getCollection(id)),
         method: "POST",
@@ -153,4 +178,59 @@ export function uploadCollection(id) {
             alert("Collection successfully uploaded!");
         }
     });
+}
+
+// export function fetchCollection(id) {
+//     $.ajax({
+//         url: "/observations/get/" + id,
+//         error: function (jqXHR) {
+//             alert("Could not establish a connection with database.");
+//             return null;
+//         },
+//         beforeSend: function(){
+//             $("body").addClass("loading");
+//         },
+//         complete: function(){
+//             $("body").removeClass("loading");
+//         },
+//         success: function (data) {
+//             console.log(data);
+//             return insertCollection(data, true);
+//         }
+//     });
+// }
+
+export async function fetchCollection(id) {
+    let result;
+
+    try {
+        result = await $.ajax({
+            url: "/observations/get/" + id,
+            error: function (jqXHR) {
+                alert("Could not establish a connection with database.");
+                return null;
+            },
+            beforeSend: function(){
+                $("body").addClass("loading");
+            },
+            complete: function(){
+                $("body").removeClass("loading");
+            },
+            success: function (data) {
+                console.log(data);
+                return insertCollection(data, true);
+            }
+        });
+
+        return result;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function markEdited(id) {
+    let collection = await getCollection(id);
+    collection['edited'] = true;
+    collection['uploaded'] = false;
+    await setCollection(collection);
 }

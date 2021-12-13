@@ -26,12 +26,12 @@ urlpatterns = [
         name="upload",
     ),
     path(
-        "edit/<str:collection_type>-<int:collection_id>",
+        "edit/<int:id>",
         views.edit,
         name="edit",
     ),
     path(
-        "get/<int:collection_id>/",
+        "get/<int:id>/",
         views.get,
         name="get",
     ),

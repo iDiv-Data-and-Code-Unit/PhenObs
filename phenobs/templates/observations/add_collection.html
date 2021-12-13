@@ -29,11 +29,6 @@
       <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
         <button class="wide-button px-lg-4 px-md-5 col-12 disabled-btn" disabled><strong>Creator</strong> <span id="creator">{{ user }}</span></button>
       </div>
-      <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
-        <button class="wide-button col-12 gray-text" onclick="location.href='{% url 'observations:add' %}'">
-          <img src="{% static 'images/add_observation.png' %}" height="20" class="px-1 pb-1"/>  Add an observation
-        </button>
-      </div>
     </div>
 
     {% block observation %}

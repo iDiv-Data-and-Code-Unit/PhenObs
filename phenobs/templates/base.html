@@ -37,11 +37,11 @@
       <script defer src="{% static 'js/js.cookie.min.js' %}"></script>
       <script defer src="{% static 'js/popper.min.js' %}"></script>
       <script defer src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script type="module" defer src="{% static 'js/project.js' %}"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
 
       <!-- place project specific Javascript in this file -->
-      <script type="javascript" defer src="{% static 'js/project.js' %}"></script>
       {% block custom_javascript %}
       {% endblock custom_javascript %}
     {% endblock javascript %}

@@ -109,7 +109,7 @@ class Record(models.Model):
     )
     remarks = models.TextField(blank=True)
     peak_flowering_estimation = models.CharField(
-        max_length=2, choices=min_observation_choices, blank=True
+        max_length=2, choices=min_observation_choices, null=True, blank=True
     )
     # TODO: make "peak_flowering_estimation" available only in frontend
 
