@@ -1,10 +1,12 @@
-function formatDate(dateToFormat) {
+function formatDate(dateToFormat, includeYear=true) {
     let options = {
         weekday: 'short',
-        year: 'numeric',
         month: 'short',
         day: 'numeric',
     };
+
+    if (includeYear)
+        options.year = 'numeric';
 
     return dateToFormat.toLocaleString('en-US', options);
 }
@@ -33,3 +35,11 @@ $(document).ready(function() {
     checkConnection();
     setInterval(() => checkConnection(), 30000);
 });
+
+if (document.getElementById('home-date') != null)
+    changeHomeDate();
+
+function changeHomeDate() {
+    let homeDate = document.getElementById('home-date');
+    homeDate.innerText = formatDate(new Date(), false).toString();
+}

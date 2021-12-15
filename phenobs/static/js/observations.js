@@ -74,7 +74,7 @@ async function initTables() {
     await insertRows("unfinished");
     await insertRows("uploaded");
     await insertRows("ready");
-    await getAllCollections();
+    // await getAllCollections();
     addUploadLink();
     addRemoveLink();
 }
@@ -131,11 +131,16 @@ async function getAllCollections() {
 }
 
 async function addOnlineCollections(collections) {
-    let table = document.getElementById('uploaded-collections-body');
     const localCollections = await getCollections();
+    let noLocalCollections = false;
+    let table = document.getElementById('uploaded-collections-body');
     let rowHTML = '';
+
+    if (localCollections == null)
+        noLocalCollections = true;
+
     for (let i = 0; collections.length; i++) {
-        if (!(parseInt(collections[i]['id']) in localCollections)) {
+        if (noLocalCollections || !(parseInt(collections[i]['id']) in localCollections)) {
             rowHTML =
                 '<tr class="d-table-row">' +
                 '<th scope="row" class="text-left">' + collections[i]['date'] + '</th>' +
