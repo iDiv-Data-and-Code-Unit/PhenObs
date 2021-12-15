@@ -7,6 +7,7 @@ async function insertRows(tableName) {
     table.innerHTML = '';
 
     for (let key in collections) {
+        console.log(collections[key], key)
         if (tableName === "uploaded") {
             if (!collections[key]["uploaded"])
                 continue;
@@ -14,10 +15,12 @@ async function insertRows(tableName) {
             if (collections[key]["finished"])
                 continue;
         } else {
-            if (!collections[key]["finished"] ||
+            if (!(!collections[key]["uploaded"] && collections[key]["finished"]) &&
                 !(collections[key]["edited"] && !collections[key]["uploaded"]))
                 continue;
         }
+        console.log('-----------------------')
+        console.log(collections[key], key)
         let rowHTML =
             ' <tr class="d-table-row">\n' +
             '<th scope="row" class="text-left">' + collections[key]["date"] + '</th>\n' +
@@ -74,7 +77,6 @@ async function initTables() {
     await insertRows("unfinished");
     await insertRows("uploaded");
     await insertRows("ready");
-    // await getAllCollections();
     addUploadLink();
     addRemoveLink();
 }
@@ -158,3 +160,7 @@ async function addOnlineCollections(collections) {
         }
     }
 }
+
+$('#get-collections').click(async function () {
+    await getAllCollections();
+});

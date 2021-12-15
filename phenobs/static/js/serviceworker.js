@@ -1,8 +1,7 @@
-var staticCacheName = "django-pwa-v05";
+var staticCacheName = "django-pwa-v07";
 var filesToCache = [
     '/',
     '/observations/',
-    '/observations/add/',
     '/offline/',
     '/static/css/project.css',
     '/static/css/bootstrap.min.css',
@@ -12,7 +11,9 @@ var filesToCache = [
     '/static/js/popper.min.js',
     '/static/js/project.js',
     '/static/js/add.js',
+    '/static/js/edit.js',
     '/static/js/observation.js',
+    '/static/js/observations.js',
     '/static/js/collection.js',
     '/static/js/modals.js',
     '/static/images/PhenObs_Logo.png',
@@ -21,7 +22,21 @@ var filesToCache = [
     '/static/images/all_collections.png',
     '/static/images/add_collection.png',
     '/static/images/add_observation.png',
-    '/static/images/loading.gif'
+    '/static/images/loading.gif',
+    '/static/css/bootstrap-icons.scss',
+    '/static/css/bootstrap-icons.css',
+    '/static/fonts/bootstrap-icons.woff',
+    '/static/fonts/bootstrap-icons.woff2',
+    '/static/fonts/bootstrap-icons.woff?a74547b2f0863226942ff8ded57db345',
+    '/static/fonts/bootstrap-icons.woff2?a74547b2f0863226942ff8ded57db345',
+
+    '/static/images/bootstrap-icons/cloud-arrow-up-fill.svg',
+    '/static/images/bootstrap-icons/cloud-check-fill.svg',
+    '/static/images/bootstrap-icons/cloud-fill.svg',
+    '/static/images/bootstrap-icons/exclamation-circle-fill.svg',
+    '/static/images/bootstrap-icons/hdd-fill.svg',
+    '/static/images/bootstrap-icons/pencil-fill.svg',
+    '/static/images/bootstrap-icons/trash-fill.svg',
 ];
 
 // Cache on install

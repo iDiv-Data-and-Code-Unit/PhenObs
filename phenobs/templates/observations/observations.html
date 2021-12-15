@@ -18,13 +18,21 @@
 
   <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
     <div class="row justify-content-between">
-      <h1 class="col-9 col-md-6 col-lg-7 col-xl-8 gray-text">All collections</h1>
-      <button class="narrow-button pl-2 px-sm-3 col-2 mx-auto col-md-5 col-lg-4 col-xl-3 mx-md-4" onclick="location.href='{% url 'observations:add' %}'">
-        <div class="d-inline gray-text">
-          <img class="pr-2" src="{% static 'images/add_collection.png' %}" height="35" alt=""/>
-          <span class="d-none d-md-inline">Add collection</span>
-        </div>
-      </button>
+      <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">All collections</h1>
+      <div class="col-6 col-md-8 col-lg-6 justify-content-end col-xl-7 d-flex">
+        <button class="narrow-button col-5 mx-auto" id="get-collections">
+          <div class="d-inline gray-text">
+            <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/bootstrap-icons/cloud-fill.svg' %}" height="25" alt=""/>
+            <span class="d-none d-md-inline">All collections</span>
+          </div>
+        </button>
+        <button class="narrow-button col-5" onclick="location.href='{% url 'observations:add' %}'">
+          <div class="d-inline gray-text">
+            <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/add_collection.png' %}" height="30" alt=""/>
+            <span class="d-none d-md-inline">Add collection</span>
+          </div>
+        </button>
+      </div>
     </div>
 
     <div class="mt-1" id="all-collections">
