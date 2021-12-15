@@ -135,18 +135,20 @@ def new(request):
         if prev_collection_db is not None:
             prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
             prev_records_json = format_records(prev_records_db)
+
+            prev_prev_collection_db = Collection.objects.filter(
+                date__lt=prev_collection_db.date, garden=garden
+            ).last()
+
             prev_collection_json = {
                 "id": prev_collection_db.id,
                 "creator": prev_collection_db.creator.username,
                 "garden": prev_collection_db.garden.name,
                 "date": prev_collection_db.date,
                 "records": prev_records_json,
-                "last-collection-id": Collection.objects.filter(
-                    date__lt=prev_collection_db.date, garden=garden
-                )
-                .exclude(id=prev_collection_db.id)
-                .last()
-                .id,
+                "last-collection-id": prev_prev_collection_db.id
+                if (prev_prev_collection_db is not None)
+                else None,
             }
 
         return JsonResponse(
