@@ -140,7 +140,7 @@ async function addOnlineCollections(collections) {
         noLocalCollections = true;
 
     for (let i = 0; collections.length; i++) {
-        if (noLocalCollections || !(parseInt(collections[i]['id']) in localCollections)) {
+        if (noLocalCollections || !(localCollections != null  && parseInt(collections[i]['id']) in localCollections)) {
             rowHTML =
                 '<tr class="d-table-row">' +
                 '<th scope="row" class="text-left">' + collections[i]['date'] + '</th>' +

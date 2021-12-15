@@ -33,7 +33,7 @@ function checkConnection() {
 
 $(document).ready(function() {
     checkConnection();
-    setInterval(() => checkConnection(), 30000);
+    setInterval(() => checkConnection(), 15000);
 });
 
 if (document.getElementById('home-date') != null)
