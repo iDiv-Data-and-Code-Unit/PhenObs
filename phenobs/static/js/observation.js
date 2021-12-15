@@ -1,18 +1,33 @@
 import { fillInOldData, fillInModalDates, fillInButtons } from "./modals.js";
-import { setCollections, setCollection, getCollections, getCollection } from "./collection.js";
+import {setCollections, setCollection, getCollections, getCollection, fetchCollection} from "./collection.js";
 
-export function getFields() {
+export function getFields(isOld=false) {
     return {
-        "dropdowns": $('select').not('[id*="-old"]').not('[id*="plant"]'),
-        "intensities": $('input[type="number"]').not('[id*="-old"]'),
-        "checkboxes": $('input[type="checkbox"]').not('[id*="-old"]'),
-        "textarea": $('textarea').not('[id*="-old"]')
+        "dropdowns": $('select')
+            .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
+            .not((isOld) ? '[id*=""]' : '[id*="-old"]')
+            .not('[id*="plant"]'),
+        "intensities": $('input[type="number"]')
+            .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
+            .not((isOld) ? '[id*=""]' : '[id*="-old"]'),
+        "checkboxes": $('input[type="checkbox"]')
+            .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
+            .not((isOld) ? '[id*=""]' : '[id*="-old"]'),
+        "textarea": $('textarea')
+            .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
+            .not((isOld) ? '[id*=""]' : '[id*="-old"]')
     };
 }
 
 export async function setupPlants(id) {
+
     const collection = await getCollection(id);
     let lastCollection = await getCollection(collection['last-collection-id']);
+
+    if (lastCollection === undefined || lastCollection == null || !("last-collection-id" in lastCollection)) {
+        lastCollection = await fetchCollection(collection['last-collection-id']);
+    }
+
     let plants = document.getElementById('plant');
 
     let lastCollectionDate = document.getElementById('last-collection-date');
@@ -165,11 +180,11 @@ export async function checkDefault(id, nextFlag) {
     }
 }
 
-export async function cacheRecord(id, isDone) {
+export async function cacheRecord(id, isDone, isOld=false) {
     let collection = await getCollection(id);
     let plants = document.getElementById("plant");
     // Current record to be cached
-    let record = await collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
+    let record = collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
     // IDs of the elements to be cached
     const ids = {
         "values": [
@@ -195,52 +210,59 @@ export async function cacheRecord(id, isDone) {
     };
 
     // Cache the values
-    ids['values'].forEach(function(id) {
-       record[id] = document.getElementById(id).value
+    ids['values'].forEach(function (id) {
+        console.log(id, isOld);
+        record[id] = document.getElementById(id + ((isOld) ? '-old' : '')).value
     });
-    ids['checked'].forEach(function(id) {
-       record[id] = document.getElementById(id).checked
+    ids['checked'].forEach(function (id) {
+        if (isOld && id === "no-observation") return;
+        record[id] = document.getElementById(id + ((isOld) ? '-old' : '')).checked
     });
+    if (!isOld) {
+        record['done'] = (isDone) ?
+            isDone :
+            record["done"];
 
-    record['done'] = (isDone) ?
-        isDone :
-        record["done"];
+        // Check if the plant is finished
+        if (isDone) {
+            // Remove the order from the remaining orders list
+            const index = collection["remaining"].indexOf(plants.selectedIndex + 1);
+            // If the element is already finished
+            if (index > -1)
+                collection["remaining"].splice(index, 1);
+            // Highlight the plant in the dropdown
+            $('option[id=' + (plants.selectedIndex + 1).toString() + ']').addClass("done-plant");
+        }
 
-    // Check if the plant is finished
-    if (isDone) {
-        // Remove the order from the remaining orders list
-        const index = collection["remaining"].indexOf(plants.selectedIndex + 1);
-        // If the element is already finished
-        if (index > -1)
-            collection["remaining"].splice(index, 1);
-        // Highlight the plant in the dropdown
-        $('option[id='+ (plants.selectedIndex + 1).toString() +']').addClass("done-plant");
-    }
+        // Done collection button
+        let doneBtn = $("#done-btn");
+        // If there exists no plant, then disable the button
+        if (!collection["remaining"].length) {
+            collection['finished'] = true;
+            doneBtn.prop("disabled", false);
+            doneBtn.addClass("text-white");
+            doneBtn.removeClass("text-black");
+            doneBtn.addClass("done-btn-ready");
+        } else {
+            doneBtn.prop("disabled", true);
+            doneBtn.addClass("text-black");
+            doneBtn.removeClass("text-white");
+            doneBtn.removeClass("done-btn-ready");
+        }
+        // Update the "Done" button to show updated progress
+        doneBtn.text(
+            (Object.keys(collection["records"]).length - collection["remaining"].length) +
+            "/" +
+            Object.keys(collection["records"]).length +
+            " Done"
+        );
 
-    // Done collection button
-    let doneBtn = $("#done-btn");
-    // If there exists no plant, then disable the button
-    if (!collection["remaining"].length) {
-        doneBtn.prop("disabled", false);
-        doneBtn.addClass("text-white");
-        doneBtn.removeClass("text-black");
-        doneBtn.addClass("done-btn-ready");
+        if (!collection["remaining"].length && !collection["records"][record["order"]]["done"] && isDone)
+            alert("Collection is ready to be saved");
     } else {
-        doneBtn.prop("disabled", true);
-        doneBtn.addClass("text-black");
-        doneBtn.removeClass("text-white");
-        doneBtn.removeClass("done-btn-ready");
+        collection['edited'] = true;
+        collection['uploaded'] = false;
     }
-    // Update the "Done" button to show updated progress
-    doneBtn.text(
-        (Object.keys(collection["records"]).length - collection["remaining"].length) +
-        "/" +
-        Object.keys(collection["records"]).length +
-        " Done"
-    );
-
-    if (!collection["remaining"].length && !collection["records"][record["order"]]["done"] && isDone)
-        alert("Collection is ready to be saved");
 
     collection["records"][record["order"]] = record;
     // Update the collections

@@ -1,4 +1,5 @@
 import {selectPlant, setupPlants} from './observation.js'
+import {oldClickListeners} from "./edit.js";
 
 let collectionId = null;
 
@@ -25,35 +26,7 @@ export async function getCollection(id) {
     return null;
 }
 
-export async function insertCollection(collection, isOnline) {
-    let collections = await getCollections();
-
-    if (collections == null)
-        collections = {};
-
-    collections[collection['id']] = {
-        'id': collection['id'],
-        'date': collection['date'],
-        'creator': collection['creator'],
-        'garden': collection['garden'],
-        'last-collection-id': collection['last-collection']['id'],
-        'edited': false,
-        'finished': isOnline,
-        'uploaded': isOnline,
-        'records': {},
-        'remaining': []
-    };
-
-    // Add the last collection to the list
-    collections[collection['last-collection']['id']] = collection['last-collection'];
-    collections[collection['last-collection']['id']]['edited'] = false;
-    collections[collection['last-collection']['id']]['finished'] = true;
-    collections[collection['last-collection']['id']]['uploaded'] = true;
-
-    /*
-    Add remaining indices
-    Create default records
-     */
+function formatRecords(collections, collection, isOnline) {
     for (let key in collection['records']) {
         const current = collection['records'][key];
 
@@ -84,15 +57,52 @@ export async function insertCollection(collection, isOnline) {
         };
     }
 
+    return collections;
+}
+
+export async function insertCollection(collection, isOnline) {
+    let collections = await getCollections();
+
+    if (collections == null)
+        collections = {};
+
+    collections[collection['id']] = {
+        'id': collection['id'],
+        'date': collection['date'],
+        'creator': collection['creator'],
+        'garden': collection['garden'],
+        'last-collection-id': collection['last-collection']['id'],
+        'edited': false,
+        'finished': isOnline,
+        'uploaded': isOnline,
+        'records': {},
+        'remaining': []
+    };
+
+    // Add the last collection to the list
+    collections[collection['last-collection']['id']] = collection['last-collection'];
+    collections[collection['last-collection']['id']]['last-collection-id'] =
+        collection['last-collection']['last-collection-id'];
+    collections[collection['last-collection']['id']]['remaining'] = [];
+    collections[collection['last-collection']['id']]['edited'] = false;
+    collections[collection['last-collection']['id']]['finished'] = true;
+    collections[collection['last-collection']['id']]['uploaded'] = true;
+
+    /*
+    Add remaining indices
+    Create default records
+     */
+    collections = formatRecords(collections, collection, isOnline);
+    // collections = formatRecords(collections, collections[collection['last-collection']['id']], isOnline);
     await setCollections(collections);
-    return collection;
+    return collections[collection['id']];
 }
 
 // Sets a single collection in local storage
 export async function setCollection(collection) {
     let collections = await getCollections();
     collections[collection["id"]] = collection;
-    setCollections(collections);
+    await setCollections(collections);
     return collection;
 }
 
@@ -125,9 +135,11 @@ export async function emptyCollection(fields, change, caching) {
         }
     });
 
+    const collection = await getCollection(getCollectionId());
     await setupPlants(getCollectionId())
         .finally(() => selectPlant(parseInt(getCollectionId()), 1))
         .finally(change(fields(), parseInt(getCollectionId()), false))
+    await oldClickListeners(parseInt(collection["last-collection-id"]))
         .then(() => caching(parseInt(getCollectionId())));
 }
 // Create an empty collection with default observation values
@@ -161,9 +173,10 @@ export async function deleteCollection(id) {
 }
 // Upload a collection
 export async function uploadCollection(id) {
+    const collection = await getCollection(id);
     await $.ajax({
         url: "/observations/upload/",
-        data: JSON.stringify(getCollection(id)),
+        data: JSON.stringify(collection),
         method: "POST",
         error: function (jqXHR) {
             alert("Could not establish a connection with database.");
@@ -174,7 +187,11 @@ export async function uploadCollection(id) {
         complete: function(){
             $("body").removeClass("loading");
         },
-        success: function () {
+        success: async function () {
+            collection['uploaded'] = true;
+            collection['finished'] = true;
+            collection['edited'] = false;
+            await setCollection(collection);
             alert("Collection successfully uploaded!");
         }
     });

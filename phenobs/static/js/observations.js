@@ -25,6 +25,7 @@ async function insertRows(tableName) {
     // TODO: get all online collections
     let collections = await getCollections();
     let table = document.getElementById(tableName + '-collections-body');
+    table.innerHTML = '';
 
     for (let key in collections) {
         if (tableName === "uploaded") {
@@ -64,7 +65,7 @@ async function insertRows(tableName) {
         if (collections[key]["edited"] || (collections[key]["finished"] && !collections[key]["uploaded"]))
             rowHTML +=
                 '<td>\n' +
-                '  <a onclick="uploadCollection(\'' + key + '\')">\n' +
+                '  <a onclick="">\n' +
                 '    <i class="bi bi-cloud-arrow-up-fill" style="font-size: 1.5rem; color: blue;" id="' + key + '-upload"></i>\n' +
                 '  </a>\n' +
                 '</td>\n';
@@ -78,7 +79,7 @@ async function insertRows(tableName) {
 
         rowHTML +=
             '<td>\n' +
-            '  <a onclick="deleteCollection(' + key + ')">\n' +
+            '  <a onclick="">\n' +
             '    <i class="bi bi-trash-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-cancel"></i>\n' +
             '  </a>\n' +
             '</td>\n' +
@@ -88,6 +89,44 @@ async function insertRows(tableName) {
     }
 }
 
-await insertRows("unfinished");
-await insertRows("uploaded");
-await insertRows("ready");
+await initTables();
+
+async function initTables() {
+    await insertRows("unfinished");
+    await insertRows("uploaded");
+    await insertRows("ready");
+    addUploadLink();
+    addRemoveLink();
+}
+
+function addUploadLink() {
+    let allButtons = $('[id*="-upload"]');
+
+    for (let i = 0; i < allButtons.length; i++) {
+        const id = parseInt(allButtons[i].id.split('-')[0]);
+        allButtons[i].parentElement.addEventListener(
+            'click',
+            async () => {
+                await uploadCollection(id);
+                await initTables();
+            }
+        );
+        allButtons[i].parentElement.style.cursor = 'pointer';
+    }
+}
+
+function addRemoveLink() {
+    let allButtons = $('[id*="-cancel"]');
+
+    for (let i = 0; i < allButtons.length; i++) {
+        const id = parseInt(allButtons[i].id.split('-')[0]);
+        allButtons[i].parentElement.addEventListener(
+            'click',
+            async () => {
+                await deleteCollection(id);
+                await initTables();
+            }
+        );
+        allButtons[i].parentElement.style.cursor = 'pointer';
+    }
+}

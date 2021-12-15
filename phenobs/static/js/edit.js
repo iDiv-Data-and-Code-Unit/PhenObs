@@ -14,6 +14,11 @@ import {
     requireIntensities, selectPlant,
     setupPlants
 } from "./observation.js";
+import {
+    fillInButtons,
+    fillInModalDates,
+    fillInOldData
+} from "./modals.js";
 
 if (location.href.indexOf('edit') !== -1) {
     const id = parseInt(getId());
@@ -26,9 +31,10 @@ if (location.href.indexOf('edit') !== -1) {
     }
 
     setDate(new Date(collection["date"]));
-    await setupPlants(parseInt(collection["id"]))
-        .finally(() => selectPlant(parseInt(collection["id"]), 1))
-        .finally(changeListeners(getFields(), parseInt(collection["id"]), true))
+    await setupPlants(parseInt(collection["id"]));
+    await selectPlant(parseInt(collection["id"]), 1);
+    await changeListeners(getFields(), parseInt(collection["id"]), true);
+    await oldClickListeners(parseInt(collection["last-collection-id"]))
         .then(() => cachingListeners(parseInt(collection["id"])));
 
     // await changeListeners(getFields(), parseInt(collection["id"]), true);
@@ -55,6 +61,24 @@ export async function changeListeners(fields, id, editFlag) {
                 }
             );
         }
+    }
+}
+
+export async function oldClickListeners(id) {
+    let saveButtons = $('[id*="-save"]');
+
+    for (let i = 0; i < saveButtons.length; i++) {
+        saveButtons[i].addEventListener('click', async function () {
+            await cacheRecord(id, true, true);
+
+            const collection = await getCollection(id);
+            const plants = document.getElementById("plant");
+            const order = collection["records"][plants.children[plants.selectedIndex].id]["order"];
+
+            fillInOldData(collection, order);
+            fillInModalDates(collection);
+            fillInButtons(collection, order);
+        });
     }
 }
 

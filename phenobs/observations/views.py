@@ -108,7 +108,7 @@ def new(request):
         records = format_records(Record.objects.filter(collection=collection).all())
 
         prev_collection_db = (
-            Collection.objects.filter(date__lte=collection.date)
+            Collection.objects.filter(date__lt=collection.date)
             .exclude(id=collection.id)
             .last()
         )
@@ -128,6 +128,12 @@ def new(request):
                     "garden": prev_collection_db.garden.name,
                     "date": prev_collection_db.date,
                     "records": prev_records_json,
+                    "last-collection-id": Collection.objects.filter(
+                        date__lt=prev_collection_db.date
+                    )
+                    .exclude(id=prev_collection_db.id)
+                    .last()
+                    .id,
                 },
             }
         )
@@ -209,7 +215,8 @@ def new(request):
 def upload(request):
     if request.method == "POST" and request.user.is_authenticated:
         data = json.loads(request.body)
-        collection_date = datetime.strptime(data["collection-date"], "%Y-%m-%d")
+        print(data)
+        collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
         doy = collection_date.date() - date(collection_date.year, 1, 1)
 
         collection = Collection(
@@ -217,7 +224,7 @@ def upload(request):
             garden=Garden.objects.filter(auth_users=request.user).get(),
             date=collection_date.date(),
             doy=doy.days,
-            creator=request.user.username,
+            creator=User.objects.filter(username=data["creator"]).get(),
         )
 
         collection.save()
@@ -239,12 +246,18 @@ def upload(request):
                 flowers_open=record["flowers-opening"],
                 peak_flowering=record["peak-flowering"],
                 flowering_intensity=None
-                if (len(record["flowering-intensity"]) == 0)
+                if (
+                    len(str(record["flowering-intensity"])) == 0
+                    or record["flowering-intensity"] is None
+                )
                 else int(record["flowering-intensity"]),
                 ripe_fruits=record["ripe-fruits"],
                 senescence=record["senescence"],
                 senescence_intensity=None
-                if (len(record["senescence-intensity"]) == 0)
+                if (
+                    len(str(record["senescence-intensity"])) == 0
+                    or record["senescence-intensity"] is None
+                )
                 else int(record["senescence-intensity"]),
                 maintenance=[
                     "cut_partly" if (record["cut-partly"]) else None,
