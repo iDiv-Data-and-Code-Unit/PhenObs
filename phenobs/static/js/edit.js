@@ -34,8 +34,11 @@ if (location.href.indexOf('edit') !== -1) {
     await setupPlants(parseInt(collection["id"]));
     await selectPlant(parseInt(collection["id"]), 1);
     await changeListeners(getFields(), parseInt(collection["id"]), true);
-    await oldClickListeners(parseInt(collection["last-collection-id"]))
-        .then(() => cachingListeners(parseInt(collection["id"])));
+
+    if (collection["last-collection-id"] != null)
+        await oldClickListeners(parseInt(collection["last-collection-id"]));
+
+    await cachingListeners(parseInt(collection["id"]));
 
     // await changeListeners(getFields(), parseInt(collection["id"]), true);
     // cachingListeners(parseInt(collection["id"]));

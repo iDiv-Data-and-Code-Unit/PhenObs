@@ -71,7 +71,9 @@ export async function insertCollection(collection, isOnline) {
         'date': collection['date'],
         'creator': collection['creator'],
         'garden': collection['garden'],
-        'last-collection-id': collection['last-collection']['id'],
+        'last-collection-id': (collection['last-collection'] != null) ?
+            collection['last-collection']['id'] :
+            null,
         'edited': false,
         'finished': isOnline,
         'uploaded': isOnline,
@@ -80,13 +82,15 @@ export async function insertCollection(collection, isOnline) {
     };
 
     // Add the last collection to the list
-    collections[collection['last-collection']['id']] = collection['last-collection'];
-    collections[collection['last-collection']['id']]['last-collection-id'] =
-        collection['last-collection']['last-collection-id'];
-    collections[collection['last-collection']['id']]['remaining'] = [];
-    collections[collection['last-collection']['id']]['edited'] = false;
-    collections[collection['last-collection']['id']]['finished'] = true;
-    collections[collection['last-collection']['id']]['uploaded'] = true;
+    if (collection['last-collection'] != null) {
+        collections[collection['last-collection']['id']] = collection['last-collection'];
+        collections[collection['last-collection']['id']]['last-collection-id'] =
+            collection['last-collection']['last-collection-id'];
+        collections[collection['last-collection']['id']]['remaining'] = [];
+        collections[collection['last-collection']['id']]['edited'] = false;
+        collections[collection['last-collection']['id']]['finished'] = true;
+        collections[collection['last-collection']['id']]['uploaded'] = true;
+    }
 
     /*
     Add remaining indices

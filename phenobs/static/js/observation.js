@@ -1,4 +1,4 @@
-import { fillInOldData, fillInModalDates, fillInButtons } from "./modals.js";
+import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons} from "./modals.js";
 import {setCollections, setCollection, getCollections, getCollection, fetchCollection} from "./collection.js";
 
 export function getFields(isOld=false) {
@@ -22,16 +22,19 @@ export function getFields(isOld=false) {
 export async function setupPlants(id) {
 
     const collection = await getCollection(id);
-    let lastCollection = await getCollection(collection['last-collection-id']);
 
-    if (lastCollection === undefined || lastCollection == null || !("last-collection-id" in lastCollection)) {
-        lastCollection = await fetchCollection(collection['last-collection-id']);
+    if (collection['last-collection-id'] != null) {
+        let lastCollection = await getCollection(collection['last-collection-id']);
+
+        if (lastCollection === undefined || lastCollection == null || !("last-collection-id" in lastCollection)) {
+            lastCollection = await fetchCollection(collection['last-collection-id']);
+        }
+
+        let lastCollectionDate = document.getElementById('last-collection-date');
+    lastCollectionDate.innerText = lastCollection["date"];
     }
 
     let plants = document.getElementById('plant');
-
-    let lastCollectionDate = document.getElementById('last-collection-date');
-    lastCollectionDate.innerText = lastCollection["date"];
 
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
@@ -58,7 +61,6 @@ export async function setupPlants(id) {
 export async function fillInFields(id, order) {
     console.log('fillIn');
     const collection = await getCollection(id);
-    const lastCollection = await getCollection(collection['last-collection-id']);
     let fields = getFields();
 
     let plants = document.getElementById('plant');
@@ -91,10 +93,16 @@ export async function fillInFields(id, order) {
     // Set the textarea
     $('#remarks').val(plant["remarks"])
 
-    // Call button and modal filling functions
-    fillInOldData(lastCollection, plant["order"]);
-    fillInModalDates(lastCollection);
-    fillInButtons(lastCollection, plant["order"]);
+    if (collection['last-collection-id'] != null) {
+        const lastCollection = await getCollection(collection['last-collection-id']);
+
+        // Call button and modal filling functions
+        fillInOldData(lastCollection, plant["order"]);
+        fillInModalDates(lastCollection);
+        fillInButtons(lastCollection, plant["order"]);
+    } else
+        toggleButtons(true);
+
     // Cache the record
     await cacheRecord(id, plant['done']);
     noObservationPossible(plant["no-observation"]);

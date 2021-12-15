@@ -112,8 +112,25 @@ def new(request):
             .exclude(id=collection.id)
             .last()
         )
-        prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
-        prev_records_json = format_records(prev_records_db)
+
+        prev_collection_json = None
+
+        if prev_collection_db is not None:
+            prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
+            prev_records_json = format_records(prev_records_db)
+            prev_collection_json = {
+                "id": prev_collection_db.id,
+                "creator": prev_collection_db.creator.username,
+                "garden": prev_collection_db.garden.name,
+                "date": prev_collection_db.date,
+                "records": prev_records_json,
+                "last-collection-id": Collection.objects.filter(
+                    date__lt=prev_collection_db.date
+                )
+                .exclude(id=prev_collection_db.id)
+                .last()
+                .id,
+            }
 
         return JsonResponse(
             {
@@ -122,19 +139,7 @@ def new(request):
                 "creator": request.user.username,
                 "garden": garden.name,
                 "records": records,
-                "last-collection": {
-                    "id": prev_collection_db.id,
-                    "creator": prev_collection_db.creator.username,
-                    "garden": prev_collection_db.garden.name,
-                    "date": prev_collection_db.date,
-                    "records": prev_records_json,
-                    "last-collection-id": Collection.objects.filter(
-                        date__lt=prev_collection_db.date
-                    )
-                    .exclude(id=prev_collection_db.id)
-                    .last()
-                    .id,
-                },
+                "last-collection": prev_collection_json,
             }
         )
     return JsonResponse("ERROR", safe=False)
@@ -433,12 +438,23 @@ def get(request, id):
         collection_records = Record.objects.filter(collection=collection).all()
 
         prev_collection_db = (
-            Collection.objects.filter(date__lte=collection.date).exclude(id=id).last()
+            Collection.objects.filter(date__lt=collection.date).exclude(id=id).last()
         )
-        prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
+
+        prev_collection_json = None
+
+        if prev_collection_db is not None:
+            prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
+            prev_records_json = format_records(prev_records_db)
+            prev_collection_json = {
+                "id": prev_collection_db.id,
+                "creator": prev_collection_db.creator.username,
+                "garden": prev_collection_db.garden.name,
+                "date": prev_collection_db.date,
+                "records": prev_records_json,
+            }
 
         records = format_records(collection_records)
-        prev_records_json = format_records(prev_records_db)
 
         return JsonResponse(
             {
@@ -447,12 +463,7 @@ def get(request, id):
                 "creator": request.user.username,
                 "garden": garden.name,
                 "records": records,
-                "last-collection": {
-                    "id": prev_collection_db.id,
-                    "creator": prev_collection_db.creator.username,
-                    "garden": prev_collection_db.garden.name,
-                    "date": prev_collection_db.date,
-                    "records": prev_records_json,
-                },
+                "last-collection": prev_collection_json,
             }
         )
+    return JsonResponse("ERROR", safe=False)
