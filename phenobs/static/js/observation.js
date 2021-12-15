@@ -110,20 +110,22 @@ export async function fillInFields(id, order) {
 
 export async function selectPlant(id, order) {
     let collection = await getCollection(id);
-    await fillInFields(id, order);
+    if (order in collection['records']) {
+        await fillInFields(id, order);
 
-    // Display/Hide "Previous" button
-    if (order === 1) {
-        $('#prev-btn').addClass("d-none");
-    } else {
-        $('#prev-btn').removeClass("d-none");
-    }
+        // Display/Hide "Previous" button
+        if (order === 1) {
+            $('#prev-btn').addClass("d-none");
+        } else {
+            $('#prev-btn').removeClass("d-none");
+        }
 
-    // Display/Rename "Next" button
-    if (collection['remaining'].length === 1 && collection['remaining'][0] === order) {
-        $('#next-btn').val("Finish")
-    } else {
-        $('#next-btn').removeClass("d-none");
+        // Display/Rename "Next" button
+        if (collection['remaining'].length === 1 && collection['remaining'][0] === order) {
+            $('#next-btn').val("Finish")
+        } else {
+            $('#next-btn').removeClass("d-none");
+        }
     }
 }
 

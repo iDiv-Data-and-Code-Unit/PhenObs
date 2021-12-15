@@ -35,4 +35,9 @@ urlpatterns = [
         views.get,
         name="get",
     ),
+    path(
+        "all_collections/",
+        views.get_all_collections,
+        name="get_all_collections",
+    ),
 ]

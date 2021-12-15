@@ -44,38 +44,66 @@
         </tbody>
       </table>
 
-    <table class="table" id="uploaded-collections-table">
-      <thead class="">
-        <tr class="d-table-row">
-          <th scope="col" class="text-left">Date</th>
-          <th scope="col" class="text-left">Creator</th>
-          <th scope="col" class="text-left">Status</th>
-          <th scope="col" class="text-left">Edit</th>
-          <th scope="col" class="text-left">Delete</th>
-        </tr>
-      </thead>
-      <tbody class="" id="uploaded-collections-body">
-        <h3>Uploaded</h3>
-        {#     Insert rows here     #}
-      </tbody>
-    </table>
+      <table class="table" id="ready-collections-table">
+        <thead class="">
+          <tr class="d-table-row">
+            <th scope="col" class="text-left">Date</th>
+            <th scope="col" class="text-left">Creator</th>
+            <th scope="col" class="text-left">Status</th>
+            <th scope="col" class="text-left">Upload</th>
+            <th scope="col" class="text-left">Edit</th>
+            <th scope="col" class="text-left">Delete</th>
+          </tr>
+        </thead>
+        <tbody class="" id="ready-collections-body">
+          <h3>Ready for upload</h3>
+          {#     Insert rows here     #}
+        </tbody>
+      </table>
 
-    <table class="table" id="ready-collections-table">
-      <thead class="">
-        <tr class="d-table-row">
-          <th scope="col" class="text-left">Date</th>
-          <th scope="col" class="text-left">Creator</th>
-          <th scope="col" class="text-left">Status</th>
-          <th scope="col" class="text-left">Upload</th>
-          <th scope="col" class="text-left">Edit</th>
-          <th scope="col" class="text-left">Delete</th>
-        </tr>
-      </thead>
-      <tbody class="" id="ready-collections-body">
-        <h3>Ready for upload</h3>
-        {#     Insert rows here     #}
-      </tbody>
-    </table>
+      <table class="table" id="uploaded-collections-table">
+        <thead class="">
+          <tr class="d-table-row">
+            <th scope="col" class="text-left">Date</th>
+            <th scope="col" class="text-left">Creator</th>
+            <th scope="col" class="text-left">Status</th>
+            <th scope="col" class="text-left">Edit</th>
+            <th scope="col" class="text-left">Delete</th>
+          </tr>
+        </thead>
+        <tbody class="" id="uploaded-collections-body">
+          <h3>Uploaded</h3>
+          {#     Insert rows here     #}
+        </tbody>
+      </table>
+
+{#      <table class="table" id="uploaded-collections-table">#}
+{#        <thead class="">#}
+{#          <tr class="d-table-row">#}
+{#            <th scope="col" class="text-left">Date</th>#}
+{#            <th scope="col" class="text-left">Creator</th>#}
+{#            <th scope="col" class="text-left">Status</th>#}
+{#            <th scope="col" class="text-left">Edit</th>#}
+{#          </tr>#}
+{#        </thead>#}
+{#        <tbody class="" id="uploaded-collections-body">#}
+{#          <h3>Uploaded and online</h3>#}
+{#          {% for collection in collections %}#}
+{#            <tr class="d-table-row">#}
+{#              <th scope="row" class="text-left">{{ collection.date }}</th>#}
+{#              <td class="text-left">{{ collection.creator }}</td>#}
+{#              <td>#}
+{#                <i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="{{ collection.id }}-online"></i>#}
+{#              </td>#}
+{#              <td>#}
+{#                <a href="edit/{{ collection.id }}">#}
+{#                  <i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="{{ collection.id }}-edit"></i>#}
+{#                </a>#}
+{#              </td>#}
+{#            </tr>#}
+{#          {% endfor %}#}
+{#        </tbody>#}
+{#      </table>#}
 
     </div>
 

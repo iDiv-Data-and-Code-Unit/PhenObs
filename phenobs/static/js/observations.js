@@ -1,26 +1,5 @@
 import { getCollections, deleteCollection, uploadCollection } from "./collection.js";
 
-function update(collections, collectionId) {
-    // TODO: Change method to UPDATE
-    $.ajax({
-        url: "/observations/update",
-        data: JSON.stringify(collections["edited"][collectionId]),
-        method: "POST",
-        error: function (jqXHR) {
-            alert("Could not establish a connection with database.");
-        },
-        beforeSend: function(){
-            $("body").addClass("loading");
-        },
-        complete: function(){
-            $("body").removeClass("loading");
-        },
-        success: function (data) {
-            alert("Collection successfully updated!");
-        }
-    });
-}
-
 async function insertRows(tableName) {
     // TODO: get all online collections
     let collections = await getCollections();
@@ -95,6 +74,7 @@ async function initTables() {
     await insertRows("unfinished");
     await insertRows("uploaded");
     await insertRows("ready");
+    await getAllCollections();
     addUploadLink();
     addRemoveLink();
 }
@@ -128,5 +108,48 @@ function addRemoveLink() {
             }
         );
         allButtons[i].parentElement.style.cursor = 'pointer';
+    }
+}
+
+async function getAllCollections() {
+    await $.ajax({
+        url: "/observations/all_collections/",
+        method: "GET",
+        error: function (jqXHR) {
+            alert("Could not establish a connection with database.");
+        },
+        beforeSend: function(){
+            $("body").addClass("loading");
+        },
+        complete: function(){
+            $("body").removeClass("loading");
+        },
+        success: async function (data) {
+            await addOnlineCollections(data);
+        }
+    });
+}
+
+async function addOnlineCollections(collections) {
+    let table = document.getElementById('uploaded-collections-body');
+    const localCollections = await getCollections();
+    let rowHTML = '';
+    for (let i = 0; collections.length; i++) {
+        if (!(parseInt(collections[i]['id']) in localCollections)) {
+            rowHTML =
+                '<tr class="d-table-row">' +
+                '<th scope="row" class="text-left">' + collections[i]['date'] + '</th>' +
+                '<td class="text-left">' + collections[i]['creator'] + '</td>' +
+                '<td>\n' +
+                '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
+                '</td>' +
+                '<td>\n' +
+                '<a href="edit/' + collections[i]['id'] + '">\n' +
+                '<i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="' + collections[i]['id'] + '-edit"></i>\n' +
+                '</a>\n' +
+                '</td>';
+
+            table.innerHTML += rowHTML;
+        }
     }
 }

@@ -50,6 +50,23 @@ def get_context(request):
     return context
 
 
+def get_all_collections(request):
+    if request.user.is_authenticated:
+        garden = Garden.objects.filter(auth_users=request.user).get()
+        collections = Collection.objects.filter(garden=garden).all()
+        collections_json = []
+        for collection in collections:
+            collections_json.append(
+                {
+                    "id": collection.id,
+                    "date": collection.date,
+                    "creator": collection.creator.username,
+                }
+            )
+        return JsonResponse(collections_json, safe=False)
+    return JsonResponse("ERROR", safe=False)
+
+
 def all(request):
     if request.user.is_authenticated:
         context = get_context(request)
@@ -108,7 +125,7 @@ def new(request):
         records = format_records(Record.objects.filter(collection=collection).all())
 
         prev_collection_db = (
-            Collection.objects.filter(date__lt=collection.date)
+            Collection.objects.filter(date__lt=collection.date, garden=garden)
             .exclude(id=collection.id)
             .last()
         )
@@ -125,7 +142,7 @@ def new(request):
                 "date": prev_collection_db.date,
                 "records": prev_records_json,
                 "last-collection-id": Collection.objects.filter(
-                    date__lt=prev_collection_db.date
+                    date__lt=prev_collection_db.date, garden=garden
                 )
                 .exclude(id=prev_collection_db.id)
                 .last()
@@ -438,7 +455,9 @@ def get(request, id):
         collection_records = Record.objects.filter(collection=collection).all()
 
         prev_collection_db = (
-            Collection.objects.filter(date__lt=collection.date).exclude(id=id).last()
+            Collection.objects.filter(date__lt=collection.date, garden=garden)
+            .exclude(id=id)
+            .last()
         )
 
         prev_collection_json = None
