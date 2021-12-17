@@ -31,6 +31,8 @@ if (location.href.indexOf('edit') !== -1) {
     }
 
     setDate(new Date(collection["date"]));
+    $('#garden').text(collection['garden']);
+    $('#creator').text(collection['creator']);
     await setupPlants(parseInt(collection["id"]));
     await selectPlant(parseInt(collection["id"]), 1);
     await changeListeners(getFields(), parseInt(collection["id"]), true);
@@ -96,15 +98,15 @@ export function setDate(dateToSet) {
 // Add event listeners
 export function cachingListeners(id) {
     document.getElementById('collection-date')
-        .addEventListener("change", () => updateCollection(id));
+        .addEventListener("change", async () => await updateCollection(id));
     // Add event listener for next and previous buttons
     document.getElementById("next-btn")
         .addEventListener("click",
-            () => checkDefault(id, true)
+            async () => await checkDefault(id, true)
         );
     document.getElementById("prev-btn")
         .addEventListener("click",
-            () => checkDefault(id, false)
+            async () => await checkDefault(id, false)
         );
 
     // Add event listener for #no-observation
@@ -115,11 +117,14 @@ export function cachingListeners(id) {
 
     // Add event listener for done collection button
     document.getElementById("cancel-btn")
-        .addEventListener("click", () => deleteCollection(id));
+        .addEventListener("click", () => {
+            if (confirm("Are you sure you want to cancel and go back?"))
+                location.href = "/observations";
+        });
 
     // Add event listener for cancel collection button
     document.getElementById("done-btn")
-        .addEventListener("click", () => uploadCollection(id));
+        .addEventListener("click", async () => await uploadCollection(id));
 
     // Add event listener for #flowers-opening
     document.getElementById("flowers-opening")
@@ -132,7 +137,7 @@ export function cachingListeners(id) {
     // Add event listener for #plant
     document.getElementById("plant")
         .addEventListener("change",
-            () => selectPlant(
+            async () => await selectPlant(
                 id,
                 document.getElementById("plant").selectedIndex + 1
             )

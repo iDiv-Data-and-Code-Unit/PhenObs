@@ -1,10 +1,12 @@
+import {formatDate} from './project.js';
+
 export function fillInModalDates(lastCollection) {
     // Get all the spans with date values in the modal titles
     let modals = $('span[id*="-date"]');
     // Add the last collection dates
     // TODO: make the dates more human readable (LongDate)
     for (let j = 0; j < modals.length; j++) {
-        modals[j].innerText = lastCollection["date"];
+        modals[j].innerText = formatDate(new Date(lastCollection["date"])).toString();
     }
 }
 
@@ -111,8 +113,12 @@ export function toggleButtons(hideFlag) {
         else
             buttons[i].classList.remove("d-none");
     }
-    if (hideFlag)
+    if (hideFlag) {
         document.getElementById('last-obs-date').classList.add('d-none');
-    else
+        document.getElementById('remarks-large-button').classList.remove('d-lg-block');
+    }
+    else {
         document.getElementById('last-obs-date').classList.remove('d-none');
+        document.getElementById('remarks-large-button').classList.add('d-lg-block');
+    }
 }

@@ -1,4 +1,5 @@
-var staticCacheName = "django-pwa-v07";
+var today = new Date();
+var staticCacheName = "django-pwa-v" + today.getTime().toString();
 var filesToCache = [
     '/',
     '/observations/',

@@ -69,7 +69,8 @@ def get_all_collections(request):
 
 def all(request):
     if request.user.is_authenticated:
-        context = get_context(request)
+        # context = get_context(request)
+        context = {}
         return render(request, "observations/observations.html", context)
     else:
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
@@ -77,7 +78,8 @@ def all(request):
 
 def add(request):
     if request.user.is_authenticated:
-        context = get_context(request)
+        # context = get_context(request)
+        context = {}
         context["ids"] = [
             {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
             {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
@@ -99,7 +101,7 @@ def add(request):
 def new(request):
     if request.method == "POST" and request.user.is_authenticated:
         today = timezone.now()
-        doy = today.date() - date(today.date().year, 1, 1)
+        doy = today.date() - date(today.date().year, 1, 1) + 1
         garden = Garden.objects.filter(auth_users=request.user).get()
         creator = User.objects.filter(id=request.user.id).get()
         all_plants = (
@@ -410,8 +412,9 @@ def format_records(collection_records):
 
 def edit(request, id):
     if request.user.is_authenticated:
-        context = get_context(request)
+        # context = get_context(request)
 
+        context = {}
         context["id"] = id
         context["ids"] = [
             {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},

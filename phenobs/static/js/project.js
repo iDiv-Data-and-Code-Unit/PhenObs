@@ -1,6 +1,5 @@
-function formatDate(dateToFormat, includeYear=true) {
+export function formatDate(dateToFormat, includeYear=true) {
     let options = {
-        weekday: 'short',
         month: 'short',
         day: 'numeric',
     };
@@ -31,7 +30,7 @@ function checkConnection() {
     // });
 }
 
-function isReachable(url) {
+export function isReachable(url) {
   return fetch(url, { method: 'HEAD', mode: 'no-cors' })
     .then(function(resp) {
       return resp && (resp.ok || resp.type === 'opaque');
@@ -78,7 +77,19 @@ $(document).ready(function() {
 if (document.getElementById('home-date') != null)
     changeHomeDate();
 
+if (document.getElementById('add-collection') != null) {
+    $('#add-collection').click(() => {
+        isReachable('/200').then(function(online) {
+            if (online) {
+                location.href = '/observations/add/'
+            } else {
+                alert('Add functionality is not available in offline mode');
+            }
+        });
+    });
+}
+
 function changeHomeDate() {
     let homeDate = document.getElementById('home-date');
-    homeDate.innerText = formatDate(new Date(), false).toString();
+    homeDate.innerText = formatDate(new Date()).toString();
 }

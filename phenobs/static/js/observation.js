@@ -1,5 +1,6 @@
 import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons} from "./modals.js";
 import {setCollections, setCollection, getCollections, getCollection, fetchCollection} from "./collection.js";
+import {formatDate} from './project.js';
 
 export function getFields(isOld=false) {
     return {
@@ -31,7 +32,7 @@ export async function setupPlants(id) {
         }
 
         let lastCollectionDate = document.getElementById('last-collection-date');
-    lastCollectionDate.innerText = lastCollection["date"];
+        lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"])).toString();
     }
 
     let plants = document.getElementById('plant');
@@ -130,12 +131,12 @@ export async function selectPlant(id, order) {
 }
 
 function checkValid() {
-    $('[required]').each(function() {
-        if ($(this).is(':invalid') || !$(this).val()) {
-            $(this).focus();
+    const elements = $('[required]');
+    for (let i = 0; i < elements.length; i++)
+        if ($(elements[i]).is(':invalid') || $(elements[i]).val().length === 0) {
+            $(elements[i]).focus();
             return false;
         }
-    });
     return true;
 }
 
@@ -221,7 +222,7 @@ export async function cacheRecord(id, isDone, isOld=false) {
 
     // Cache the values
     ids['values'].forEach(function (id) {
-        console.log(id, isOld);
+        // console.log(id, isOld);
         record[id] = document.getElementById(id + ((isOld) ? '-old' : '')).value
     });
     ids['checked'].forEach(function (id) {

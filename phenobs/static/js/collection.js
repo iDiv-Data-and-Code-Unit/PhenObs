@@ -152,13 +152,15 @@ async function createEmptyCollection(data, collections) {
     if (collections == null) {
         return createEmptyCollection(data, {});
     } else {
-        console.log(data)
-        console.log(data);
         setCollectionId(data['id']);
         await insertCollection(data, false);
         let collection = await getCollection(data['id']);
         for (let key in collection['records'])
             collection["remaining"].push(collection['records'][key]['order']);
+
+        $('#garden').text(data['garden']);
+        $('#creator').text(data['creator']);
+
         await setCollection(collection);
     }
 }

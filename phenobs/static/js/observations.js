@@ -1,4 +1,5 @@
 import { getCollections, deleteCollection, uploadCollection } from "./collection.js";
+import {formatDate, isReachable} from "./project.js";
 
 async function insertRows(tableName) {
     // TODO: get all online collections
@@ -7,7 +8,7 @@ async function insertRows(tableName) {
     table.innerHTML = '';
 
     for (let key in collections) {
-        console.log(collections[key], key)
+        // console.log(collections[key], key)
         if (tableName === "uploaded") {
             if (!collections[key]["uploaded"])
                 continue;
@@ -19,11 +20,11 @@ async function insertRows(tableName) {
                 !(collections[key]["edited"] && !collections[key]["uploaded"]))
                 continue;
         }
-        console.log('-----------------------')
-        console.log(collections[key], key)
+        // console.log('-----------------------')
+        // console.log(collections[key], key)
         let rowHTML =
             ' <tr class="d-table-row">\n' +
-            '<th scope="row" class="text-left">' + collections[key]["date"] + '</th>\n' +
+            '<th scope="row" class="text-left">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
             '<td class="text-left">' + collections[key]["creator"] + '</td>\n' +
             '<td>\n';
 
@@ -54,7 +55,7 @@ async function insertRows(tableName) {
 
         rowHTML +=
             '<td>\n' +
-            '  <a href="edit/' + key + '">\n' +
+            // '  <a href="edit/' + key + '">\n' +
             '    <i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-edit"></i>\n' +
             '  </a>\n' +
             '</td>\n';
@@ -79,6 +80,7 @@ async function initTables() {
     await insertRows("ready");
     addUploadLink();
     addRemoveLink();
+    addEditLink();
 }
 
 function addUploadLink() {
@@ -97,6 +99,27 @@ function addUploadLink() {
     }
 }
 
+function addEditLink() {
+    let editButtons = $('[id*="-edit"]');
+
+    for (let i = 0; i < editButtons.length; i++) {
+        const id = parseInt(editButtons[i].id.split('-')[0]);
+        editButtons[i].parentElement.addEventListener(
+            'click',
+            () => {
+                isReachable('/200').then(function(online) {
+                    if (online) {
+                        location.href = '/observations/edit/' + id;
+                    } else {
+                        alert('Edit functionality is not available in offline mode');
+                    }
+                });
+            }
+        );
+        editButtons[i].parentElement.style.cursor = 'pointer';
+    }
+}
+
 function addRemoveLink() {
     let allButtons = $('[id*="-cancel"]');
 
@@ -105,8 +128,10 @@ function addRemoveLink() {
         allButtons[i].parentElement.addEventListener(
             'click',
             async () => {
-                await deleteCollection(id);
-                await initTables();
+                if (confirm("Are you sure you want to delete the collection from device?")) {
+                    await deleteCollection(id);
+                    await initTables();
+                }
             }
         );
         allButtons[i].parentElement.style.cursor = 'pointer';
@@ -128,30 +153,29 @@ async function getAllCollections() {
         },
         success: async function (data) {
             await addOnlineCollections(data);
+            addEditLink();
+            addRemoveLink();
         }
     });
 }
 
 async function addOnlineCollections(collections) {
+    await insertRows("uploaded");
     const localCollections = await getCollections();
-    let noLocalCollections = false;
     let table = document.getElementById('uploaded-collections-body');
     let rowHTML = '';
 
-    if (localCollections == null)
-        noLocalCollections = true;
-
-    for (let i = 0; collections.length; i++) {
-        if (noLocalCollections || !(localCollections != null  && parseInt(collections[i]['id']) in localCollections)) {
+    for (let i = 0; i < collections.length; i++) {
+        if (localCollections == null || Object.keys(localCollections).length === 0 || !(parseInt(collections[i]['id']) in localCollections)) {
             rowHTML =
                 '<tr class="d-table-row">' +
-                '<th scope="row" class="text-left">' + collections[i]['date'] + '</th>' +
+                '<th scope="row" class="text-left">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
                 '<td class="text-left">' + collections[i]['creator'] + '</td>' +
                 '<td>\n' +
                 '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
                 '</td>' +
                 '<td>\n' +
-                '<a href="edit/' + collections[i]['id'] + '">\n' +
+                // '<a href="edit/' + collections[i]['id'] + '">\n' +
                 '<i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="' + collections[i]['id'] + '-edit"></i>\n' +
                 '</a>\n' +
                 '</td>';
