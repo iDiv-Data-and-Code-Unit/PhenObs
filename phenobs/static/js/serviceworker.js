@@ -1,7 +1,6 @@
 var today = new Date();
-var staticCacheName = "django-pwa-v" + today.getTime().toString();
+var staticCacheName = "django-pwa-v56";
 var filesToCache = [
-    '/',
     '/observations/',
     '/offline/',
     '/static/css/project.css',
@@ -40,24 +39,52 @@ var filesToCache = [
     '/static/images/bootstrap-icons/trash-fill.svg',
 ];
 
+// self.addEventListener('install', function(e) {
+//     caches.keys().then(cacheNames => {
+//                     return Promise.all(
+//                         cacheNames
+//                             .filter(cacheName => (cacheName.startsWith("django-pwa")))
+//                             .map(cacheName => caches.delete(cacheName))
+//                     );
+//   });
+// });
+//   self.addEventListener('activate', function(e) {
+//     self.registration.unregister()
+//       .then(function() {
+//         return self.clients.matchAll();
+//       })
+//       .then(function(clients) {
+//         clients.forEach(client => client.navigate(client.url))
+//       });
+//   });
+
 // Cache on install
 self.addEventListener("install", event => {
-    this.skipWaiting();
-    event.waitUntil(
-        caches.open(staticCacheName)
-            .then(cache => {
-                return cache.addAll(filesToCache);
-            })
-    )
-});
+    // this.skipWaiting();
 
-// Clear cache on activate
-self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                    .filter(cacheName => (cacheName.startsWith("django-pwa-")))
+                    .filter(cacheName => (cacheName.startsWith("django-pwa")))
+                    .map(cacheName => caches.delete(cacheName))
+            );
+        }).then(() => caches.open(staticCacheName)).then(cache => {
+                return cache.addAll(filesToCache);
+        })
+    );
+});
+
+
+
+// Clear cache on activate
+self.addEventListener('activate', event => {
+    // Delete all Service Worker Caches
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames
+                    .filter(cacheName => (cacheName.startsWith("django-pwa")))
                     .filter(cacheName => (cacheName !== staticCacheName))
                     .map(cacheName => caches.delete(cacheName))
             );
@@ -66,14 +93,46 @@ self.addEventListener('activate', event => {
 });
 
 // Serve from Cache
-self.addEventListener("fetch", event => {
+self.addEventListener('fetch', function(event) {
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
-            .catch(() => {
-                return caches.match('offline');
-            })
-    )
+        fetch(event.request).catch(function() {
+            return caches.match(event.request);
+        })
+    );
 });
+
+// self.addEventListener('fetch', function(event) {
+//     event.respondWith(
+//         caches.open(staticCacheName).then(function(cache) {
+//             return fetch(event.request).then(function(response) {
+//                 cache.put(event.request, response.clone());
+//                 return response;
+//             });
+//         })
+//     );
+// });
+
+// self.addEventListener('install', function(event) {
+//     event.waitUntil(
+//         caches.open(staticCacheName).then(function(cache) {
+//             return cache.addAll([
+//                 '',
+//             ]);
+//         })
+//     );
+// });
+   
+// self.addEventListener('fetch', function(event) {
+//     var requestUrl = new URL(event.request.url);
+//         if (requestUrl.origin === location.origin) {
+//             if ((requestUrl.pathname === '/')) {
+//                 event.respondWith(caches.match(''));
+//                 return;
+//             }
+//         }
+//     event.respondWith(
+//         caches.match(event.request).then(function(response) {
+//             return response || fetch(event.request);
+//         })
+//     );
+// });

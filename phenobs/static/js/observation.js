@@ -1,14 +1,13 @@
-import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons} from "./modals.js";
+import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons, confirmModal, alertModal, formatDate} from "./modals.js";
 import {setCollections, setCollection, getCollections, getCollection, fetchCollection} from "./collection.js";
-import {formatDate} from './project.js';
 
 export function getFields(isOld=false) {
     return {
         "dropdowns": $('select')
             .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
             .not((isOld) ? '[id*=""]' : '[id*="-old"]')
-            .not('[id*="plant"]'),
-        "intensities": $('input[type="number"]')
+            .not('[id*="plant"]').not('[id*="intensity"]'),
+        "intensities": $('select[id*="intensity"]')
             .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
             .not((isOld) ? '[id*=""]' : '[id*="-old"]'),
         "checkboxes": $('input[type="checkbox"]')
@@ -44,33 +43,38 @@ export async function setupPlants(id) {
 
         plants.innerHTML +=
             '<option value="' +
-            plant["name"] + '-' +
-            plant["order"] +
+            plant["name"] +
             '" name="' +
             plant["name"] +
             '" id="' +
             plant["order"] + '">' +
-            plant["name"] + '-' +
-            plant["order"] +
+            plant["name"] +
             '</option>';
     }
 
     plants.selectedIndex = 0;
 }
 
+function findOptionIndex(order) {
+    let plants = document.getElementById('plant');
+    for (let i = 0; i < plants.length; i++)
+        if (plants[i].id == order.toString())
+            return i;
+    return -1;
+}
+
 // Fills in the form fields for a particular plant
 export async function fillInFields(id, order) {
-    console.log('fillIn');
+    // console.log('fillIn');
     const collection = await getCollection(id);
     let fields = getFields();
 
     let plants = document.getElementById('plant');
+    const index = findOptionIndex(order);
 
-    plants.selectedIndex = order - 1;
+    plants.selectedIndex = index;
 
-    console.log(plants)
-
-    let plant = collection["records"][parseInt(plants.children[order - 1].id)];
+    let plant = collection["records"][order];
 
     // Set the dropdowns
     for (let i = 0; i < fields["dropdowns"].length; i++) {
@@ -84,7 +88,10 @@ export async function fillInFields(id, order) {
     }
     // Set the intensities
     for (let i = 0; i < fields["intensities"].length; i++) {
-        fields["intensities"][i].value = plant[fields["intensities"][i].id];
+        if (plant[fields["intensities"][i].id] == null)
+            $('#'+fields["intensities"][i].id).val(null);
+        else
+            fields["intensities"][i].value = plant[fields["intensities"][i].id];
     }
     // Set the checkboxes
     for (let i = 0; i < fields["checkboxes"].length; i++) {
@@ -105,7 +112,7 @@ export async function fillInFields(id, order) {
         toggleButtons(true);
 
     // Cache the record
-    await cacheRecord(id, plant['done']);
+    await cacheRecord(id, order, plant['done']);
     noObservationPossible(plant["no-observation"]);
 }
 
@@ -115,7 +122,7 @@ export async function selectPlant(id, order) {
         await fillInFields(id, order);
 
         // Display/Hide "Previous" button
-        if (order === 1) {
+        if (order === Math.min.apply(null,Object.keys(collection["records"]))) {
             $('#prev-btn').addClass("d-none");
         } else {
             $('#prev-btn').removeClass("d-none");
@@ -124,9 +131,15 @@ export async function selectPlant(id, order) {
         // Display/Rename "Next" button
         if (collection['remaining'].length === 1 && collection['remaining'][0] === order) {
             $('#next-btn').val("Finish")
-        } else {
+        } else if (order == Math.max.apply(null,Object.keys(collection["records"]))) {
+            $('#next-btn').addClass("d-none");
+        }
+        else {
             $('#next-btn').removeClass("d-none");
         }
+
+        // Move the screen back to the top
+        location.href = "#title";
     }
 }
 
@@ -141,27 +154,46 @@ function checkValid() {
 }
 
 export async function selectNextPlant(id, order) {
-    if (!checkValid()) alert("Please fill all fields!");
+    if (!checkValid()) 
+        // alert("Please fill all fields!");
+        alertModal("Please fill all fields!");
     else {
-        await cacheRecord(id, true);
+        let collection = await getCollection(id);
+        // console.log(collection);
+        await cacheRecord(id, order, true);
         // Select the next plant
-        await selectPlant(id, parseInt(order) + 1);
+        const next = parseInt(Object.keys(collection["records"]).find(num => num > order));
+
+        await selectPlant(id, next);
     }
 }
 
 export async function selectPreviousPlant(id, order) {
-    if (!checkValid()) alert("Please fill all fields!");
+    if (!checkValid()) 
+        // alert("Please fill all fields!");
+        alertModal("Please fill all fields!");
     else {
-        await cacheRecord(id, true);
+        let collection = await getCollection(id);
+        await cacheRecord(id, order, true);
         // Select the previous plant
-        await selectPlant(id, parseInt(order) - 1);
+        const prev = parseInt(Object.keys(collection["records"]).reverse().find(num => num < order));
+
+        await selectPlant(id, prev);
+    }
+}
+
+export async function markDone(id) {
+    let collection = await getCollection(id);
+    for (let record in collection["records"]) {
+        if (collection["records"][record]["done"])
+        $('option[id=' + collection["records"][record]["order"] + ']').addClass("done-plant");
     }
 }
 
 export async function checkDefault(id, nextFlag) {
     let collection = await getCollection(id);
     const plants = document.getElementById('plant');
-    let current = await collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
+    let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];
     let defaultFlag = true;
     // Check the values
     for (let key in current) {
@@ -173,16 +205,25 @@ export async function checkDefault(id, nextFlag) {
         }
     }
 
-    const order = plants.selectedIndex + 1;
+    const order = parseInt(plants.selectedOptions[0].id);
 
     // Check if the values are default
     if (defaultFlag && !current["done"]) {
-        if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
-            if (nextFlag)
-                await selectNextPlant(id, order);
-            else
-                await selectPreviousPlant(id, order);
-        }
+        // if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
+        //     if (nextFlag)
+        //         await selectNextPlant(id, order);
+        //     else
+        //         await selectPreviousPlant(id, order);
+        // }
+        confirmModal("You have not changed any default value. Are you sure you want to move on?");
+        $('#confirm-yes').click(
+            async function() {
+                if (nextFlag)
+                    await selectNextPlant(id, order);
+                else
+                    await selectPreviousPlant(id, order);
+            }
+        );
     } else {
         if (nextFlag)
             await selectNextPlant(id, order);
@@ -191,11 +232,11 @@ export async function checkDefault(id, nextFlag) {
     }
 }
 
-export async function cacheRecord(id, isDone, isOld=false) {
+export async function cacheRecord(id, order, isDone, isOld=false) {
     let collection = await getCollection(id);
     let plants = document.getElementById("plant");
     // Current record to be cached
-    let record = collection["records"][parseInt(plants.children[plants.selectedIndex].id)];
+    let record = collection["records"][parseInt(order)];
     // IDs of the elements to be cached
     const ids = {
         "values": [
@@ -237,12 +278,12 @@ export async function cacheRecord(id, isDone, isOld=false) {
         // Check if the plant is finished
         if (isDone) {
             // Remove the order from the remaining orders list
-            const index = collection["remaining"].indexOf(plants.selectedIndex + 1);
+            const index = collection["remaining"].indexOf(parseInt(order));
             // If the element is already finished
             if (index > -1)
                 collection["remaining"].splice(index, 1);
             // Highlight the plant in the dropdown
-            $('option[id=' + (plants.selectedIndex + 1).toString() + ']').addClass("done-plant");
+            $('option[id=' + order + ']').addClass("done-plant");
         }
 
         // Done collection button
@@ -269,7 +310,8 @@ export async function cacheRecord(id, isDone, isOld=false) {
         );
 
         if (!collection["remaining"].length && !collection["records"][record["order"]]["done"] && isDone)
-            alert("Collection is ready to be saved");
+            // alert("Collection is ready to be saved");
+            alertModal("Collection is ready to be saved");
     } else {
         collection['edited'] = true;
         collection['uploaded'] = false;

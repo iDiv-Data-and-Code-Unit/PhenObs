@@ -1,4 +1,14 @@
-import {formatDate} from './project.js';
+export function formatDate(dateToFormat, includeYear=true) {
+    let options = {
+        month: 'short',
+        day: 'numeric',
+    };
+
+    if (includeYear)
+        options.year = 'numeric';
+
+    return dateToFormat.toLocaleString('en-US', options);
+}
 
 export function fillInModalDates(lastCollection) {
     // Get all the spans with date values in the modal titles
@@ -116,9 +126,23 @@ export function toggleButtons(hideFlag) {
     if (hideFlag) {
         document.getElementById('last-obs-date').classList.add('d-none');
         document.getElementById('remarks-large-button').classList.remove('d-lg-block');
+        document.getElementById('remarks-small-button').classList.remove('d-block');
     }
     else {
         document.getElementById('last-obs-date').classList.remove('d-none');
         document.getElementById('remarks-large-button').classList.add('d-lg-block');
+        document.getElementById('remarks-large-button').classList.add('d-none');
+        document.getElementById('remarks-small-button').classList.remove('d-block');
+        document.getElementById('remarks-small-button').classList.remove('d-none');
     }
+}
+
+export function alertModal(message) {
+    $('#alert-body').text(message);
+    $('#alert').modal('show');
+}
+
+export function confirmModal(message) {
+    $('#confirm-body').text(message);
+    $('#confirm').modal('show');
 }

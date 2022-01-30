@@ -26,6 +26,7 @@ class Collection(models.Model):
     doy = models.IntegerField(help_text="Day of year")
     # TODO: make "doy" available only in backend
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    finished = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         """Returns the garden, date and time information for the collection."""

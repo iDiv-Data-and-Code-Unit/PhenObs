@@ -1,14 +1,4 @@
-export function formatDate(dateToFormat, includeYear=true) {
-    let options = {
-        month: 'short',
-        day: 'numeric',
-    };
-
-    if (includeYear)
-        options.year = 'numeric';
-
-    return dateToFormat.toLocaleString('en-US', options);
-}
+import {alertModal, formatDate} from './modals.js';
 
 function checkConnection() {
     // $.ajax({
@@ -41,34 +31,52 @@ export function isReachable(url) {
 }
 
 function handleConnection() {
-  if (navigator.onLine) {
-      isReachable('/200').then(function(online) {
-      if (online) {
-          $('#signout').removeClass('disabled');
-          $('#myprofile').removeClass('disabled');
-          $('#online').removeClass('d-none');
-          $('#offline').addClass('d-none');
-          console.log('online');
-      } else {
-          $('#signout').addClass('disabled');
-          $('#myprofile').addClass('disabled');
-          $('#offline').removeClass('d-none');
-          $('#online').addClass('d-none');
-          console.log('no connectivity');
-      }
-    });
-  } else {
-      $('#signout').addClass('disabled');
-      $('#myprofile').addClass('disabled');
-      $('#offline').removeClass('d-none');
-      $('#online').addClass('d-none');
-      console.log('offline');
-  }
+    if (navigator.onLine) {
+        isReachable('/200/').then(function(online) {
+            if (online) {
+                $('#signout').removeClass('disabled');
+                $('#brand').attr("href", "/");
+                $('#home').removeClass('disabled');
+                $('#myprofile').removeClass('disabled');
+                $('#online').removeClass('d-none');
+                $('#offline').addClass('d-none');
+                console.log('online');
+                
+                return true;
+            } else {
+                $('#signout').addClass('disabled');
+                $('#brand').removeAttr("href");
+                $('#home').addClass('disabled');
+                $('#myprofile').addClass('disabled');
+                $('#offline').removeClass('d-none');
+                $('#online').addClass('d-none');
+                console.log('no connectivity');
+
+                return false;
+            }
+        });
+    } else {
+        $('#signout').addClass('disabled');
+        $('#brand').removeAttr("href");
+        $('#home').addClass('disabled');
+        $('#myprofile').addClass('disabled');
+        $('#offline').removeClass('d-none');
+        $('#online').addClass('d-none');
+        console.log('offline');
+
+        return false;
+    }
 }
 
 $(document).ready(function() {
     // checkConnection();
     // setInterval(() => checkConnection(), 15000);
+    // if (handleConnection())
+        // navigator.serviceWorker.getRegistrations().then(function(registrations) { 
+        //     for(let registration of registrations) { 
+        //         registration.unregister(); 
+        //     } 
+        // }); 
     handleConnection();
     window.addEventListener('online', handleConnection);
     window.addEventListener('offline', handleConnection);
@@ -83,7 +91,8 @@ if (document.getElementById('add-collection') != null) {
             if (online) {
                 location.href = '/observations/add/'
             } else {
-                alert('Add functionality is not available in offline mode');
+                // alert('Add functionality is not available in offline mode');
+                alertModal('Add functionality is not available in offline mode');
             }
         });
     });
@@ -93,3 +102,5 @@ function changeHomeDate() {
     let homeDate = document.getElementById('home-date');
     homeDate.innerText = formatDate(new Date()).toString();
 }
+
+console.log(document.cookie.split(';'))

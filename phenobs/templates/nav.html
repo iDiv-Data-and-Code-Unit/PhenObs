@@ -6,12 +6,12 @@
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="{% url 'home' %}">PhenObs | <span class="text-success d-none" id="online">Online</span><span class="text-warning d-none" id="offline">Offline</span></a>
+      <a id="brand" class="navbar-brand" href="{% url 'home' %}">PhenObs | <span class="text-success d-none" id="online">Online</span><span class="text-warning d-none" id="offline">Offline</span></a>
 
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
           <li class="nav-item {% block home_active %}{% endblock home_active %}">
-            <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+            <a id="home" class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item {% block observations_active %}{% endblock observations_active %}">
             <a class="nav-link" href="{% url 'observations:all' %}">Observations</a>
@@ -19,10 +19,10 @@
         </ul>
         <ul class="navbar-nav">
           {% if request.user.is_authenticated %}
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               {# URL provided by django-allauth/account/urls.py #}
               <a class="nav-link disabled" id="myprofile" href="{% url 'users:detail' request.user.username  %}">{% translate "My Profile" %}</a>
-            </li>
+            </li> -->
             <li class="nav-item">
               {# URL provided by django-allauth/account/urls.py #}
               <a class="nav-link disabled" id="signout" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>

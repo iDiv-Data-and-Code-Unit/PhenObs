@@ -3,7 +3,12 @@
   <label for="{{ id.id }}" class="col-10 col-md-5 col-lg-4 pl-0">{{ id.label }}</label>
   <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
     {% if 'intensity' in id.id %}
-      <input type="number" id="{{ id.id }}" name="{{ id.id }}" min="0" max="100" disabled class="custom-dropdown no-margin-left col mr-3 new-value-btn disabled-btn">
+      <select id="{{ id.id }}" name="{{ id.id }}" disabled class="custom-dropdown no-margin-left col mr-3 new-value-btn disabled-btn">
+        <option selected value=""></option>
+      {% for i in range %}
+        <option value="{{ i }}">{{ i }}%</option>
+      {% endfor %}
+      </select>
     {% else %}
       <select name="{{ id.id }}" id="{{ id.id }}" class="custom-dropdown no-margin-left col mr-3 new-value-btn">
         <option value="y">yes</option>

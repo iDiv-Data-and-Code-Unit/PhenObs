@@ -11,21 +11,24 @@ from . import views
 
 urlpatterns = [
     path("", include("pwa.urls")),
+    # path("", views.index, name="index"),
     path("", views.home, name="home"),
-    path(
-        "favicon.ico",
-        RedirectView.as_view(
-            url=staticfiles_storage.url("images/favicons/favicon.ico")
-        ),
-    ),
+ #    path(
+ #       "favicon.ico",
+ #       RedirectView.as_view(
+ #           url=staticfiles_storage.url("images/favicons/favicon.ico")
+#        ),
+#    ),
     path(
         "observations/", include("phenobs.observations.urls", namespace="observations")
     ),
+
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("phenobs.users.urls", namespace="users")),
     path("200/", TemplateView.as_view(template_name="200.html"), name="ok"),
+    path("offline/", TemplateView.as_view(template_name="offline.html"), name="offline"),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

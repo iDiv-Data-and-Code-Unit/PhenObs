@@ -1,5 +1,6 @@
 import {selectPlant, setupPlants} from './observation.js'
 import {oldClickListeners} from "./edit.js";
+import {alertModal} from "./modals.js";
 
 let collectionId = null;
 
@@ -53,7 +54,7 @@ function formatRecords(collections, collection, isOnline) {
             "removed": current['removed'],
             "transplanted": current['transplanted'],
             "no-observation": false,
-            "done": isOnline
+            "done": current['done']
         };
     }
 
@@ -62,9 +63,15 @@ function formatRecords(collections, collection, isOnline) {
 
 export async function insertCollection(collection, isOnline) {
     let collections = await getCollections();
+    let remaining = [];
 
     if (collections == null)
         collections = {};
+
+    for (let record in collection["records"]) {
+        if (!collection["records"][record]["done"])
+            remaining.push(collection["records"][record]["order"]);
+    }
 
     collections[collection['id']] = {
         'id': collection['id'],
@@ -75,10 +82,10 @@ export async function insertCollection(collection, isOnline) {
             collection['last-collection']['id'] :
             null,
         'edited': false,
-        'finished': isOnline,
+        'finished': collection["finished"],
         'uploaded': isOnline,
         'records': {},
-        'remaining': []
+        'remaining': remaining
     };
 
     // Add the last collection to the list
@@ -124,7 +131,8 @@ export async function emptyCollection(fields, change, caching) {
         url: "/observations/new/",
         method: "POST",
         error: function (jqXHR) {
-            alert(jqXHR.response);
+            // alert(jqXHR.responseText);
+            alertModal(jqXHR.responseText);
             setCollections(createEmptyCollection(null, getCollections()));
         },
         beforeSend: function(){
@@ -155,8 +163,8 @@ async function createEmptyCollection(data, collections) {
         setCollectionId(data['id']);
         await insertCollection(data, false);
         let collection = await getCollection(data['id']);
-        for (let key in collection['records'])
-            collection["remaining"].push(collection['records'][key]['order']);
+        // for (let key in collection['records'])
+        //     collection["remaining"].push(collection['records'][key]['order']);
 
         $('#garden').text(data['garden']);
         $('#creator').text(data['creator']);
@@ -185,7 +193,8 @@ export async function uploadCollection(id) {
         data: JSON.stringify(collection),
         method: "POST",
         error: function (jqXHR) {
-            alert("Could not establish a connection with database.");
+            // alert("Could not establish a connection with database.");
+            alertModal("Could not establish a connection with database.");
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -198,7 +207,8 @@ export async function uploadCollection(id) {
             collection['finished'] = true;
             collection['edited'] = false;
             await setCollection(collection);
-            alert("Collection successfully uploaded!");
+            // alert("Collection successfully uploaded!");
+            alertModal("Collection successfully uploaded!");
         }
     });
 }
@@ -230,7 +240,8 @@ export async function fetchCollection(id) {
         result = await $.ajax({
             url: "/observations/get/" + id,
             error: function (jqXHR) {
-                alert("Could not establish a connection with database.");
+                // alert("Could not establish a connection with database.");
+                alertModal("Could not establish a connection with database.");
                 return null;
             },
             beforeSend: function(){

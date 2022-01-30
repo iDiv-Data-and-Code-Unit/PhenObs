@@ -101,7 +101,7 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "users:redirect"
+# LOGIN_REDIRECT_URL = "users:redirect"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
 
@@ -274,6 +274,7 @@ ACCOUNT_ADAPTER = "phenobs.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "phenobs.users.adapters.SocialAccountAdapter"
 LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/accounts/login"
 
 # django-pwa
 # ------------------------------------------------------------------------------
@@ -285,17 +286,17 @@ PWA_APP_BACKGROUND_COLOR = "#ffffff"
 PWA_APP_DISPLAY = "standalone"
 PWA_APP_SCOPE = "/"
 PWA_APP_ORIENTATION = "any"
-PWA_APP_START_URL = "/"
+PWA_APP_START_URL = "/observations/"
 PWA_APP_STATUS_BAR_COLOR = "default"
 PWA_APP_ICONS = [
-    {"src": "static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
+    {"src": "/static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
 ]
 PWA_APP_ICONS_APPLE = [
-    {"src": "static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
+    {"src": "/static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
 ]
 PWA_APP_SPLASH_SCREEN = [
     {
-        "src": "static/images/PhenObs_Splash.png",
+        "src": "/static/images/PhenObs_Splash.png",
         "media": "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
     }
 ]

@@ -1,0 +1,18 @@
+{
+    "name": "PhenObs",
+    "short_name": "PhenObs",
+    "description": "PhenObs",
+    "start_url": "/observations/",
+    "display": "standalone",
+    "scope": "/",
+    "orientation": "any",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "status_bar": "default",
+    "icons": [
+        {"src": "/static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"},
+        {"src": "/static/images/PhenObs_Logo_Rounded_512px.png", "sizes": "512x512"}
+    ],
+    "dir": "ltr",
+    "lang": "en-US"
+}

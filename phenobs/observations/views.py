@@ -1,10 +1,11 @@
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -15,7 +16,7 @@ from .models import Collection, Record
 def get_context(request):
     garden = Garden.objects.filter(auth_users=request.user).get()
     collections = Collection.objects.filter(garden=garden).all()
-    last_collection = Collection.objects.filter(garden=garden).order_by("date").last()
+    last_collection = Collection.objects.filter(garden=garden, finished=True).order_by("date").last()
 
     recs = Record.objects.filter(collection_id=last_collection.id)
     plants = Plant.objects.order_by("order").filter(garden_id=garden.id).all()
@@ -49,37 +50,48 @@ def get_context(request):
 
     return context
 
-
+@login_required(login_url='/accounts/login/')
 def get_all_collections(request):
     if request.user.is_authenticated:
         garden = Garden.objects.filter(auth_users=request.user).get()
         collections = Collection.objects.filter(garden=garden).all()
         collections_json = []
         for collection in collections:
+            finished = True
+            records = Record.objects.filter(collection=collection).all()
+            for record in records:
+                print(record.done)
+                if record.done == False:
+                    finished = False
+                    break
             collections_json.append(
                 {
                     "id": collection.id,
                     "date": collection.date,
                     "creator": collection.creator.username,
+                    "finished": finished,
                 }
             )
         return JsonResponse(collections_json, safe=False)
-    return JsonResponse("ERROR", safe=False)
+    # return JsonResponse("ERROR", safe=False)
 
-
+@login_required(login_url='/accounts/login/')
 def all(request):
     if request.user.is_authenticated:
         # context = get_context(request)
         context = {}
         return render(request, "observations/observations.html", context)
-    else:
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
+    # else:
+    #     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
-
+@login_required(login_url='/accounts/login/')
 def add(request):
     if request.user.is_authenticated:
         # context = get_context(request)
         context = {}
+
+        context["range"] = range(5, 105, 5)
+        
         context["ids"] = [
             {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
             {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
@@ -93,15 +105,16 @@ def add(request):
         ]
 
         return render(request, "observations/add_observation.html", context)
-    else:
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
+    # else:
+    #     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
 
 @csrf_exempt
+@login_required(login_url='/accounts/login/')
 def new(request):
     if request.method == "POST" and request.user.is_authenticated:
         today = timezone.now()
-        doy = today.date() - date(today.date().year, 1, 1) + 1
+        doy = today.date() - date(today.date().year, 1, 1) + timedelta(days=1)
         garden = Garden.objects.filter(auth_users=request.user).get()
         creator = User.objects.filter(id=request.user.id).get()
         all_plants = (
@@ -109,7 +122,7 @@ def new(request):
         )
 
         collection = Collection(
-            garden=garden, date=today.date(), doy=doy.days, creator=creator
+            garden=garden, date=today.date(), doy=doy.days, creator=creator, finished=False
         )
         collection.save()
 
@@ -124,10 +137,10 @@ def new(request):
             )
             record.save()
 
-        records = format_records(Record.objects.filter(collection=collection).all())
+        finished, records = format_records(Record.objects.filter(collection=collection).all())
 
         prev_collection_db = (
-            Collection.objects.filter(date__lt=collection.date, garden=garden)
+            Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
             .exclude(id=collection.id)
             .last()
         )
@@ -136,10 +149,10 @@ def new(request):
 
         if prev_collection_db is not None:
             prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
-            prev_records_json = format_records(prev_records_db)
+            prev_finished, prev_records_json = format_records(prev_records_db)
 
             prev_prev_collection_db = Collection.objects.filter(
-                date__lt=prev_collection_db.date, garden=garden
+                date__lt=prev_collection_db.date, garden=garden, finished=True
             ).last()
 
             prev_collection_json = {
@@ -151,6 +164,7 @@ def new(request):
                 "last-collection-id": prev_prev_collection_db.id
                 if (prev_prev_collection_db is not None)
                 else None,
+                "finished": prev_finished
             }
 
         return JsonResponse(
@@ -161,9 +175,10 @@ def new(request):
                 "garden": garden.name,
                 "records": records,
                 "last-collection": prev_collection_json,
+                "finished": finished
             }
         )
-    return JsonResponse("ERROR", safe=False)
+    # return JsonResponse("ERROR", safe=False)
 
 
 #
@@ -238,6 +253,7 @@ def new(request):
 
 
 @csrf_exempt
+@login_required(login_url='/accounts/login/')
 def upload(request):
     if request.method == "POST" and request.user.is_authenticated:
         data = json.loads(request.body)
@@ -251,6 +267,7 @@ def upload(request):
             date=collection_date.date(),
             doy=doy.days,
             creator=User.objects.filter(username=data["creator"]).get(),
+            finished=True
         )
 
         collection.save()
@@ -260,6 +277,7 @@ def upload(request):
             timestamp = timezone.now()
             new_record = Record(
                 collection=collection,
+                id=record["id"],
                 plant=Plant.objects.filter(
                     order=record["order"],
                     garden_id=Garden.objects.filter(name=data["garden"]).get().id,
@@ -301,7 +319,7 @@ def upload(request):
             new_record.save()
 
         return JsonResponse("OK", safe=False)
-    return JsonResponse("ERROR", safe=False)
+    # return JsonResponse("ERROR", safe=False)
 
 
 #
@@ -371,6 +389,7 @@ def upload(request):
 #
 def format_records(collection_records):
     records = {}
+    finished = True
     for record in collection_records:
         records[record.plant.order] = {
             "id": record.id,
@@ -407,15 +426,19 @@ def format_records(collection_records):
             "peak-flowering-estimation": record.peak_flowering_estimation,
         }
 
-    return records
+        if (record.done is None or record.done is False):
+            finished = False
 
+    return finished, records
 
+@login_required(login_url='/accounts/login/')
 def edit(request, id):
     if request.user.is_authenticated:
         # context = get_context(request)
 
         context = {}
         context["id"] = id
+        context["range"] = range(5, 105, 5)
         context["ids"] = [
             {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
             {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
@@ -428,8 +451,8 @@ def edit(request, id):
             {"id": "senescence-intensity", "label": "Senescence intensity"},
         ]
         return render(request, "observations/edit_observation.html", context)
-    else:
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
+    # else:
+    #     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
 
 # def get(request, id):
@@ -452,7 +475,7 @@ def edit(request, id):
 #     return JsonResponse("ERROR", safe=False)
 #     # return render(request, "observations/edit_observation.html", context)
 
-
+@login_required(login_url='/accounts/login/')
 def get(request, id):
     if request.user.is_authenticated:
         garden = Garden.objects.filter(auth_users=request.user).get()
@@ -460,7 +483,7 @@ def get(request, id):
         collection_records = Record.objects.filter(collection=collection).all()
 
         prev_collection_db = (
-            Collection.objects.filter(date__lt=collection.date, garden=garden)
+            Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
             .exclude(id=id)
             .last()
         )
@@ -469,16 +492,18 @@ def get(request, id):
 
         if prev_collection_db is not None:
             prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
-            prev_records_json = format_records(prev_records_db)
+            prev_finished, prev_records_json = format_records(prev_records_db)
             prev_collection_json = {
                 "id": prev_collection_db.id,
                 "creator": prev_collection_db.creator.username,
                 "garden": prev_collection_db.garden.name,
                 "date": prev_collection_db.date,
                 "records": prev_records_json,
+                "uploaded": True,
+                "finished": prev_finished
             }
 
-        records = format_records(collection_records)
+        finished, records = format_records(collection_records)
 
         return JsonResponse(
             {
@@ -488,6 +513,7 @@ def get(request, id):
                 "garden": garden.name,
                 "records": records,
                 "last-collection": prev_collection_json,
+                "finished": finished
             }
         )
-    return JsonResponse("ERROR", safe=False)
+    # return JsonResponse("ERROR", safe=False)

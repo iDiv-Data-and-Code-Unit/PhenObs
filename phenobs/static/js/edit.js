@@ -10,6 +10,7 @@ import {
     cacheRecord,
     checkDefault,
     getFields,
+    markDone,
     noObservationPossible,
     requireIntensities, selectPlant,
     setupPlants
@@ -17,7 +18,8 @@ import {
 import {
     fillInButtons,
     fillInModalDates,
-    fillInOldData
+    fillInOldData,
+    confirmModal
 } from "./modals.js";
 
 if (location.href.indexOf('edit') !== -1) {
@@ -36,6 +38,7 @@ if (location.href.indexOf('edit') !== -1) {
     await setupPlants(parseInt(collection["id"]));
     await selectPlant(parseInt(collection["id"]), 1);
     await changeListeners(getFields(), parseInt(collection["id"]), true);
+    await markDone(parseInt(collection["id"]));
 
     if (collection["last-collection-id"] != null)
         await oldClickListeners(parseInt(collection["last-collection-id"]));
@@ -59,8 +62,8 @@ export async function changeListeners(fields, id, editFlag) {
                 "change", async function() {
                     const collection = await getCollection(id);
                     const plants = document.getElementById("plant");
-                    const isDone = collection["records"][plants.children[plants.selectedIndex].id]["done"];
-                    await cacheRecord(id, isDone);
+                    const isDone = collection["records"][plants.selectedOptions[0].id]["done"];
+                    await cacheRecord(id, plants.selectedOptions[0].id, isDone);
                     if (editFlag)
                         await markEdited(id);
                 }
@@ -74,11 +77,11 @@ export async function oldClickListeners(id) {
 
     for (let i = 0; i < saveButtons.length; i++) {
         saveButtons[i].addEventListener('click', async function () {
-            await cacheRecord(id, true, true);
-
             const collection = await getCollection(id);
             const plants = document.getElementById("plant");
-            const order = collection["records"][plants.children[plants.selectedIndex].id]["order"];
+            const order = parseInt(plants.selectedOptions[0].id);
+
+            await cacheRecord(id, order, true, true);
 
             fillInOldData(collection, order);
             fillInModalDates(collection);
@@ -118,8 +121,13 @@ export function cachingListeners(id) {
     // Add event listener for done collection button
     document.getElementById("cancel-btn")
         .addEventListener("click", () => {
-            if (confirm("Are you sure you want to cancel and go back?"))
-                location.href = "/observations";
+            // if (confirm("Are you sure you want to cancel and go back?"))
+            //     location.href = "/observations/";
+            confirmModal(
+                "Are you sure you want to cancel and go back?", 
+            );
+            $('#confirm-yes').click(() => location.href = "/observations/");
+            
         });
 
     // Add event listener for cancel collection button
@@ -139,7 +147,7 @@ export function cachingListeners(id) {
         .addEventListener("change",
             async () => await selectPlant(
                 id,
-                document.getElementById("plant").selectedIndex + 1
+                parseInt(document.getElementById("plant").selectedOptions[0].id)
             )
         );
 }
