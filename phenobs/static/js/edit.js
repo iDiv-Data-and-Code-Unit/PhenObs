@@ -77,11 +77,10 @@ export async function oldClickListeners(id) {
 
     for (let i = 0; i < saveButtons.length; i++) {
         saveButtons[i].addEventListener('click', async function () {
-            const collection = await getCollection(id);
-            const plants = document.getElementById("plant");
-            const order = parseInt(plants.selectedOptions[0].id);
+            const order = parseInt(document.getElementById("plant").selectedOptions[0].id);
 
             await cacheRecord(id, order, true, true);
+            let collection = await getCollection(id);
 
             fillInOldData(collection, order);
             fillInModalDates(collection);

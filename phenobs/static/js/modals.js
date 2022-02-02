@@ -23,7 +23,7 @@ export function fillInModalDates(lastCollection) {
 export function fillInOldData(lastCollection, plant) {
     let old_record = null;
     // Check if the record exists for the plant
-    if (plant in lastCollection["records"]){
+    if (plant in lastCollection["records"]) {
         toggleButtons(false);
         old_record = lastCollection["records"][plant];
     } else {
@@ -33,11 +33,10 @@ export function fillInOldData(lastCollection, plant) {
 
     // Get the elements to be filled in
     let old_dropdowns = $('select[id*="-old"]');
-    let old_intensities = $('input[type="number"][id*="-old"]')
     let old_checkboxes = $('input[type="checkbox"][id*="-old"]');
     let old_textarea = $('textarea[id*="-old"]');
 
-    // Dropdowns
+    // Dropdowns and intensities
     for (let j = 0; j < old_dropdowns.length; j++)
         for (let i = 0; i < old_dropdowns[j].children.length; i++)
             if (
@@ -45,10 +44,6 @@ export function fillInOldData(lastCollection, plant) {
                 old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]
             )
                 old_dropdowns[j].children[i].selected = true;
-    // Intensities
-    for (let j = 0; j < old_intensities.length; j++)
-        old_intensities[j].value =
-            old_record[old_intensities[j].id.slice(0, old_intensities[j].id.length - 4)];
     // Checkboxes
     for (let j = 0; j < old_checkboxes.length; j++) {
         old_checkboxes[j].checked =
@@ -98,7 +93,12 @@ export function fillInButtons(lastCollection, plant) {
             buttons[i].innerHTML = oldCheckboxesText;
         // Intensities, dropdowns, textareas
         else {
-            let value = old_record[buttons[i].id.slice(0, buttons[i].id.length - 7)]
+            let value = old_record[buttons[i].id.slice(0, buttons[i].id.length - 7)];
+            console.log("*********************************************************")
+            console.log(old_record)
+            console.log(buttons[i].id.slice(0, buttons[i].id.length - 7))
+            console.log(value)
+            console.log("?????????????????????????????????????????????????????????")
             if (value === "y")
                 buttons[i].innerHTML = "yes";
             else if (value === "u")

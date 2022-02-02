@@ -25,12 +25,12 @@ async function insertRows(tableName) {
         // console.log(collections[key], key)
         let rowHTML =
             '<tr class="d-table-row">\n' +
-            '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
-            '<td class="text-left d-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</td>\n' +
+            // '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
+            '<th class="text-left d-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
             '<td class="text-left d-table-cell">' + collections[key]["creator"] + '</td>\n' +
             '<td class="text-left d-table-cell">\n';
 
-        if (!collections[key]["finished"])
+        if (!collections[key]["finished"]) 
             rowHTML +=
                 '  <i class="bi bi-hdd-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-local"></i>\n' +
                 '  <i class="bi bi-exclamation-circle-fill" style="font-size: 1.5rem; color: red;" id="' + key + '-unfinished"></i>\n' +
@@ -205,8 +205,8 @@ async function addOnlineCollections(collections) {
         if (localCollections == null || Object.keys(localCollections).length === 0 || !(parseInt(collections[i]['id']) in localCollections)) {
             rowHTML =
                 '<tr class="d-table-row">' +
-                '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
-                '<td class="text-left d-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</td>' +
+                // '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
+                '<th class="text-left d-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
                 '<td class="text-left d-table-cell">' + collections[i]['creator'] + '</td>' +
                 '<td class="text-left d-table-cell">\n';
 
