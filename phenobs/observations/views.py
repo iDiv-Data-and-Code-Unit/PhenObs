@@ -12,6 +12,30 @@ from ..plants.models import Plant
 from ..users.models import User
 from .models import Collection, Record
 
+# @login_required(login_url='/accounts/login/')
+# def deactivate_plants_jena(request):
+#     garden = Garden.objects.filter(auth_users=request.user).get()
+#     plants = Plant.objects.filter(garden=garden, active=True).exclude(order__range=(6, 43)).all()
+#     plants_json = {}
+
+#     for plant in plants:
+#         plant_tmp = Plant(
+#             id=plant.id,
+#             garden=plant.garden,
+#             species=plant.species,
+#             garden_name=plant.garden_name,
+#             order=plant.order,
+#             active=False
+#         )
+#         plant_tmp.save()
+
+#         plants_json[plant.garden_name] = {
+#             "name": plant.garden_name,
+#             "order": plant.order
+#         }
+
+#     # print(plants)
+#     return JsonResponse(plants_json, safe=False)
 
 def get_context(request):
     garden = Garden.objects.filter(auth_users=request.user).get()
@@ -52,59 +76,59 @@ def get_context(request):
 
 @login_required(login_url='/accounts/login/')
 def get_all_collections(request):
-    if request.user.is_authenticated:
-        garden = Garden.objects.filter(auth_users=request.user).get()
-        collections = Collection.objects.filter(garden=garden).all()
-        collections_json = []
-        for collection in collections:
-            finished = True
-            records = Record.objects.filter(collection=collection).all()
-            for record in records:
-                print(record.done)
-                if record.done == False:
-                    finished = False
-                    break
-            collections_json.append(
-                {
-                    "id": collection.id,
-                    "date": collection.date,
-                    "creator": collection.creator.username,
-                    "finished": finished,
-                }
-            )
-        return JsonResponse(collections_json, safe=False)
+    garden = Garden.objects.filter(auth_users=request.user).get()
+    collections = Collection.objects.filter(garden=garden).all()
+    collections_json = []
+    for collection in collections:
+        finished, records = format_records(Record.objects.filter(collection=collection).all())
+        prev_collection = Collection.objects.filter(
+            date__lt=collection.date, garden=garden, finished=True
+        ).last()
+        collections_json.append(
+            {
+                "id": collection.id,
+                "date": collection.date,
+                "creator": collection.creator.username,
+                "finished": finished,
+                "records": records,
+                "garden": collection.garden.name,
+                "last-collection-id": prev_collection.id 
+                    if (prev_collection is not None)
+                    else None
+            }
+        )
+    return JsonResponse(collections_json, safe=False)
     # return JsonResponse("ERROR", safe=False)
 
 @login_required(login_url='/accounts/login/')
 def all(request):
-    if request.user.is_authenticated:
         # context = get_context(request)
-        context = {}
-        return render(request, "observations/observations.html", context)
+    context = {}
+    return render(request, "observations/observations.html", context)
     # else:
     #     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
 @login_required(login_url='/accounts/login/')
 def add(request):
-    if request.user.is_authenticated:
+    # if request.user.is_authenticated:
         # context = get_context(request)
-        context = {}
+    context = {}
 
-        context["range"] = range(5, 105, 5)
-        
-        context["ids"] = [
-            {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
-            {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
-            {"id": "flowers-opening", "label": "Flowers opening"},
-            {"id": "peak-flowering", "label": "Peak flowering"},
-            {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
-            {"id": "flowering-intensity", "label": "Flowering intensity"},
-            {"id": "ripe-fruits", "label": "Ripe fruits"},
-            {"id": "senescence", "label": "Senescence"},
-            {"id": "senescence-intensity", "label": "Senescence intensity"},
-        ]
+    context["range"] = range(5, 105, 5)
+    
+    context["ids"] = [
+        {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
+        {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
+        {"id": "flowers-opening", "label": "Flowers opening"},
+        {"id": "peak-flowering", "label": "Peak flowering"},
+        {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
+        {"id": "flowering-intensity", "label": "Flowering intensity"},
+        {"id": "ripe-fruits", "label": "Ripe fruits"},
+        {"id": "senescence", "label": "Senescence"},
+        {"id": "senescence-intensity", "label": "Senescence intensity"},
+    ]
 
-        return render(request, "observations/add_observation.html", context)
+    return render(request, "observations/add_observation.html", context)
     # else:
     #     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/accounts/login"))
 
@@ -178,7 +202,7 @@ def new(request):
                 "finished": finished
             }
         )
-    # return JsonResponse("ERROR", safe=False)
+    return JsonResponse("ERROR", safe=False)
 
 
 #

@@ -13,14 +13,17 @@
 
 
 
-table {
-
+html {
+  height: 100%;
 }
 
-tbody {
-  /*overflow-y: auto; !* Trigger vertical scroll    *!*/
-  /*overflow-x: hidden; !* Hide the horizontal scroll *!*/
+
+
+body {
+  position: relative;
+  min-height: 100%;
 }
+
 
 
 label, p {
@@ -28,6 +31,45 @@ label, p {
 }
 
 
+
+.imprint:link {
+  color: rgba(0, 0, 0, 0.5);
+  /* position: absolute; */
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+}
+
+.imprint:hover {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.imprint:visited {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.imprint:active {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+
+
+a:link {
+  color: rgba(0, 0, 0, 1);
+}
+
+a:hover {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+a:visited {
+  color: rgba(0, 0, 0, 1);
+}
+
+a:active {
+  color: rgba(0, 0, 0, 0.7);
+}
 
 
 

@@ -36,7 +36,7 @@ if (location.href.indexOf('edit') !== -1) {
     $('#garden').text(collection['garden']);
     $('#creator').text(collection['creator']);
     await setupPlants(parseInt(collection["id"]));
-    await selectPlant(parseInt(collection["id"]), 1);
+    await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), true);
     await markDone(parseInt(collection["id"]));
 

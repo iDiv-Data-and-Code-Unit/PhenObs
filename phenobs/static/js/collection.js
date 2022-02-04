@@ -149,7 +149,7 @@ export async function emptyCollection(fields, change, caching) {
 
     const collection = await getCollection(getCollectionId());
     await setupPlants(getCollectionId())
-        .finally(() => selectPlant(parseInt(getCollectionId()), 1))
+        .finally(() => selectPlant(parseInt(getCollectionId()), Math.min.apply(null,Object.keys(collection["records"]))))
         .finally(change(fields(), parseInt(getCollectionId()), false))
     await oldClickListeners(parseInt(collection["last-collection-id"]))
         .then(() => caching(parseInt(getCollectionId())));

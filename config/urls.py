@@ -22,7 +22,8 @@ urlpatterns = [
     path(
         "observations/", include("phenobs.observations.urls", namespace="observations")
     ),
-
+    path(
+        "imprint/", TemplateView.as_view(template_name="pages/imprint.html"), name="imprint"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
