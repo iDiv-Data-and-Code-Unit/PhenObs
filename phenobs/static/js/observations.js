@@ -194,7 +194,7 @@ async function addOnlineCollections(collections) {
 
     // Make sure local collections are up-to-date
     for (let i = 0; i < collections.length; i++)
-        if (localCollections != null && collections[i]["id"] in localCollections &&
+        if (localCollections != null && (collections[i]["id"] in localCollections) &&
             localCollections[collections[i]["id"]]["uploaded"])
             insertCollection(collections[i], true);
 

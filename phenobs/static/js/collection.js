@@ -27,7 +27,7 @@ export async function getCollection(id) {
     return null;
 }
 
-function formatRecords(collections, collection, isOnline) {
+function formatRecords(collections, collection) {
     for (let key in collection['records']) {
         const current = collection['records'][key];
 
@@ -53,7 +53,7 @@ function formatRecords(collections, collection, isOnline) {
             "covered-artificial": current['covered-artificial'],
             "removed": current['removed'],
             "transplanted": current['transplanted'],
-            "no-observation": false,
+            "no-observation": current['no-observation'],
             "done": current['done']
         };
     }
@@ -85,7 +85,8 @@ export async function insertCollection(collection, isOnline) {
         'finished': collection["finished"],
         'uploaded': isOnline,
         'records': {},
-        'remaining': remaining
+        'remaining': remaining,
+        "no-observation": collection["no-observation"]
     };
 
     // Add the last collection to the list
@@ -103,7 +104,7 @@ export async function insertCollection(collection, isOnline) {
     Add remaining indices
     Create default records
      */
-    collections = formatRecords(collections, collection, isOnline);
+    collections = formatRecords(collections, collection);
     // collections = formatRecords(collections, collections[collection['last-collection']['id']], isOnline);
     await setCollections(collections);
     return collections[collection['id']];
