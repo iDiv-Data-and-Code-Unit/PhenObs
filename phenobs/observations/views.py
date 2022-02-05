@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.db.models.query import QuerySet
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -269,7 +270,7 @@ def upload(request: HttpRequest) -> JsonResponse:
         return JsonResponse("OK", safe=False)
 
 
-def format_records(collection_records: QuerySet) -> tuple[bool, Dict[str, Any]]:
+def format_records(collection_records: QuerySet) -> tuple:
     """Converts records data into a JSON object
 
     Args:
