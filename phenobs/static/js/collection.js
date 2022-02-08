@@ -105,7 +105,7 @@ export async function insertCollection(collection, isOnline) {
     Create default records
      */
     collections = formatRecords(collections, collection);
-    // collections = formatRecords(collections, collections[collection['last-collection']['id']], isOnline);
+
     await setCollections(collections);
     return collections[collection['id']];
 }
@@ -164,8 +164,6 @@ async function createEmptyCollection(data, collections) {
         setCollectionId(data['id']);
         await insertCollection(data, false);
         let collection = await getCollection(data['id']);
-        // for (let key in collection['records'])
-        //     collection["remaining"].push(collection['records'][key]['order']);
 
         $('#garden').text(data['garden']);
         $('#creator').text(data['creator']);
@@ -213,26 +211,6 @@ export async function uploadCollection(id) {
         }
     });
 }
-
-// export function fetchCollection(id) {
-//     $.ajax({
-//         url: "/observations/get/" + id,
-//         error: function (jqXHR) {
-//             alert("Could not establish a connection with database.");
-//             return null;
-//         },
-//         beforeSend: function(){
-//             $("body").addClass("loading");
-//         },
-//         complete: function(){
-//             $("body").removeClass("loading");
-//         },
-//         success: function (data) {
-//             console.log(data);
-//             return insertCollection(data, true);
-//         }
-//     });
-// }
 
 export async function fetchCollection(id) {
     let result;

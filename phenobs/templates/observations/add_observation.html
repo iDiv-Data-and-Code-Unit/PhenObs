@@ -10,14 +10,19 @@
     <div class="form-group row px-sm-1 px-md-3 pt-4">
       <label for="plant" class="col-10 col-md-5 col-lg-4 pl-0">Plant</label>
       <div class="d-flex col-12 col-md-7 col-lg-7 col-xl-6">
-        <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-sm-3 pr-3 mr-0 new-value-btn">
+        <select name="plant" id="plant" class="custom-dropdown no-margin-left col mr-3 pr-3 new-value-btn">
 {#          {% for plant in plants %}#}
 {#              <option value="{{ plant.garden_name }}-{{ plant.order }}" name="{{ plant.garden_name }}" id="{{ plant.order }}">{{ plant }}</option>#}
 {#          {% endfor %}#}
         </select>
-        <div class="col text-center lead" id="last-obs-date">
-          <strong id="last-collection-date"></strong>
-        </div>
+        <button type="button" class="custom-dropdown no-margin-left old-data-btn col d-flex justify-content-center" id="copy-older">
+          <i class="bi bi-files" style="color: gray;"></i>
+          <div id="last-collection-date" class="mx-2">
+            <div id="last-obs-date">
+
+            </div>
+          </div>
+        </button>
       </div>
     </div>
 

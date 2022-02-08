@@ -30,8 +30,8 @@ export async function setupPlants(id) {
             lastCollection = await fetchCollection(collection['last-collection-id']);
         }
 
-        let lastCollectionDate = document.getElementById('last-collection-date');
-        lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"])).toString();
+        let lastCollectionDate = document.getElementById('last-obs-date');
+        lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
     }
 
     let plants = document.getElementById('plant');
@@ -39,7 +39,7 @@ export async function setupPlants(id) {
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
 
-        console.log(key, plant['name'], plant['order']);
+        // console.log(key, plant['name'], plant['order']);
 
         plants.innerHTML +=
             '<option value="' +
@@ -64,9 +64,16 @@ function findOptionIndex(order) {
 }
 
 // Fills in the form fields for a particular plant
-export async function fillInFields(id, order) {
-    // console.log('fillIn');
-    const collection = await getCollection(id);
+export async function fillInFields(id, order, lastCollectionId=null) {
+    let collection = null;
+    let currentCollection = null;
+    
+    if (lastCollectionId != null) {
+        collection = await getCollection(lastCollectionId);
+        currentCollection = await getCollection(id);
+    } else
+        collection = await getCollection(id);
+
     let fields = getFields();
 
     let plants = document.getElementById('plant');
@@ -94,15 +101,20 @@ export async function fillInFields(id, order) {
             fields["intensities"][i].value = plant[fields["intensities"][i].id];
     }
     // Set the checkboxes
-    for (let i = 0; i < fields["checkboxes"].length; i++) {
-        fields["checkboxes"][i].checked = plant[fields["checkboxes"][i].id];
-    }
+    if (lastCollectionId == null)
+        for (let i = 0; i < fields["checkboxes"].length; i++) {
+            fields["checkboxes"][i].checked = plant[fields["checkboxes"][i].id];
+        }
 
     // Set the textarea
-    $('#remarks').val(plant["remarks"])
+    if (lastCollectionId == null)
+        $('#remarks').val(plant["remarks"])
 
-    if (collection['last-collection-id'] != null) {
-        const lastCollection = await getCollection(collection['last-collection-id']);
+    if ((currentCollection == null && collection['last-collection-id'] != null) || 
+        currentCollection != null) {
+        let lastCollection = collection;
+        if (currentCollection == null)
+            lastCollection = await getCollection(collection['last-collection-id']);
 
         // Call button and modal filling functions
         fillInOldData(lastCollection, plant["order"]);
@@ -111,8 +123,12 @@ export async function fillInFields(id, order) {
     } else
         toggleButtons(true);
 
-    // Cache the record
-    await cacheRecord(id, order, plant['done']);
+    await cacheRecord(
+        id, order, 
+        (currentCollection == null) 
+            ? plant['done'] 
+            : currentCollection["records"][order]["done"]
+    );
     noObservationPossible(plant["no-observation"]);
 }
 

@@ -9,6 +9,7 @@ import {
 import {
     cacheRecord,
     checkDefault,
+    fillInFields,
     getFields,
     markDone,
     noObservationPossible,
@@ -77,7 +78,7 @@ export async function oldClickListeners(id) {
 
     for (let i = 0; i < saveButtons.length; i++) {
         saveButtons[i].addEventListener('click', async function () {
-            const order = parseInt(document.getElementById("plant").selectedOptions[0].id);
+            let order = parseInt(document.getElementById("plant").selectedOptions[0].id);
 
             await cacheRecord(id, order, true, true);
             let collection = await getCollection(id);
@@ -149,4 +150,14 @@ export function cachingListeners(id) {
                 parseInt(document.getElementById("plant").selectedOptions[0].id)
             )
         );
+    
+    document.getElementById("copy-older")
+        .addEventListener("click", async function() { 
+            let collection = await getCollection(id);
+            await fillInFields(
+                id, 
+                document.getElementById("plant").selectedOptions[0].id, 
+                collection["last-collection-id"]
+            ); 
+        });
 }

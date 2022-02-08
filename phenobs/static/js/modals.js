@@ -14,7 +14,6 @@ export function fillInModalDates(lastCollection) {
     // Get all the spans with date values in the modal titles
     let modals = $('span[id*="-date"]');
     // Add the last collection dates
-    // TODO: make the dates more human readable (LongDate)
     for (let j = 0; j < modals.length; j++) {
         modals[j].innerText = formatDate(new Date(lastCollection["date"])).toString();
     }
@@ -38,12 +37,15 @@ export function fillInOldData(lastCollection, plant) {
 
     // Dropdowns and intensities
     for (let j = 0; j < old_dropdowns.length; j++)
-        for (let i = 0; i < old_dropdowns[j].children.length; i++)
+        for (let i = 0; i < old_dropdowns[j].children.length; i++) {
             if (
-                old_dropdowns[j].children[i].value ===
-                old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]
+                (old_dropdowns[j].children[i].value ===
+                old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]) || 
+                (old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)] == null &&
+                old_dropdowns[j].children[i].value === "")
             )
                 old_dropdowns[j].children[i].selected = true;
+        }
     // Checkboxes
     for (let j = 0; j < old_checkboxes.length; j++) {
         old_checkboxes[j].checked =
@@ -94,11 +96,7 @@ export function fillInButtons(lastCollection, plant) {
         // Intensities, dropdowns, textareas
         else {
             let value = old_record[buttons[i].id.slice(0, buttons[i].id.length - 7)];
-            console.log("*********************************************************")
-            console.log(old_record)
-            console.log(buttons[i].id.slice(0, buttons[i].id.length - 7))
-            console.log(value)
-            console.log("?????????????????????????????????????????????????????????")
+            
             if (value === "y")
                 buttons[i].innerHTML = "yes";
             else if (value === "u")
