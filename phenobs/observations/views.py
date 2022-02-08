@@ -26,7 +26,7 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 
     """
     garden = Garden.objects.filter(auth_users=request.user).get()
-    collections = Collection.objects.filter(garden=garden).all()
+    collections = Collection.objects.filter(garden=garden).order_by("date").all()
     collections_json = []
 
     for collection in collections:
@@ -221,16 +221,16 @@ def upload(request: HttpRequest) -> JsonResponse:
                 timestamp_edit=timestamp,
                 editor=User.objects.filter(username=data["creator"]).get(),
                 initial_vegetative_growth=record["initial-vegetative-growth"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 young_leaves_unfolding=record["young-leaves-unfolding"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 flowers_open=record["flowers-opening"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 peak_flowering=record["peak-flowering"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 flowering_intensity=None
                 if (
@@ -239,10 +239,10 @@ def upload(request: HttpRequest) -> JsonResponse:
                 )
                 else int(record["flowering-intensity"]),
                 ripe_fruits=record["ripe-fruits"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 senescence=record["senescence"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 senescence_intensity=None
                 if (
@@ -260,7 +260,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 ],
                 remarks=record["remarks"],
                 peak_flowering_estimation=record["peak-flowering-estimation"]
-                if (record["no-observation"] is True)
+                if (record["no-observation"] is False)
                 else None,
                 done=record["done"],
             )

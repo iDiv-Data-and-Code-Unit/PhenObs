@@ -23,8 +23,11 @@ import {
     confirmModal
 } from "./modals.js";
 
-if (location.href.indexOf('edit') !== -1) {
-    const id = parseInt(getId());
+if (location.href.indexOf('edit') !== -1)
+    await init();
+
+async function init() {
+    const id = parseInt(getEditId());
     let collection = await getCollection(id);
 
     if (collection === undefined || collection == null || !("last-collection-id" in collection)) {
@@ -41,8 +44,13 @@ if (location.href.indexOf('edit') !== -1) {
     await changeListeners(getFields(), parseInt(collection["id"]), true);
     await markDone(parseInt(collection["id"]));
 
-    if (collection["last-collection-id"] != null)
+    if (collection["last-collection-id"] != null) {
         await oldClickListeners(parseInt(collection["last-collection-id"]));
+    } else if (collection["last-collection"] != null) {
+        await oldClickListeners(parseInt(collection["last-collection"]["id"]));
+    }else {
+        console.log(collection);
+    }
 
     await cachingListeners(parseInt(collection["id"]));
 
@@ -50,7 +58,7 @@ if (location.href.indexOf('edit') !== -1) {
     // cachingListeners(parseInt(collection["id"]));
 }
 
-function getId() {
+function getEditId() {
     const url = location.href;
     const split = url.split('/');
     return split[split.length - 1];
@@ -150,6 +158,7 @@ export function cachingListeners(id) {
                 parseInt(document.getElementById("plant").selectedOptions[0].id)
             )
         );
+    
     
     document.getElementById("copy-older")
         .addEventListener("click", async function() { 

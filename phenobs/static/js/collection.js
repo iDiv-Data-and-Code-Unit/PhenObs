@@ -229,9 +229,10 @@ export async function fetchCollection(id) {
             complete: function(){
                 $("body").removeClass("loading");
             },
-            success: function (data) {
+            success: async function (data) {
                 console.log(data);
-                return insertCollection(data, true);
+                const collection = await insertCollection(data, true);
+                return collection;
             }
         });
 

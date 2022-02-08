@@ -38,8 +38,12 @@ export function fillInOldData(lastCollection, plant) {
     // Dropdowns and intensities
     for (let j = 0; j < old_dropdowns.length; j++)
         for (let i = 0; i < old_dropdowns[j].children.length; i++) {
+            // console.log(old_dropdowns[j].id)
+            // console.log(old_dropdowns[j].children[i].value + " " + old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)])
             if (
                 (old_dropdowns[j].children[i].value ===
+                old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]) || 
+                (parseInt(old_dropdowns[j].children[i].value) === 
                 old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)]) || 
                 (old_record[old_dropdowns[j].id.slice(0, old_dropdowns[j].id.length - 4)] == null &&
                 old_dropdowns[j].children[i].value === "")
@@ -123,11 +127,15 @@ export function toggleButtons(hideFlag) {
     }
     if (hideFlag) {
         document.getElementById('last-obs-date').classList.add('d-none');
+        document.getElementById('copy-older').classList.remove('d-flex');
+        document.getElementById('copy-older').classList.add('d-none');
         document.getElementById('remarks-large-button').classList.remove('d-lg-block');
         document.getElementById('remarks-small-button').classList.remove('d-block');
     }
     else {
         document.getElementById('last-obs-date').classList.remove('d-none');
+        document.getElementById('copy-older').classList.add('d-flex');
+        document.getElementById('copy-older').classList.remove('d-none');
         document.getElementById('remarks-large-button').classList.add('d-lg-block');
         document.getElementById('remarks-large-button').classList.add('d-none');
         document.getElementById('remarks-small-button').classList.remove('d-block');
