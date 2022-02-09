@@ -105,9 +105,8 @@ export async function insertCollection(collection, isOnline) {
     Create default records
      */
     collections = formatRecords(collections, collection);
-
     await setCollections(collections);
-    return collections[collection['id']];
+    return collections[collection["id"]];
 }
 
 // Sets a single collection in local storage
@@ -229,11 +228,7 @@ export async function fetchCollection(id) {
             complete: function(){
                 $("body").removeClass("loading");
             },
-            success: async function (data) {
-                console.log(data);
-                const collection = await insertCollection(data, true);
-                return collection;
-            }
+            success: async (data) => await insertCollection(data, true),
         });
 
         return result;

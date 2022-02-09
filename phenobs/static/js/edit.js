@@ -1,10 +1,10 @@
 import {
-    deleteCollection,
     fetchCollection,
     getCollection,
     updateCollection,
     uploadCollection,
-    markEdited
+    markEdited,
+    setCollection
 } from "./collection.js";
 import {
     cacheRecord,
@@ -46,16 +46,11 @@ async function init() {
 
     if (collection["last-collection-id"] != null) {
         await oldClickListeners(parseInt(collection["last-collection-id"]));
-    } else if (collection["last-collection"] != null) {
-        await oldClickListeners(parseInt(collection["last-collection"]["id"]));
-    }else {
+    } else {
         console.log(collection);
     }
 
     await cachingListeners(parseInt(collection["id"]));
-
-    // await changeListeners(getFields(), parseInt(collection["id"]), true);
-    // cachingListeners(parseInt(collection["id"]));
 }
 
 function getEditId() {

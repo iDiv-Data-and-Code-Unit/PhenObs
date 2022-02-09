@@ -109,6 +109,8 @@ export function fillInButtons(lastCollection, plant) {
                 buttons[i].innerHTML = "missed";
             else if (value === "no")
                 buttons[i].innerHTML = "no";
+            else if (buttons[i].id.includes("intensity") && value != null && value.toString().length > 0)
+                buttons[i].innerHTML = value + "%";
             else
                 buttons[i].innerHTML = value;
         }

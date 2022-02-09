@@ -167,9 +167,16 @@ function addRemoveLink(collections=null) {
 }
 
 async function getAllCollections() {
+    const collections = await getCollections();
+    let ids = [];
+    for (let collection in collections) {
+        ids.push(parseInt(collection));
+    }
+
     await $.ajax({
         url: "/observations/all_collections/",
-        method: "GET",
+        method: "POST",
+        data: JSON.stringify(ids),
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
             alertModal("Could not establish a connection with database.");

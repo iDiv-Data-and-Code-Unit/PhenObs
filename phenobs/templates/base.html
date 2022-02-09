@@ -42,7 +42,11 @@
       <script type="module" defer src="{% static 'js/project.js' %}"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
-      
+      {% if user.is_authenticated %}
+        <script type="text/javascript">
+          sessionStorage.setItem("loggedIn", "{{user.username}}");
+        </script>
+      {% endif %}
       <!-- place project specific Javascript in this file -->
       {% block custom_javascript %}
       {% endblock custom_javascript %}
@@ -53,9 +57,7 @@
   <body>
     {% block nav %}
     {% endblock nav %}
-
     <div class="container">
-
       {% if messages %}
           {% for message in messages %}
               <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
@@ -69,7 +71,7 @@
     </div> <!-- /container -->
 
     {% block modal %}{% endblock modal %}
-    {% include 'observations/modals.html' %}
+    {% include "observations/alerts.html" %}
     {% block inline_javascript %}
     {# Script tags with only code, no src (defer by default) #}
     {% endblock inline_javascript %}

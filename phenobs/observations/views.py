@@ -14,6 +14,7 @@ from ..users.models import User
 from .models import Collection, Record
 
 
+@csrf_exempt
 @login_required(login_url='/accounts/login/')
 def get_all_collections(request: HttpRequest) -> JsonResponse:
     """Fetches all the collections from database for the given garden
@@ -25,12 +26,19 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         collections_json: JSON object consisting of all the received collections
 
     """
+    
+    data = json.loads(request.body)
+
     garden = Garden.objects.filter(auth_users=request.user).get()
     collections = Collection.objects.filter(garden=garden).order_by("date").all()
     collections_json = []
 
     for collection in collections:
-        finished, records = format_records(Record.objects.filter(collection=collection).all())
+        records = None
+        finished = True
+        if (collection.id in data):
+            print(collection.id)
+            finished, records = format_records(Record.objects.filter(collection=collection).all())
 
         prev_collection = Collection.objects.filter(
             date__lt=collection.date, garden=garden, finished=True
@@ -219,7 +227,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 ).get(),
                 timestamp_entry=timestamp,
                 timestamp_edit=timestamp,
-                editor=User.objects.filter(username=data["creator"]).get(),
+                editor=User.objects.filter(username=request.user.username).get(),
                 initial_vegetative_growth=record["initial-vegetative-growth"]
                 if (record["no-observation"] is False)
                 else None,
@@ -236,6 +244,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 if (
                     len(str(record["flowering-intensity"])) == 0
                     or record["flowering-intensity"] is None
+                    or record["flowering-intensity"] != "y"
                 )
                 else int(record["flowering-intensity"]),
                 ripe_fruits=record["ripe-fruits"]
@@ -248,6 +257,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 if (
                     len(str(record["senescence-intensity"])) == 0
                     or record["senescence-intensity"] is None
+                    or record["senescence"] != "y"
                 )
                 else int(record["senescence-intensity"]),
                 maintenance=[
@@ -412,7 +422,7 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
         {
             "id": collection.id,
             "date": collection.date,
-            "creator": request.user.username,
+            "creator": collection.creator.username,
             "garden": garden.name,
             "records": records,
             "last-collection": prev_collection_json,
