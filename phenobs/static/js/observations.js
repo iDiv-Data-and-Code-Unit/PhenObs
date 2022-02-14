@@ -25,9 +25,9 @@ async function insertRows(tableName) {
         let rowHTML =
             '<tr class="d-table-row">\n' +
             // '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
-            '<th class="text-left d-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
-            '<td class="text-left d-table-cell">' + collections[key]["creator"] + '</td>\n' +
-            '<td class="text-left d-table-cell">\n';
+            '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
+            '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[key]["creator"] + '</td>\n' +
+            '<td class="text-left d-table-cell icon-table-cell">\n';
 
         if (!collections[key]["finished"]) 
             rowHTML +=
@@ -48,7 +48,7 @@ async function insertRows(tableName) {
 
         if ((collections[key]["edited"] && collections[key]["finished"]) || (collections[key]["finished"] && !collections[key]["uploaded"]))
             rowHTML +=
-                '<td class="text-left d-table-cell">\n' +
+                '<td class="text-left d-table-cell icon-table-cell">\n' +
                 '  <a onclick="">\n' +
                 '    <i class="bi bi-cloud-arrow-up-fill" style="font-size: 1.5rem; color: blue;" id="' + key + '-upload"></i>\n' +
                 '  </a>\n' +
@@ -56,18 +56,18 @@ async function insertRows(tableName) {
 
         if (tableName === "uploaded" || tableName === "unfinished")
             rowHTML +=
-                '<td class="text-left d-table-cell">\n' +
+                '<td class="text-left d-table-cell icon-table-cell">\n' +
                 '</td>\n';
 
         rowHTML +=
-            '<td class="text-left d-table-cell">\n' +
+            '<td class="text-left d-table-cell icon-table-cell">\n' +
             // '  <a href="edit/' + key + '">\n' +
             '    <i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-edit"></i>\n' +
             '  </a>\n' +
             '</td>\n';
 
         rowHTML +=
-            '<td class="text-left d-table-cell">\n' +
+            '<td class="text-left d-table-cell icon-table-cell">\n' +
             '  <a onclick="">\n' +
             '    <i class="bi bi-trash-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-cancel"></i>\n' +
             '  </a>\n' +
@@ -151,7 +151,7 @@ function addRemoveLink(collections=null) {
                     //     await initTables();
                     // }
                     confirmModal("Are you sure you want to delete the collection from device?");
-                    $('#confirm-yes').click(
+                    $('#confirm-yes').unbind().click(
                         async function() {
                             await deleteCollection(id);
                             await initTables();
@@ -220,30 +220,30 @@ async function addOnlineCollections(collections) {
             rowHTML =
                 '<tr class="d-table-row">' +
                 // '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
-                '<th class="text-left d-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
-                '<td class="text-left d-table-cell">' + collections[i]['creator'] + '</td>' +
-                '<td class="text-left d-table-cell">\n';
+                '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
+                '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[i]['creator'] + '</td>' +
+                '<td class="text-left d-table-cell icon-table-cell">\n';
 
             if (collections[i]["finished"] == true)
                 rowHTML += 
                     '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
                     '</td>' +
-                    '<td class="text-left d-table-cell">\n';
+                    '<td class="text-left d-table-cell icon-table-cell">\n';
             else
                 rowHTML += 
                     '<i class="bi bi-cloud-fill" style="font-size: 1.5rem; color: gray;" id="' + collections[i]['id'] + '-online"></i>\n' +
                     '<i class="bi bi-exclamation-circle-fill" style="font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
                     '</td>' +
-                    '<td class="text-left d-table-cell">\n';
+                    '<td class="text-left d-table-cell icon-table-cell">\n';
                 // '<a href="edit/' + collections[i]['id'] + '">\n' +
             rowHTML +=
                 '</td>\n' +
-                '<td class="text-left d-table-cell">\n';
+                '<td class="text-left d-table-cell icon-table-cell">\n';
             rowHTML += '<i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="' + collections[i]['id'] + '-edit"></i>\n' +
                 '</a>\n' +
                 '</td>';
             rowHTML +=
-                '<td class="text-left d-table-cell">\n' +
+                '<td class="text-left d-table-cell icon-table-cell">\n' +
                 '</td>\n</tr>\n';
 
             table.innerHTML += rowHTML;

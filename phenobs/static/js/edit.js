@@ -133,7 +133,7 @@ export function cachingListeners(id) {
             confirmModal(
                 "Are you sure you want to cancel and go back?", 
             );
-            $('#confirm-yes').click(() => location.href = "/observations/");
+            $('#confirm-yes').unbind().click(() => location.href = "/observations/");
             
         });
 
