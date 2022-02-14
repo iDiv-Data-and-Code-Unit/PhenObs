@@ -1,5 +1,5 @@
 var today = new Date();
-var staticCacheName = "django-pwa-v62";
+var staticCacheName = "django-pwa-v66";
 var filesToCache = [
     '/observations/',
     '/offline/',
@@ -60,7 +60,7 @@ var filesToCache = [
 
 // Cache on install
 self.addEventListener("install", event => {
-    // this.skipWaiting();
+    this.skipWaiting();
 
     event.waitUntil(
         caches.keys().then(cacheNames => {

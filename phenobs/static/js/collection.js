@@ -73,14 +73,18 @@ export async function insertCollection(collection, isOnline) {
             remaining.push(collection["records"][record]["order"]);
     }
 
+    let lastCollectionId = null;
+    if (collection['last-collection'] != null)
+        lastCollectionId = collection['last-collection']['id'];
+    else if (collection['last-collection-id'] != null)
+        lastCollectionId = collection['last-collection-id'];
+
     collections[collection['id']] = {
         'id': collection['id'],
         'date': collection['date'],
         'creator': collection['creator'],
         'garden': collection['garden'],
-        'last-collection-id': (collection['last-collection'] != null) ?
-            collection['last-collection']['id'] :
-            null,
+        'last-collection-id': lastCollectionId,
         'edited': false,
         'finished': collection["finished"],
         'uploaded': isOnline,

@@ -17,6 +17,6 @@ setDate(new Date());
 // Create an empty collection
 await emptyCollection(getFields, changeListeners, cachingListeners);
 
-window.onbeforeunload = function () {
-    return 'Are you sure you want to reload the page?';
+window.onbeforeunload = function(event) {
+    return confirm("Do you want the page to be reloaded?");
 }

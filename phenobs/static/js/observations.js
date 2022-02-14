@@ -3,7 +3,6 @@ import {confirmModal, alertModal, formatDate} from './modals.js';
 import {isReachable} from "./project.js";
 
 async function insertRows(tableName) {
-    // TODO: get all online collections
     let collections = await getCollections();
     let table = document.getElementById(tableName + '-collections-body');
     table.innerHTML = '';
@@ -131,15 +130,15 @@ function addEditLink() {
 function addRemoveLink(collections=null) {
     let allButtons = $('[id*="-cancel"]');
 
-    if (collections != null) {
-        allButtons = [];
-        for (let i = 0; i < collections.length; i++)
-            if (
-                !$('[id="' + collections[i]["id"] + '-upload"]').length && 
-                !$('[id="' + collections[i]["id"] + '-unfinished"]').length
-            )
-                allButtons.push($('[id="' + collections[i]["id"] + '-cancel"]')[0])
-    }
+    // if (collections != null) {
+    //     allButtons = [];
+    //     for (let i = 0; i < collections.length; i++)
+    //         if (
+    //             !$('[id="' + collections[i]["id"] + '-upload"]').length && 
+    //             !$('[id="' + collections[i]["id"] + '-unfinished"]').length
+    //         )
+    //             allButtons.push($('[id="' + collections[i]["id"] + '-cancel"]')[0])
+    // }
 
     for (let i = 0; i < allButtons.length; i++) {
         if (allButtons[i] !== undefined) {
@@ -197,13 +196,21 @@ async function getAllCollections() {
 
 async function addOnlineCollections(collections) {
     await insertRows("uploaded");
-    const localCollections = await getCollections();
+    let localCollections = await getCollections();
 
     // Make sure local collections are up-to-date
-    for (let i = 0; i < collections.length; i++)
+    for (let i = 0; i < collections.length; i++) {
         if (localCollections != null && (collections[i]["id"] in localCollections) &&
-            localCollections[collections[i]["id"]]["uploaded"])
-            insertCollection(collections[i], true);
+            (localCollections[collections[i]["id"]]["uploaded"])) {
+            await insertCollection(collections[i], true);
+        } else if (localCollections != null && (collections[i]["id"] in localCollections) &&
+            !localCollections[collections[i]["id"]]["finished"] && collections[i]["finished"]) {
+            await insertCollection(collections[i], true);
+        }
+    }
+
+    localCollections = await getCollections();
+    await initTables();
 
     let table = document.getElementById('uploaded-collections-body');
     let rowHTML = '';

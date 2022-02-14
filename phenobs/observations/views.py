@@ -26,19 +26,12 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         collections_json: JSON object consisting of all the received collections
 
     """
-    
-    data = json.loads(request.body)
-
     garden = Garden.objects.filter(auth_users=request.user).get()
     collections = Collection.objects.filter(garden=garden).order_by("date").all()
     collections_json = []
 
     for collection in collections:
-        records = None
-        finished = True
-        if (collection.id in data):
-            print(collection.id)
-            finished, records = format_records(Record.objects.filter(collection=collection).all())
+        finished, records = format_records(Record.objects.filter(collection=collection).all())
 
         prev_collection = Collection.objects.filter(
             date__lt=collection.date, garden=garden, finished=True
@@ -52,9 +45,9 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
                 "finished": finished,
                 "records": records,
                 "garden": collection.garden.name,
-                "last-collection-id": prev_collection.id 
-                    if (prev_collection is not None)
-                    else None
+                "last-collection-id": prev_collection.id
+                if (prev_collection is not None)
+                else None
             }
         )
     return JsonResponse(collections_json, safe=False)
@@ -149,6 +142,7 @@ def new(request: HttpRequest) -> JsonResponse:
         prev_collection_db = (
             Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
             .exclude(id=collection.id)
+            .order_by("date")
             .last()
         )
 
@@ -160,7 +154,7 @@ def new(request: HttpRequest) -> JsonResponse:
 
             prev_prev_collection_db = Collection.objects.filter(
                 date__lt=prev_collection_db.date, garden=garden, finished=True
-            ).last()
+            ).order_by("date").last()
 
             prev_collection_json = {
                 "id": prev_collection_db.id,
@@ -398,6 +392,7 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
     prev_collection_db = (
         Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
         .exclude(id=id)
+        .order_by("date")
         .last()
     )
 

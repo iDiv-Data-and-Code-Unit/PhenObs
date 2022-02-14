@@ -27,6 +27,10 @@ if (location.href.indexOf('edit') !== -1)
     await init();
 
 async function init() {
+    window.onbeforeunload = function(event) {
+        return confirm("Do you want the page to be reloaded?");
+    }
+
     const id = parseInt(getEditId());
     let collection = await getCollection(id);
 
@@ -64,10 +68,10 @@ export async function changeListeners(fields, id, editFlag) {
         for (let i = 0; i < fields[key].length; i++) {
             fields[key][i].addEventListener(
                 "change", async function() {
-                    const collection = await getCollection(id);
-                    const plants = document.getElementById("plant");
-                    const isDone = collection["records"][plants.selectedOptions[0].id]["done"];
-                    await cacheRecord(id, plants.selectedOptions[0].id, isDone);
+                    let collection = await getCollection(id);
+                    let plants = document.getElementById("plant");
+                    let isDone = collection["records"][parseInt(plants.selectedOptions[0].id)]["done"];
+                    await cacheRecord(id, parseInt(plants.selectedOptions[0].id), isDone);
                     if (editFlag)
                         await markEdited(id);
                 }
@@ -145,15 +149,20 @@ export function cachingListeners(id) {
     document.getElementById("senescence")
         .addEventListener("change", () => requireIntensities());
 
-    // Add event listener for #plant
-    document.getElementById("plant")
-        .addEventListener("change",
-            async () => await selectPlant(
+    // Add event listeners for #plant
+    document.getElementById("plant").addEventListener(
+        "focus", async (e) => {
+            await checkDefault(id, false, true);
+        }
+    );
+    document.getElementById("plant").addEventListener(
+        "change", async (e) => {
+            await selectPlant(
                 id,
-                parseInt(document.getElementById("plant").selectedOptions[0].id)
+                parseInt(e.target.selectedOptions[0].id)
             )
-        );
-    
+        }
+    );
     
     document.getElementById("copy-older")
         .addEventListener("click", async function() { 

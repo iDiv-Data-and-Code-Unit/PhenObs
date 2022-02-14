@@ -1,5 +1,5 @@
 import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons, confirmModal, alertModal, formatDate} from "./modals.js";
-import {setCollections, setCollection, getCollections, getCollection, fetchCollection} from "./collection.js";
+import {setCollections, setCollection, getCollections, getCollection, fetchCollection, markEdited} from "./collection.js";
 
 export function getFields(isOld=false) {
     return {
@@ -65,14 +65,13 @@ function findOptionIndex(order) {
 
 // Fills in the form fields for a particular plant
 export async function fillInFields(id, order, lastCollectionId=null) {
-    let collection = null;
+    let collection = await getCollection(id);
     let currentCollection = null;
     
     if (lastCollectionId != null) {
+        currentCollection = collection;
         collection = await getCollection(lastCollectionId);
-        currentCollection = await getCollection(id);
-    } else
-        collection = await getCollection(id);
+    }
 
     let fields = getFields();
 
@@ -81,7 +80,7 @@ export async function fillInFields(id, order, lastCollectionId=null) {
 
     plants.selectedIndex = index;
 
-    let plant = collection["records"][order];
+    let plant = collection["records"][parseInt(order)];
 
     // Set the dropdowns
     for (let i = 0; i < fields["dropdowns"].length; i++) {
@@ -122,7 +121,6 @@ export async function fillInFields(id, order, lastCollectionId=null) {
         fillInButtons(lastCollection, plant["order"]);
     } else
         toggleButtons(true);
-
     await cacheRecord(
         id, order, 
         (currentCollection == null) 
@@ -145,7 +143,7 @@ export async function selectPlant(id, order) {
         }
 
         // Display/Rename "Next" button
-        if (collection['remaining'].length === 1 && collection['remaining'][0] === order) {
+        if (collection['remaining'].length === 1 && collection['remaining'][0] === order && !collection["finished"]) {
             $('#next-btn').val("Finish")
         } else if (order == Math.max.apply(null,Object.keys(collection["records"]))) {
             $('#next-btn').addClass("d-none");
@@ -159,7 +157,7 @@ export async function selectPlant(id, order) {
     }
 }
 
-function checkValid() {
+export function checkValid() {
     const elements = $('[required]');
     for (let i = 0; i < elements.length; i++)
         if ($(elements[i]).is(':invalid') || $(elements[i]).val().length === 0) {
@@ -180,6 +178,7 @@ export async function selectNextPlant(id, order) {
         // Select the next plant
         const next = parseInt(Object.keys(collection["records"]).find(num => num > order));
 
+        await markEdited(id);
         await selectPlant(id, next);
     }
 }
@@ -194,6 +193,7 @@ export async function selectPreviousPlant(id, order) {
         // Select the previous plant
         const prev = parseInt(Object.keys(collection["records"]).reverse().find(num => num < order));
 
+        await markEdited(id);
         await selectPlant(id, prev);
     }
 }
@@ -201,16 +201,22 @@ export async function selectPreviousPlant(id, order) {
 export async function markDone(id) {
     let collection = await getCollection(id);
     for (let record in collection["records"]) {
-        if (collection["records"][record]["done"])
-        $('option[id=' + collection["records"][record]["order"] + ']').addClass("done-plant");
+        if (collection["records"][record]["done"]) {
+            $('option[id=' + collection["records"][record]["order"] + ']').addClass("done-plant");
+            const tmp = $('option[id=' + collection["records"][record]["order"] + ']').text();
+            if (!tmp.includes("✓"))
+                $('option[id=' + collection["records"][record]["order"] + ']').text("✓ " + tmp);
+        }
     }
 }
 
-export async function checkDefault(id, nextFlag) {
+export async function checkDefault(id, nextFlag, manual=false) {
     let collection = await getCollection(id);
-    const plants = document.getElementById('plant');
+    let plants = document.getElementById('plant');
     let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];
     let defaultFlag = true;
+
+    // console.log(current["done"]);
     // Check the values
     for (let key in current) {
         if (current[key] === 'y' ||
@@ -218,39 +224,39 @@ export async function checkDefault(id, nextFlag) {
             current[key] === 'm' ||
             current[key] === true) {
             defaultFlag = false;
+            break;
         }
     }
 
     const order = parseInt(plants.selectedOptions[0].id);
 
     // Check if the values are default
-    if (defaultFlag && !current["done"]) {
-        // if (confirm("You have not changed any default value. Are you sure you want to move on?")) {
-        //     if (nextFlag)
-        //         await selectNextPlant(id, order);
-        //     else
-        //         await selectPreviousPlant(id, order);
-        // }
+    if (defaultFlag && !current["done"] && current["remarks"].length == 0) {
         confirmModal("You have not changed any default value. Are you sure you want to move on?");
-        $('#confirm-yes').click(
-            async function() {
-                if (nextFlag)
-                    await selectNextPlant(id, order);
-                else
-                    await selectPreviousPlant(id, order);
-            }
+        $('#confirm-yes').unbind().click(
+            async () => await checkManual(manual, nextFlag, checkValid(), id, order)
         );
     } else {
+        await checkManual(manual, nextFlag, checkValid(), id, order);
+    }
+}
+
+async function checkManual(manual, nextFlag, isValid, id, order) {
+    if (!manual) {
         if (nextFlag)
             await selectNextPlant(id, order);
         else
             await selectPreviousPlant(id, order);
+    } else if (!isValid) {
+        alertModal("Please fill all fields!");
+    } else {
+        await markEdited(id);
+        await cacheRecord(id, order, true);
     }
 }
 
 export async function cacheRecord(id, order, isDone, isOld=false) {
     let collection = await getCollection(id);
-    let plants = document.getElementById("plant");
     // Current record to be cached
     let record = collection["records"][parseInt(order)];
     // IDs of the elements to be cached
@@ -287,19 +293,20 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
         record[id] = document.getElementById(id + ((isOld) ? '-old' : '')).checked
     });
     if (!isOld) {
-        record['done'] = (isDone) ?
-            isDone :
-            record["done"];
+        record['done'] = (isDone) ? true : record["done"];
 
         // Check if the plant is finished
         if (isDone) {
             // Remove the order from the remaining orders list
-            const index = collection["remaining"].indexOf(parseInt(order));
+            let index = collection["remaining"].indexOf(parseInt(order));
             // If the element is already finished
             if (index > -1)
                 collection["remaining"].splice(index, 1);
             // Highlight the plant in the dropdown
             $('option[id=' + order + ']').addClass("done-plant");
+            let tmp = $('option[id=' + order + ']').text();
+            if (!tmp.includes("✓"))
+                $('option[id=' + order + ']').text("✓ " + tmp);
         }
 
         // Done collection button
@@ -325,17 +332,21 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
             " Done"
         );
 
-        if (!collection["remaining"].length && !collection["records"][record["order"]]["done"] && isDone)
+        if (
+            !collection["remaining"].length && 
+            !collection["records"][record["order"]]["done"] && 
+            isDone
+        )
             // alert("Collection is ready to be saved");
             alertModal("Collection is ready to be saved");
     } else {
-        collection['edited'] = true;
-        collection['uploaded'] = false;
+        await markEdited(id);
     }
 
     collection["records"][record["order"]] = record;
     // Update the collections
-    await setCollection(collection);
+    let updatedCollection = await setCollection(collection);
+    return updatedCollection;
 }
 
 export function noObservationPossible(flag) {

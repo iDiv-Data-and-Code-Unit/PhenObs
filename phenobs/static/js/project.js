@@ -49,14 +49,12 @@ function handleConnection() {
 }
 
 $(document).ready(function() {
-    // checkConnection();
-    // setInterval(() => checkConnection(), 15000);
     // if (handleConnection())
-        // navigator.serviceWorker.getRegistrations().then(function(registrations) { 
-        //     for(let registration of registrations) { 
-        //         registration.unregister(); 
-        //     } 
-        // }); 
+    //     navigator.serviceWorker.getRegistrations().then(function(registrations) { 
+    //         for(let registration of registrations) { 
+    //             registration.unregister(); 
+    //         } 
+    //     }); 
     handleConnection();
     window.addEventListener('online', handleConnection);
     window.addEventListener('offline', handleConnection);
@@ -82,5 +80,3 @@ function changeHomeDate() {
     let homeDate = document.getElementById('home-date');
     homeDate.innerText = formatDate(new Date()).toString();
 }
-
-console.log(document.cookie.split(';'))
