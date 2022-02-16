@@ -137,48 +137,7 @@ def new(request: HttpRequest) -> JsonResponse:
             )
             record.save()
 
-        finished, records = format_records(Record.objects.filter(collection=collection).all())
-
-        prev_collection_db = (
-            Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
-            .exclude(id=collection.id)
-            .order_by("date")
-            .last()
-        )
-
-        prev_collection_json = None
-
-        if prev_collection_db is not None:
-            prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
-            prev_finished, prev_records_json = format_records(prev_records_db)
-
-            prev_prev_collection_db = Collection.objects.filter(
-                date__lt=prev_collection_db.date, garden=garden, finished=True
-            ).order_by("date").last()
-
-            prev_collection_json = {
-                "id": prev_collection_db.id,
-                "creator": prev_collection_db.creator.username,
-                "garden": prev_collection_db.garden.name,
-                "date": prev_collection_db.date,
-                "records": prev_records_json,
-                "last-collection-id": prev_prev_collection_db.id
-                if (prev_prev_collection_db is not None)
-                else None,
-                "finished": prev_finished
-            }
-
-        return JsonResponse(
-            {
-                "id": collection.id,
-                "date": today.date(),
-                "creator": request.user.username,
-                "garden": garden.name,
-                "records": records,
-                "last-collection": prev_collection_json,
-                "finished": finished
-            }
-        )
+        return get(request, collection.id)
     return JsonResponse("ERROR", safe=False)
 
 
@@ -238,7 +197,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 if (
                     len(str(record["flowering-intensity"])) == 0
                     or record["flowering-intensity"] is None
-                    or record["flowering-intensity"] != "y"
+                    or record["flowers-opening"] != "y"
                 )
                 else int(record["flowering-intensity"]),
                 ripe_fruits=record["ripe-fruits"]

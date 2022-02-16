@@ -23,19 +23,20 @@ import {
     confirmModal
 } from "./modals.js";
 
-if (location.href.indexOf('edit') !== -1)
-    await init();
+if (location.href.indexOf('edit') !== -1) {
+    const id = parseInt(getEditId());
+    await init(id, true);
+}
 
-async function init() {
+export async function init(id, isOnline) {
     window.onbeforeunload = function(event) {
         return confirm("Do you want the page to be reloaded?");
     }
 
-    const id = parseInt(getEditId());
     let collection = await getCollection(id);
 
-    if (collection === undefined || collection == null || !("last-collection-id" in collection)) {
-        collection = await fetchCollection(id);
+    if (isOnline && collection === undefined || collection == null || !("last-collection-id" in collection)) {
+        collection = await fetchCollection(id, isOnline);
         if (!"no-observation" in collection)
             $('#no-obs-div').addClass('d-none');
     }
@@ -45,7 +46,7 @@ async function init() {
     $('#creator').text(collection['creator']);
     await setupPlants(parseInt(collection["id"]));
     await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
-    await changeListeners(getFields(), parseInt(collection["id"]), true);
+    await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
 
     if (collection["last-collection-id"] != null) {
@@ -151,16 +152,15 @@ export function cachingListeners(id) {
 
     // Add event listeners for #plant
     document.getElementById("plant").addEventListener(
-        "focus", async (e) => {
-            await checkDefault(id, false, true);
-        }
+        "focus", async (e) => await checkDefault(id, false, true)
     );
     document.getElementById("plant").addEventListener(
         "change", async (e) => {
             await selectPlant(
                 id,
                 parseInt(e.target.selectedOptions[0].id)
-            )
+            );
+            e.target.blur();
         }
     );
     

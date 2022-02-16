@@ -1,5 +1,5 @@
 import {selectPlant, setupPlants} from './observation.js'
-import {oldClickListeners} from "./edit.js";
+import {init} from "./edit.js";
 import {alertModal} from "./modals.js";
 
 let collectionId = null;
@@ -130,7 +130,7 @@ export async function setCollections(collections) {
 }
 
 // Get necessary information from the server and create an empty collection
-export async function emptyCollection(fields, change, caching) {
+export async function emptyCollection() {
     await $.ajax({
         url: "/observations/new/",
         method: "POST",
@@ -143,37 +143,31 @@ export async function emptyCollection(fields, change, caching) {
             $("body").addClass("loading");
         },
         complete: function(data){
-            console.log(getCollectionId());
+            console.log(data["id"]);
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            await setCollections(createEmptyCollection(data, await getCollections()));
+            // const newCollection = await createEmptyCollection(data, await getCollections());
+            // await setCollection(newCollection);
+            await insertCollection(data, false);
+            await init(parseInt(data["id"]), false);
         }
     });
 
-    const collection = await getCollection(getCollectionId());
-    await setupPlants(getCollectionId())
-        .finally(() => selectPlant(parseInt(getCollectionId()), Math.min.apply(null,Object.keys(collection["records"]))))
-        .finally(change(fields(), parseInt(getCollectionId()), false))
-    await oldClickListeners(parseInt(collection["last-collection-id"]))
-        .then(() => caching(parseInt(getCollectionId())));
-}
-// Create an empty collection with default observation values
-async function createEmptyCollection(data, collections) {
-    // Check if the collections item has been initialized
-    if (collections == null) {
-        return createEmptyCollection(data, {});
-    } else {
-        setCollectionId(data['id']);
-        await insertCollection(data, false);
-        let collection = await getCollection(data['id']);
+    // const collection = await getCollection(getCollectionId());
+    // await setupPlants(getCollectionId());
+    // await selectPlant(parseInt(getCollectionId()), Math.min.apply(null,Object.keys(collection["records"])));
+    // await change(fields(), parseInt(getCollectionId()), false);
 
-        $('#garden').text(data['garden']);
-        $('#creator').text(data['creator']);
+    // if (collection["last-collection-id"] != null) {
+    //     await oldClickListeners(parseInt(collection["last-collection-id"]));
+    // } else {
+    //     console.log(collection);
+    // }
 
-        await setCollection(collection);
-    }
+    // await caching(parseInt(getCollectionId()));
 }
+
 
 // Update a collection if the date (or any other value) is changed
 export async function updateCollection(id) {
@@ -215,7 +209,7 @@ export async function uploadCollection(id) {
     });
 }
 
-export async function fetchCollection(id) {
+export async function fetchCollection(id, isOnline) {
     let result;
 
     try {
