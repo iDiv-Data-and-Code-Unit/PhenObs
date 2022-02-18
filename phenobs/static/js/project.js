@@ -1,4 +1,4 @@
-import {alertModal, formatDate} from './modals.js';
+import {alertModal, confirmModal, formatDate} from './modals.js';
 
 export function isReachable(url) {
   return fetch(url, { method: 'HEAD', mode: 'no-cors' })
@@ -21,7 +21,7 @@ function handleConnection() {
                 $('#online').removeClass('d-none');
                 $('#offline').addClass('d-none');
                 console.log('online');
-                
+
                 return true;
             } else {
                 $('#signout').addClass('disabled');
@@ -50,11 +50,11 @@ function handleConnection() {
 
 $(document).ready(function() {
     // if (handleConnection())
-    //     navigator.serviceWorker.getRegistrations().then(function(registrations) { 
-    //         for(let registration of registrations) { 
-    //             registration.unregister(); 
-    //         } 
-    //     }); 
+    //     navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    //         for(let registration of registrations) {
+    //             registration.unregister();
+    //         }
+    //     });
     handleConnection();
     window.addEventListener('online', handleConnection);
     window.addEventListener('offline', handleConnection);

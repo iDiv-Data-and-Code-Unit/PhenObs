@@ -6,7 +6,7 @@ export function getFields(isOld=false) {
         "dropdowns": $('select')
             .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
             .not((isOld) ? '[id*=""]' : '[id*="-old"]')
-            .not('[id*="plant"]').not('[id*="intensity"]'),
+            .not('[id*="plant"]').not('[id*="subgarden"]').not('[id*="intensity"]'),
         "intensities": $('select[id*="intensity"]')
             .filter((isOld) ? '[id*="-old"]' : '[id!=""]')
             .not((isOld) ? '[id*=""]' : '[id*="-old"]'),
@@ -35,12 +35,12 @@ export async function setupPlants(id) {
     }
 
     let plants = document.getElementById('plant');
+    plants.innerHTML = "";
 
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
 
         // console.log(key, plant['name'], plant['order']);
-
         plants.innerHTML +=
             '<option value="' +
             plant["name"] +
@@ -67,7 +67,7 @@ function findOptionIndex(order) {
 export async function fillInFields(id, order, lastCollectionId=null) {
     let collection = await getCollection(id);
     let currentCollection = null;
-    
+
     if (lastCollectionId != null) {
         currentCollection = collection;
         collection = await getCollection(lastCollectionId);
@@ -109,7 +109,7 @@ export async function fillInFields(id, order, lastCollectionId=null) {
     if (lastCollectionId == null)
         $('#remarks').val(plant["remarks"])
 
-    if ((currentCollection == null && collection['last-collection-id'] != null) || 
+    if ((currentCollection == null && collection['last-collection-id'] != null) ||
         currentCollection != null) {
         let lastCollection = collection;
         if (currentCollection == null)
@@ -122,9 +122,9 @@ export async function fillInFields(id, order, lastCollectionId=null) {
     } else
         toggleButtons(true);
     await cacheRecord(
-        id, order, 
-        (currentCollection == null) 
-            ? plant['done'] 
+        id, order,
+        (currentCollection == null)
+            ? plant['done']
             : currentCollection["records"][order]["done"]
     );
     noObservationPossible(plant["no-observation"]);
@@ -168,7 +168,7 @@ export function checkValid() {
 }
 
 export async function selectNextPlant(id, order) {
-    if (!checkValid()) 
+    if (!checkValid())
         // alert("Please fill all fields!");
         alertModal("Please fill all fields!");
     else {
@@ -184,7 +184,7 @@ export async function selectNextPlant(id, order) {
 }
 
 export async function selectPreviousPlant(id, order) {
-    if (!checkValid()) 
+    if (!checkValid())
         // alert("Please fill all fields!");
         alertModal("Please fill all fields!");
     else {
@@ -333,14 +333,15 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
         );
 
         if (
-            !collection["remaining"].length && 
-            !collection["records"][record["order"]]["done"] && 
+            !collection["remaining"].length &&
+            !collection["records"][record["order"]]["done"] &&
             isDone
         )
             // alert("Collection is ready to be saved");
             alertModal("Collection is ready to be saved");
     } else {
-        await markEdited(id);
+        collection["edited"] = true;
+        collection["uploaded"] = false;
     }
 
     collection["records"][record["order"]] = record;

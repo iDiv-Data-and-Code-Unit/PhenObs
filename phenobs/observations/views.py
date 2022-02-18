@@ -1,12 +1,12 @@
 import json
 from datetime import date, datetime, timedelta
 
-from django.http import HttpResponseRedirect, JsonResponse, HttpRequest, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models.query import QuerySet
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.db.models.query import QuerySet
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -15,7 +15,7 @@ from .models import Collection, Record
 
 
 @csrf_exempt
-@login_required(login_url='/accounts/login/')
+@login_required(login_url="/accounts/login/")
 def get_all_collections(request: HttpRequest) -> JsonResponse:
     """Fetches all the collections from database for the given garden
 
@@ -31,7 +31,9 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
     collections_json = []
 
     for collection in collections:
-        finished, records = format_records(Record.objects.filter(collection=collection).all())
+        finished, records = format_records(
+            Record.objects.filter(collection=collection).all()
+        )
 
         prev_collection = Collection.objects.filter(
             date__lt=collection.date, garden=garden, finished=True
@@ -47,13 +49,13 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
                 "garden": collection.garden.name,
                 "last-collection-id": prev_collection.id
                 if (prev_collection is not None)
-                else None
+                else None,
             }
         )
     return JsonResponse(collections_json, safe=False)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url="/accounts/login/")
 def all(request: HttpRequest) -> HttpResponse:
     """The page showing all local and online collections
 
@@ -64,11 +66,12 @@ def all(request: HttpRequest) -> HttpResponse:
         context: Empty context object for the front-end
 
     """
-    context = {}
+    garden = Garden.objects.filter(auth_users=request.user).get()
+    context = {"garden": garden}
     return render(request, "observations/observations.html", context)
-   
 
-@login_required(login_url='/accounts/login/')
+
+@login_required(login_url="/accounts/login/")
 def add(request: HttpRequest) -> HttpResponse:
     """The page for adding a new collection
 
@@ -76,53 +79,60 @@ def add(request: HttpRequest) -> HttpResponse:
         request: The received request with metadata
 
     Returns:
-        context: JSON object consisting of all the necessary IDs and labels for JS functions to fill in with data received
+        context: JSON object consisting of all the necessary IDs and
+                 labels for JS functions to fill in with data received
 
     """
-
-    context = {}
-
-    # The intensity values from 5 to 100 (steps of 5)
-    context["range"] = range(5, 105, 5)
-    
-    context["ids"] = [
-        {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
-        {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
-        {"id": "flowers-opening", "label": "Flowers opening"},
-        {"id": "peak-flowering", "label": "Peak flowering"},
-        {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
-        {"id": "flowering-intensity", "label": "Flowering intensity"},
-        {"id": "ripe-fruits", "label": "Ripe fruits"},
-        {"id": "senescence", "label": "Senescence"},
-        {"id": "senescence-intensity", "label": "Senescence intensity"},
-    ]
+    garden = Garden.objects.filter(auth_users=request.user).get()
+    subgardens = Garden.objects.filter(main_garden=garden.main_garden).all()
+    context = {
+        "garden": garden,
+        "subgardens": subgardens,
+        "range": range(5, 105, 5),  # The intensity values from 5 to 100 (steps of 5)
+        "ids": [
+            {"id": "initial-vegetative-growth", "label": "Initial vegetative growth"},
+            {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
+            {"id": "flowers-opening", "label": "Flowers opening"},
+            {"id": "peak-flowering", "label": "Peak flowering"},
+            {"id": "peak-flowering-estimation", "label": "Peak flowering estimation"},
+            {"id": "flowering-intensity", "label": "Flowering intensity"},
+            {"id": "ripe-fruits", "label": "Ripe fruits"},
+            {"id": "senescence", "label": "Senescence"},
+            {"id": "senescence-intensity", "label": "Senescence intensity"},
+        ],
+    }
 
     return render(request, "observations/add_observation.html", context)
 
 
 @csrf_exempt
-@login_required(login_url='/accounts/login/')
-def new(request: HttpRequest) -> JsonResponse:
+@login_required(login_url="/accounts/login/")
+def new(request: HttpRequest, garden_id: int) -> JsonResponse:
     """Creates a new entry in the DB and returns data
 
     Args:
         request: The received request with metadata
 
     Returns:
-        {}: A JSON object containing new collection and related records' data 
+        {}: A JSON object containing new collection and related records' data
 
     """
     if request.method == "POST":
         today = timezone.now()
         doy = today.date() - date(today.date().year, 1, 1) + timedelta(days=1)
-        garden = Garden.objects.filter(auth_users=request.user).get()
+        # garden = Garden.objects.filter(auth_users=request.user).get()
+        garden = Garden.objects.filter(id=garden_id).get()
         creator = User.objects.filter(id=request.user.id).get()
         all_plants = (
             Plant.objects.order_by("order").filter(garden=garden, active=True).all()
         )
 
         collection = Collection(
-            garden=garden, date=today.date(), doy=doy.days, creator=creator, finished=False
+            garden=garden,
+            date=today.date(),
+            doy=doy.days,
+            creator=creator,
+            finished=False,
         )
         collection.save()
 
@@ -142,7 +152,7 @@ def new(request: HttpRequest) -> JsonResponse:
 
 
 @csrf_exempt
-@login_required(login_url='/accounts/login/')
+@login_required(login_url="/accounts/login/")
 def upload(request: HttpRequest) -> JsonResponse:
     """Uploads and edits the collection and its records
 
@@ -160,11 +170,11 @@ def upload(request: HttpRequest) -> JsonResponse:
 
         collection = Collection(
             id=data["id"],
-            garden=Garden.objects.filter(auth_users=request.user).get(),
+            garden=Garden.objects.filter(name=data["garden"]).get(),
             date=collection_date.date(),
             doy=doy.days,
             creator=User.objects.filter(username=data["creator"]).get(),
-            finished=True
+            finished=True,
         )
         collection.save()
 
@@ -248,14 +258,16 @@ def format_records(collection_records: QuerySet) -> tuple:
     finished = True
     for record in collection_records:
         no_obs = False
-        if (record.initial_vegetative_growth is None and
-            record.young_leaves_unfolding is None and
-            record.flowers_open is None and
-            record.peak_flowering is None and
-            record.ripe_fruits is None and
-            record.senescence is None and
-            record.peak_flowering_estimation is None and
-            len(record.remarks) > 0):
+        if (
+            record.initial_vegetative_growth is None
+            and record.young_leaves_unfolding is None
+            and record.flowers_open is None
+            and record.peak_flowering is None
+            and record.ripe_fruits is None
+            and record.senescence is None
+            and record.peak_flowering_estimation is None
+            and len(record.remarks) > 0
+        ):
             no_obs = True
 
         records[record.plant.order] = {
@@ -291,15 +303,16 @@ def format_records(collection_records: QuerySet) -> tuple:
             else "removed" in record.maintenance,
             "remarks": record.remarks,
             "peak-flowering-estimation": record.peak_flowering_estimation,
-            "no-observation": no_obs
+            "no-observation": no_obs,
         }
 
-        if (record.done is None or record.done is False):
+        if record.done is None or record.done is False:
             finished = False
 
     return finished, records
 
-@login_required(login_url='/accounts/login/')
+
+@login_required(login_url="/accounts/login/")
 def edit(request: HttpRequest, id: int) -> HttpResponse:
     """Edit page where the collection is received to be modified
 
@@ -308,10 +321,12 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         id: Collection ID
 
     Returns:
-        context: JSON object consisting of all the necessary IDs and labels for JS functions to fill in with data received
+        context: JSON object consisting of all the necessary IDs and
+                 labels for JS functions to fill in with data received
 
     """
-    context = {}
+    garden = Garden.objects.filter(auth_users=request.user).get()
+    context = {"garden": garden}
 
     context["id"] = id
 
@@ -330,9 +345,9 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         {"id": "senescence-intensity", "label": "Senescence intensity"},
     ]
     return render(request, "observations/edit_observation.html", context)
-    
 
-@login_required(login_url='/accounts/login/')
+
+@login_required(login_url="/accounts/login/")
 def get(request: HttpRequest, id: int) -> JsonResponse:
     """Fetches the collections from database with the given ID
 
@@ -341,15 +356,16 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
         id: Collection ID
 
     Returns:
-        {}: A JSON object containing the collection and related records' data 
+        {}: A JSON object containing the collection and related records' data
 
     """
-    garden = Garden.objects.filter(auth_users=request.user).get()
     collection = Collection.objects.filter(id=id).get()
     collection_records = Record.objects.filter(collection=collection).all()
 
     prev_collection_db = (
-        Collection.objects.filter(date__lt=collection.date, garden=garden, finished=True)
+        Collection.objects.filter(
+            date__lt=collection.date, garden=collection.garden, finished=True
+        )
         .exclude(id=id)
         .order_by("date")
         .last()
@@ -367,7 +383,7 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "date": prev_collection_db.date,
             "records": prev_records_json,
             "uploaded": True,
-            "finished": prev_finished
+            "finished": prev_finished,
         }
 
     finished, records = format_records(collection_records)
@@ -377,9 +393,9 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "id": collection.id,
             "date": collection.date,
             "creator": collection.creator.username,
-            "garden": garden.name,
+            "garden": collection.garden.name,
             "records": records,
             "last-collection": prev_collection_json,
-            "finished": finished
+            "finished": finished,
         }
     )

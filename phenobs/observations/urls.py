@@ -16,7 +16,7 @@ urlpatterns = [
         name="add",
     ),
     path(
-        "new/",
+        "new/<int:garden_id>",
         views.new,
         name="new",
     ),

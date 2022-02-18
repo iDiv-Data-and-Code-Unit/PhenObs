@@ -27,9 +27,10 @@ async function insertRows(tableName) {
             // '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
             '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
             '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[key]["creator"] + '</td>\n' +
+            '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[key]["garden"] + '</td>\n' +
             '<td class="text-left d-table-cell icon-table-cell">\n';
 
-        if (!collections[key]["finished"]) 
+        if (!collections[key]["finished"])
             rowHTML +=
                 '  <i class="bi bi-hdd-fill" style="font-size: 1.5rem; color: gray;" id="' + key + '-local"></i>\n' +
                 '  <i class="bi bi-exclamation-circle-fill" style="font-size: 1.5rem; color: red;" id="' + key + '-unfinished"></i>\n' +
@@ -134,7 +135,7 @@ function addRemoveLink(collections=null) {
     //     allButtons = [];
     //     for (let i = 0; i < collections.length; i++)
     //         if (
-    //             !$('[id="' + collections[i]["id"] + '-upload"]').length && 
+    //             !$('[id="' + collections[i]["id"] + '-upload"]').length &&
     //             !$('[id="' + collections[i]["id"] + '-unfinished"]').length
     //         )
     //             allButtons.push($('[id="' + collections[i]["id"] + '-cancel"]')[0])
@@ -159,7 +160,7 @@ function addRemoveLink(collections=null) {
                     );
                 }
             );
-            
+
             allButtons[i].parentElement.style.cursor = 'pointer';
         }
     }
@@ -222,15 +223,16 @@ async function addOnlineCollections(collections) {
                 // '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
                 '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
                 '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[i]['creator'] + '</td>' +
+                '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[i]['garden'] + '</td>' +
                 '<td class="text-left d-table-cell icon-table-cell">\n';
 
             if (collections[i]["finished"] == true)
-                rowHTML += 
+                rowHTML +=
                     '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';
             else
-                rowHTML += 
+                rowHTML +=
                     '<i class="bi bi-cloud-fill" style="font-size: 1.5rem; color: gray;" id="' + collections[i]['id'] + '-online"></i>\n' +
                     '<i class="bi bi-exclamation-circle-fill" style="font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
                     '</td>' +

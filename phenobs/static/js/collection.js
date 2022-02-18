@@ -130,14 +130,15 @@ export async function setCollections(collections) {
 }
 
 // Get necessary information from the server and create an empty collection
-export async function emptyCollection() {
+export async function emptyCollection(id=null) {
+    if (id == null)
+        id = sessionStorage.getItem("gardenId");
     await $.ajax({
-        url: "/observations/new/",
+        url: "/observations/new/" + id,
         method: "POST",
         error: function (jqXHR) {
             // alert(jqXHR.responseText);
             alertModal(jqXHR.responseText);
-            setCollections(createEmptyCollection(null, getCollections()));
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -149,6 +150,7 @@ export async function emptyCollection() {
         success: async function (data) {
             // const newCollection = await createEmptyCollection(data, await getCollections());
             // await setCollection(newCollection);
+            document.getElementById('subgarden').selectedOptions[0].id = data["id"];
             await insertCollection(data, false);
             await init(parseInt(data["id"]), false);
         }
@@ -171,6 +173,7 @@ export async function emptyCollection() {
 
 // Update a collection if the date (or any other value) is changed
 export async function updateCollection(id) {
+    await markEdited(id);
     let collection = await getCollection(id);
     collection["date"] = document.getElementById("collection-date").value;
     return await setCollection(collection);

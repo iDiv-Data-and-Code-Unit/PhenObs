@@ -1,5 +1,5 @@
 var today = new Date();
-var staticCacheName = "django-pwa-v72";
+const staticCacheName = "django-pwa-v77";
 var filesToCache = [
     '/observations/',
     '/offline/',
@@ -121,7 +121,7 @@ self.addEventListener('fetch', function(event) {
 //         })
 //     );
 // });
-   
+
 // self.addEventListener('fetch', function(event) {
 //     var requestUrl = new URL(event.request.url);
 //         if (requestUrl.origin === location.origin) {

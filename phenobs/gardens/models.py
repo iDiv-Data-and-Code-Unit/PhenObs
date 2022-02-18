@@ -27,7 +27,16 @@ class Garden(models.Model):
         Group, blank=True, verbose_name="Access groups"
     )
     auth_users = models.ManyToManyField(User, blank=True, verbose_name="Access users")
+    # If main != null, then it is a subgarden. Else, it is a main garden that has subgardens.
+    main_garden = models.ForeignKey(
+        "self", on_delete=models.DO_NOTHING, blank=True, null=True
+    )
 
     def __str__(self) -> str:
         """Returns name of the garden."""
         return str(self.name)
+
+    def is_subgarden(self):
+        if self.main_garden is None:
+            return False
+        return True

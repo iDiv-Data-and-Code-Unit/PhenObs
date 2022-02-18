@@ -65,18 +65,18 @@ function getEditId() {
 }
 
 export async function changeListeners(fields, id, editFlag) {
+    console.log(id);
     for (let key in fields) {
         for (let i = 0; i < fields[key].length; i++) {
-            fields[key][i].addEventListener(
-                "change", async function() {
-                    let collection = await getCollection(id);
-                    let plants = document.getElementById("plant");
-                    let isDone = collection["records"][parseInt(plants.selectedOptions[0].id)]["done"];
-                    await cacheRecord(id, parseInt(plants.selectedOptions[0].id), isDone);
-                    if (editFlag)
-                        await markEdited(id);
-                }
-            );
+            $(fields[key][i]).unbind().change(async function() {
+                let collection = await getCollection(id);
+                console.log(collection);
+                let plants = document.getElementById("plant");
+                let isDone = collection["records"][parseInt(plants.selectedOptions[0].id)]["done"];
+                await cacheRecord(id, parseInt(plants.selectedOptions[0].id), isDone);
+                if (editFlag)
+                    await markEdited(id);
+            });
         }
     }
 }
@@ -85,7 +85,7 @@ export async function oldClickListeners(id) {
     let saveButtons = $('[id*="-save"]');
 
     for (let i = 0; i < saveButtons.length; i++) {
-        saveButtons[i].addEventListener('click', async function () {
+        $(saveButtons[i]).unbind().click(async function () {
             let order = parseInt(document.getElementById("plant").selectedOptions[0].id);
 
             await cacheRecord(id, order, true, true);
@@ -107,70 +107,44 @@ export function setDate(dateToSet) {
 }
 
 // Add event listeners
+// Unbind first to remove event listeners if we change subgardens
 export function cachingListeners(id) {
-    document.getElementById('collection-date')
-        .addEventListener("change", async () => await updateCollection(id));
+    $("#collection-date").unbind().change(async () => await updateCollection(id));
+
     // Add event listener for next and previous buttons
-    document.getElementById("next-btn")
-        .addEventListener("click",
-            async () => await checkDefault(id, true)
-        );
-    document.getElementById("prev-btn")
-        .addEventListener("click",
-            async () => await checkDefault(id, false)
-        );
+    $("#next-btn").unbind().click(async () => await checkDefault(id, true));
+    $("#prev-btn").unbind().click(async () => await checkDefault(id, false));
 
     // Add event listener for #no-observation
-    document.getElementById("no-observation")
-        .addEventListener("change",
-            e => noObservationPossible(e.target.checked)
-        );
+    $("#no-observation").unbind().change((e) => noObservationPossible(e.target.checked));
 
     // Add event listener for done collection button
-    document.getElementById("cancel-btn")
-        .addEventListener("click", () => {
-            // if (confirm("Are you sure you want to cancel and go back?"))
-            //     location.href = "/observations/";
-            confirmModal(
-                "Are you sure you want to cancel and go back?", 
-            );
-            $('#confirm-yes').unbind().click(() => location.href = "/observations/");
-            
-        });
+    $("#done-btn").unbind().click(async () => await uploadCollection(id));
 
     // Add event listener for cancel collection button
-    document.getElementById("done-btn")
-        .addEventListener("click", async () => await uploadCollection(id));
+    $("#cancel-btn").unbind().click(() => {
+        confirmModal("Are you sure you want to cancel and go back?");
+        $('#confirm-yes').unbind().click(() => location.href = "/observations/");
+    });
 
     // Add event listener for #flowers-opening
-    document.getElementById("flowers-opening")
-        .addEventListener("change", () => requireIntensities());
-
+    $("#flowers-opening").unbind().change(requireIntensities);
     // Add event listener for #senescence
-    document.getElementById("senescence")
-        .addEventListener("change", () => requireIntensities());
-
+    $("#senescence").unbind().change(requireIntensities);
     // Add event listeners for #plant
-    document.getElementById("plant").addEventListener(
-        "focus", async (e) => await checkDefault(id, false, true)
-    );
-    document.getElementById("plant").addEventListener(
-        "change", async (e) => {
-            await selectPlant(
-                id,
-                parseInt(e.target.selectedOptions[0].id)
-            );
-            e.target.blur();
-        }
-    );
-    
-    document.getElementById("copy-older")
-        .addEventListener("click", async function() { 
-            let collection = await getCollection(id);
-            await fillInFields(
-                id, 
-                document.getElementById("plant").selectedOptions[0].id, 
-                collection["last-collection-id"]
-            ); 
-        });
+    $("#plant").unbind().focus(
+        async () => await checkDefault(id, false, true)
+    ).change(async (e) => {
+        await selectPlant(id, parseInt(e.target.selectedOptions[0].id));
+        e.target.blur();
+    });
+
+    $("#copy-older").unbind().click(async function() {
+        let collection = await getCollection(id);
+        await fillInFields(
+            id,
+            document.getElementById("plant").selectedOptions[0].id,
+            collection["last-collection-id"]
+        );
+    });
 }

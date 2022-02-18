@@ -7,10 +7,11 @@ from .models import Garden
 class GardenAdmin(admin.ModelAdmin):
     """Registers Garden model in Django Admin with the given configuration."""
 
-    list_display = ("id", "name", "latitude", "longitude")
+    list_display = ("id", "name", "main_garden", "latitude", "longitude")
     list_display_links = ("id", "name")
 
     fieldsets = (
+        ("Main", {"fields": ("main_garden",)}),
         ("Name", {"fields": ("name",)}),
         (
             "Coordinates",

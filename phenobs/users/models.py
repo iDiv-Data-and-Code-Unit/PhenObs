@@ -34,7 +34,6 @@ class User(AbstractUser):
         on_delete=DO_NOTHING,
     )
 
-
     def get_absolute_url(self) -> str:
         """Get url for user's detail view.
 

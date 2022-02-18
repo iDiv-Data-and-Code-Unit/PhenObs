@@ -28,8 +28,16 @@
 
 
 
+.garden-table-cell {
+  width: 20%;
+  min-width: 150px;
+  max-width: 150px;
+}
+
+
+
 .icon-table-cell {
-  width: 15%;
+  width: 10%;
   min-width: 100px;
   max-width: 100px;
 }
@@ -87,6 +95,17 @@ a:active {
   overflow: auto;
   min-height: 100px;
   max-height: 500px;
+}
+
+
+
+#subgarden {
+  border: none;
+  background: transparent
+}
+
+#subgarden:focus {
+  outline: none;
 }
 
 

@@ -45,6 +45,7 @@
       {% if user.is_authenticated %}
         <script type="text/javascript">
           sessionStorage.setItem("loggedIn", "{{user.username}}");
+          sessionStorage.setItem("gardenId", "{{garden.id}}");
         </script>
       {% endif %}
       <!-- place project specific Javascript in this file -->
@@ -76,7 +77,7 @@
     {# Script tags with only code, no src (defer by default) #}
     {% endblock inline_javascript %}
     <footer class="container text-center my-5">
-        <a href="{% url 'imprint' %}" class="imprint">Imprint</a> 
+        <a href="{% url 'imprint' %}" class="imprint">Imprint</a>
     </footer>
   </body>
 </html>
