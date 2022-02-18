@@ -13,7 +13,6 @@ from ..plants.models import Plant
 from ..users.models import User
 from .models import Collection, Record
 
-
 @csrf_exempt
 @login_required(login_url="/accounts/login/")
 def get_all_collections(request: HttpRequest) -> JsonResponse:
@@ -27,16 +26,19 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 
     """
     garden = Garden.objects.filter(auth_users=request.user).get()
-    collections = Collection.objects.filter(garden=garden).order_by("date").all()
+    collections = Collection.objects.filter(garden__main_garden=garden.main_garden).order_by("date").all()
     collections_json = []
+    data = json.loads(request.body)
 
     for collection in collections:
-        finished, records = format_records(
-            Record.objects.filter(collection=collection).all()
-        )
+        records = None
+        if (collection.id in data):
+            records = format_records(
+                Record.objects.filter(collection=collection).all()
+            )
 
         prev_collection = Collection.objects.filter(
-            date__lt=collection.date, garden=garden, finished=True
+            date__lt=collection.date, garden=collection.garden, finished=True
         ).last()
 
         collections_json.append(
@@ -44,7 +46,7 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
                 "id": collection.id,
                 "date": collection.date,
                 "creator": collection.creator.username,
-                "finished": finished,
+                "finished": collection.finished,
                 "records": records,
                 "garden": collection.garden.name,
                 "last-collection-id": prev_collection.id
@@ -243,19 +245,17 @@ def upload(request: HttpRequest) -> JsonResponse:
         return JsonResponse("OK", safe=False)
 
 
-def format_records(collection_records: QuerySet) -> tuple:
+def format_records(collection_records: QuerySet):
     """Converts records data into a JSON object
 
     Args:
         collection_records: The records to be converted into JSON object
 
     Returns:
-        finished: True if all the records are marked "done", False otherwise
         records: JSON object containing all the records
 
     """
     records = {}
-    finished = True
     for record in collection_records:
         no_obs = False
         if (
@@ -306,10 +306,7 @@ def format_records(collection_records: QuerySet) -> tuple:
             "no-observation": no_obs,
         }
 
-        if record.done is None or record.done is False:
-            finished = False
-
-    return finished, records
+    return records
 
 
 @login_required(login_url="/accounts/login/")
@@ -375,7 +372,7 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
 
     if prev_collection_db is not None:
         prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
-        prev_finished, prev_records_json = format_records(prev_records_db)
+        prev_records_json = format_records(prev_records_db)
         prev_collection_json = {
             "id": prev_collection_db.id,
             "creator": prev_collection_db.creator.username,
@@ -383,10 +380,10 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "date": prev_collection_db.date,
             "records": prev_records_json,
             "uploaded": True,
-            "finished": prev_finished,
+            "finished": prev_collection_db.finished,
         }
 
-    finished, records = format_records(collection_records)
+    records = format_records(collection_records)
 
     return JsonResponse(
         {
@@ -396,6 +393,6 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "garden": collection.garden.name,
             "records": records,
             "last-collection": prev_collection_json,
-            "finished": finished,
+            "finished": collection.finished,
         }
     )

@@ -7,7 +7,7 @@ from .models import Collection, Record
 class CollectionAdmin(admin.ModelAdmin):
     """Registers Collection model in Django Admin with the given configuration."""
 
-    list_display = ("id", "garden", "date", "creator")
+    list_display = ("id", "garden", "date", "creator", "finished")
     list_display_links = ("id", "date")
     search_fields = ("id", "garden", "user")
     list_per_page = 10

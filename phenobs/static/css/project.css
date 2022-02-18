@@ -106,8 +106,12 @@ a:active {
 
 #subgarden:focus {
   outline: none;
+  background: transparent
 }
 
+#subgarden:hover {
+  background: transparent
+}
 
 
 .active {
