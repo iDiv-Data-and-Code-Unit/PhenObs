@@ -278,6 +278,6 @@ phenobs/media/
 phenobs/static/js/manifest.json.tmp
 phenobs/static/js/manifest.json
 config/settings/production.py
-config/settings/production (copy).py
+config/settings/production.py.old
 config/settings/local.py
-.idea/misc.xml
+.idea/

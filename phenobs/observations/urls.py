@@ -40,4 +40,9 @@ urlpatterns = [
         views.get_all_collections,
         name="get_all_collections",
     ),
+    path(
+        "last/",
+        views.last,
+        name="last",
+    )
 ]

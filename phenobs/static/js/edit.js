@@ -1,9 +1,11 @@
 import {
     fetchCollection,
     getCollection,
+    setCollection,
     updateCollection,
     uploadCollection,
-    markEdited
+    markEdited,
+    insertCollection
 } from "./collection.js";
 import {
     cacheRecord,
@@ -19,7 +21,9 @@ import {
     fillInButtons,
     fillInModalDates,
     fillInOldData,
-    confirmModal
+    confirmModal,
+    alertModal,
+    formatDate
 } from "./modals.js";
 
 if (location.href.indexOf('edit') !== -1) {
@@ -110,7 +114,37 @@ export function setDate(dateToSet) {
 // Add event listeners
 // Unbind first to remove event listeners if we change subgardens
 export function cachingListeners(id) {
-    $("#collection-date").unbind().change(async () => await updateCollection(id));
+    $("#collection-date").unbind().change(async () => { 
+        await updateCollection(id);
+        let collection = await getCollection(id);
+        await $.ajax({
+            url: "/observations/last/",
+            data: JSON.stringify(collection),
+            method: "POST",
+            error: function (jqXHR) {
+                // alert("Could not establish a connection with database.");
+                alertModal("Could not establish a connection with database.");
+            },
+            beforeSend: function(){
+                $("body").addClass("loading");
+            },
+            complete: function(){
+                $("body").removeClass("loading");
+            },
+            success: async function (lastCollection) {
+                collection['last-collection-id'] = lastCollection["id"]
+                await insertCollection(lastCollection, true)
+                await setCollection(collection);
+                await fillInFields(
+                    id,
+                    document.getElementById("plant").selectedOptions[0].id,
+                    collection["last-collection-id"]
+                );
+                let lastCollectionDate = document.getElementById('last-obs-date');
+                lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+            }
+        });
+    });
 
     // Add event listener for next and previous buttons
     $("#next-btn").unbind().click(async () => await checkDefault(id, true));

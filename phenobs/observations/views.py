@@ -358,12 +358,28 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
     """
     collection = Collection.objects.filter(id=id).get()
     collection_records = Record.objects.filter(collection=collection).all()
+    prev_collection_json = get_older(collection)
 
+    records = format_records(collection_records)
+
+    return JsonResponse(
+        {
+            "id": collection.id,
+            "date": collection.date,
+            "creator": collection.creator.username,
+            "garden": collection.garden.name,
+            "records": records,
+            "last-collection": prev_collection_json,
+            "finished": collection.finished,
+        }
+    )
+
+def get_older(collection):
     prev_collection_db = (
         Collection.objects.filter(
             date__lt=collection.date, garden=collection.garden, finished=True
         )
-        .exclude(id=id)
+        .exclude(id=collection.id)
         .order_by("date")
         .last()
     )
@@ -382,17 +398,16 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "uploaded": True,
             "finished": prev_collection_db.finished,
         }
+    
+    return prev_collection_json
 
-    records = format_records(collection_records)
+@csrf_exempt
+@login_required(login_url="/accounts/login/")
+def last(request):
+    data = json.loads(request.body)
+    garden = Garden.objects.filter(name=data["garden"]).get()
 
-    return JsonResponse(
-        {
-            "id": collection.id,
-            "date": collection.date,
-            "creator": collection.creator.username,
-            "garden": collection.garden.name,
-            "records": records,
-            "last-collection": prev_collection_json,
-            "finished": collection.finished,
-        }
-    )
+    collection = Collection.objects.filter(id=data["id"]).get()
+    collection.date = data['date']
+
+    return JsonResponse(get_older(collection), safe=False)
