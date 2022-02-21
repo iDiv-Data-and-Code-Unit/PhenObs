@@ -1,15 +1,10 @@
-import {selectPlant, setupPlants} from './observation.js'
-import {init} from "./edit.js";
+import {fill} from "./edit.js";
 import {alertModal} from "./modals.js";
 
 let collectionId = null;
 
 export function getCollectionId() {
     return collectionId;
-}
-
-function setCollectionId(id) {
-    collectionId = id;
 }
 
 // Gets the locally stored collections
@@ -152,7 +147,7 @@ export async function emptyCollection(id=null) {
             // await setCollection(newCollection);
             document.getElementById('subgarden').selectedOptions[0].id = data["id"];
             await insertCollection(data, false);
-            await init(parseInt(data["id"]), false);
+            await fill(parseInt(data["id"]), false);
         }
     });
 

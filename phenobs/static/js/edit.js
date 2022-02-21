@@ -3,8 +3,7 @@ import {
     getCollection,
     updateCollection,
     uploadCollection,
-    markEdited,
-    setCollection
+    markEdited
 } from "./collection.js";
 import {
     cacheRecord,
@@ -24,12 +23,14 @@ import {
 } from "./modals.js";
 
 if (location.href.indexOf('edit') !== -1) {
-    const id = parseInt(getEditId());
-    await init(id, true);
+    (async () => {
+        const id = parseInt(getEditId());
+        await fill(id, true);
+    })();
 }
 
-export async function init(id, isOnline) {
-    window.onbeforeunload = function(event) {
+export async function fill(id, isOnline) {
+    window.onbeforeunload = function() {
         return confirm("Do you want the page to be reloaded?");
     }
 

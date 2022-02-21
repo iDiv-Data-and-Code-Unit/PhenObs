@@ -79,9 +79,11 @@ async function insertRows(tableName) {
     }
 }
 
-await initTables();
+(async () => {
+    await fillTables();
+})();
 
-async function initTables() {
+async function fillTables() {
     await insertRows("unfinished");
     await insertRows("uploaded");
     await insertRows("ready");
@@ -99,7 +101,7 @@ function addUploadLink() {
             'click',
             async () => {
                 await uploadCollection(id);
-                await initTables();
+                await fillTables();
             }
         );
         allButtons[i].parentElement.style.cursor = 'pointer';
@@ -155,7 +157,7 @@ function addRemoveLink(collections=null) {
                     $('#confirm-yes').unbind().click(
                         async function() {
                             await deleteCollection(id);
-                            await initTables();
+                            await fillTables();
                         }
                     );
                 }
@@ -211,7 +213,7 @@ async function addOnlineCollections(collections) {
     }
 
     localCollections = await getCollections();
-    await initTables();
+    await fillTables();
 
     let table = document.getElementById('uploaded-collections-body');
     let rowHTML = '';

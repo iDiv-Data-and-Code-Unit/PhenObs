@@ -3,7 +3,7 @@ import {
 } from './collection.js';
 
 import {
-    init
+    fill
 } from './edit.js';
 
 // Set today on "#collection-date"
@@ -21,6 +21,6 @@ $("#subgarden").change(
             e.target.selectedOptions[0].innerText =
                 e.target.selectedOptions[0].innerText.replace("+", " ")
         } else
-            await init(parseInt(e.target.selectedOptions[0].id), false);
+            await fill(parseInt(e.target.selectedOptions[0].id), false);
     }
 );
