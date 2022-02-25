@@ -33,7 +33,7 @@ if (location.href.indexOf('edit') !== -1) {
     })();
 }
 
-export async function fill(id, isOnline) {
+export async function fill(id, isOnline, isOrdered=false) {
     window.onbeforeunload = function() {
         return confirm("Do you want the page to be reloaded?");
     }
@@ -49,7 +49,14 @@ export async function fill(id, isOnline) {
     setDate(new Date(collection["date"]));
     $('#garden').text(collection['garden']);
     $('#creator').text(collection['creator']);
-    await setupPlants(parseInt(collection["id"]));
+    $('#orderedList').unbind().click(async function() {
+        const collection = await getCollection(id);
+        if ($(this).attr("name") === "alpha")
+            await fill(id, isOnline, true)
+        else
+            await fill(id, isOnline);
+    })
+    await setupPlants(parseInt(collection["id"]), isOrdered);
     // await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));

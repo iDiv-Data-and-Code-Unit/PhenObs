@@ -19,7 +19,7 @@ export function getFields(isOld=false) {
     };
 }
 
-export async function setupPlants(id) {
+export async function setupPlants(id, orderedList=false) {
 
     const collection = await getCollection(id);
 
@@ -37,18 +37,29 @@ export async function setupPlants(id) {
     let plants = document.getElementById('plant');
     plants.innerHTML = '<option value="" name="" id=""></option>';
 
-    // Sorting for alphabetical order
-    let names = {};
-    for (let key in collection["records"]) {
-        const plant = collection["records"][key];
-        names[plant["name"]] = plant;
+    let ordered = collection["records"];
+    if (orderedList) {
+        // Sorting for alphabetical order
+        let names = {};
+        for (let key in collection["records"]) {
+            const plant = collection["records"][key];
+            names[plant["name"]] = plant;
+        }
+        ordered = Object.keys(names).sort().reduce(
+            (obj, key) => { 
+            obj[key] = collection["records"][names[key]["order"]]; 
+            return obj;
+            }, {}
+        );
+        
+        $("#orderedList").attr("name", "numeric");
+        $("#orderedList").removeClass("bi-sort-alpha-down");
+        $("#orderedList").addClass("bi-sort-numeric-down");
+    } else {
+        $("#orderedList").attr("name", "alpha");
+        $("#orderedList").addClass("bi-sort-alpha-down");
+        $("#orderedList").removeClass("bi-sort-numeric-down");
     }
-    const ordered = Object.keys(names).sort().reduce(
-        (obj, key) => { 
-          obj[key] = collection["records"][names[key]["order"]]; 
-          return obj;
-        }, {}
-      );
 
     for (let key in ordered) {
         const plant = ordered[key];
