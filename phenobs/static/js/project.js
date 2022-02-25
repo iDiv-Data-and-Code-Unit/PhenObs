@@ -49,12 +49,6 @@ function handleConnection() {
 }
 
 $(document).ready(function() {
-    // if (handleConnection())
-    //     navigator.serviceWorker.getRegistrations().then(function(registrations) {
-    //         for(let registration of registrations) {
-    //             registration.unregister();
-    //         }
-    //     });
     handleConnection();
     window.addEventListener('online', handleConnection);
     window.addEventListener('offline', handleConnection);
@@ -69,7 +63,6 @@ if (document.getElementById('add-collection') != null) {
             if (online) {
                 location.href = '/observations/add/'
             } else {
-                // alert('Add functionality is not available in offline mode');
                 alertModal('Add functionality is not available in offline mode');
             }
         });

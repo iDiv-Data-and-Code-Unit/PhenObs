@@ -50,7 +50,7 @@ export async function fill(id, isOnline) {
     $('#garden').text(collection['garden']);
     $('#creator').text(collection['creator']);
     await setupPlants(parseInt(collection["id"]));
-    await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
+    // await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
 
@@ -111,39 +111,43 @@ export function setDate(dateToSet) {
         `${String(dateToSet.getDate()).padStart(2, '0')}`;
 }
 
+async function getLast(id) {
+    let collection = await getCollection(id);
+    await $.ajax({
+        url: "/observations/last/",
+        data: JSON.stringify(collection),
+        method: "POST",
+        error: function (jqXHR) {
+            // alert("Could not establish a connection with database.");
+            alertModal("Could not establish a connection with database.");
+        },
+        beforeSend: function(){
+            $("body").addClass("loading");
+        },
+        complete: function(){
+            $("body").removeClass("loading");
+        },
+        success: async function (lastCollection) {
+            collection['last-collection-id'] = lastCollection["id"]
+            await insertCollection(lastCollection, true)
+            await setCollection(collection);
+            await fillInFields(
+                id,
+                document.getElementById("plant").selectedOptions[0].id,
+                collection["last-collection-id"]
+            );
+            let lastCollectionDate = document.getElementById('last-obs-date');
+            lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+        }
+    });
+}
+
 // Add event listeners
 // Unbind first to remove event listeners if we change subgardens
 export function cachingListeners(id) {
-    $("#collection-date").unbind().change(async () => { 
+    $("#collection-date").unbind().change(async () => {
         await updateCollection(id);
-        let collection = await getCollection(id);
-        await $.ajax({
-            url: "/observations/last/",
-            data: JSON.stringify(collection),
-            method: "POST",
-            error: function (jqXHR) {
-                // alert("Could not establish a connection with database.");
-                alertModal("Could not establish a connection with database.");
-            },
-            beforeSend: function(){
-                $("body").addClass("loading");
-            },
-            complete: function(){
-                $("body").removeClass("loading");
-            },
-            success: async function (lastCollection) {
-                collection['last-collection-id'] = lastCollection["id"]
-                await insertCollection(lastCollection, true)
-                await setCollection(collection);
-                await fillInFields(
-                    id,
-                    document.getElementById("plant").selectedOptions[0].id,
-                    collection["last-collection-id"]
-                );
-                let lastCollectionDate = document.getElementById('last-obs-date');
-                lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
-            }
-        });
+        await getLast(id);
     });
 
     // Add event listener for next and previous buttons

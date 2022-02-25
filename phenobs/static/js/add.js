@@ -10,10 +10,6 @@ import {
 // Create an empty collection
 $(document).ready(async () => await emptyCollection());
 
-// window.onbeforeunload = function(event) {
-//     return confirm("Do you want the page to be reloaded?");
-// }
-
 $("#subgarden").change(
     async (e) => {
         if (e.target.selectedOptions[0].id.length === 0) {

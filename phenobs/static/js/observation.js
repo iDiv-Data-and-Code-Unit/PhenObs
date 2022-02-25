@@ -35,7 +35,7 @@ export async function setupPlants(id) {
     }
 
     let plants = document.getElementById('plant');
-    plants.innerHTML = "";
+    plants.innerHTML = '<option value="" name="" id=""></option>';
 
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
