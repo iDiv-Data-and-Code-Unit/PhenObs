@@ -108,7 +108,7 @@ a:active {
 #subgarden {
   border: none;
   background: transparent;
-  width: 70%;
+  max-width: 70%;
 }
 
 #subgarden:focus {
