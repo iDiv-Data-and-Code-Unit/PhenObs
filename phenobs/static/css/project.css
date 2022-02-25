@@ -99,9 +99,16 @@ a:active {
 
 
 
+#garden {
+  width: 50%;
+}
+
+
+
 #subgarden {
   border: none;
-  background: transparent
+  background: transparent;
+  width: 70%;
 }
 
 #subgarden:focus {

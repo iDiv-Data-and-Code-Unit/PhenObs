@@ -37,10 +37,22 @@ export async function setupPlants(id) {
     let plants = document.getElementById('plant');
     plants.innerHTML = '<option value="" name="" id=""></option>';
 
+    // Sorting for alphabetical order
+    let names = {};
     for (let key in collection["records"]) {
         const plant = collection["records"][key];
+        names[plant["name"]] = plant;
+    }
+    const ordered = Object.keys(names).sort().reduce(
+        (obj, key) => { 
+          obj[key] = collection["records"][names[key]["order"]]; 
+          return obj;
+        }, {}
+      );
 
-        // console.log(key, plant['name'], plant['order']);
+    for (let key in ordered) {
+        const plant = ordered[key];
+
         plants.innerHTML +=
             '<option value="' +
             plant["name"] +

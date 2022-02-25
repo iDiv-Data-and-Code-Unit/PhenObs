@@ -44,5 +44,5 @@ urlpatterns = [
         "last/",
         views.last,
         name="last",
-    )
+    ),
 ]

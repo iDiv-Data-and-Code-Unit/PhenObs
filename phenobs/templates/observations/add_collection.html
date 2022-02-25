@@ -20,15 +20,15 @@
     <h1>Add a collection</h1>
 
     <div class="row justify-content-between px-3 mt-4">
-      <div class="col-md-6 col-lg-3">
+      <div class="col-lg-3">
         <input type="date" class="wide-button px-lg-3 col-12 gray-text" id="collection-date"/>
       </div>
-      <div class="col-md-6 mt-3 mt-md-0 col-lg-3">
+      <div class="col-lg-6 mt-3 mt-lg-0">
         <div class="wide-button px-lg-4 px-md-5 col-12 d-flex align-items-center justify-content-center">
           <strong>Garden</strong>
           <select class="text-right" style="border: none; background: transparent" id="subgarden">
             {% for sub in subgardens %}
-            <option value="{{ sub.name }}" name="{{ sub.id }}" {% if sub.id == garden.id%} selected {% endif %}>
+            <option class="text-truncate" value="{{ sub.name }}" name="{{ sub.id }}" {% if sub.id == garden.id%} selected {% endif %}>
               {% if sub.id == garden.id%}
               {% else %}+
               {% endif %}
@@ -38,7 +38,7 @@
           </select>
         </div>
       </div>
-      <div class="col-md-6 mt-3 mt-lg-0 col-lg-3">
+      <div class="col-lg-3 mt-3 mt-lg-0">
         <button class="wide-button px-lg-4 px-md-5 col-12 disabled-btn" disabled><strong>Creator</strong> <span id="creator"></span></button>
       </div>
     </div>
