@@ -79,6 +79,7 @@ export async function insertCollection(collection, isOnline) {
         'date': collection['date'],
         'creator': collection['creator'],
         'garden': collection['garden'],
+        'garden-name': collection['garden-name'],
         'last-collection-id': lastCollectionId,
         'edited': false,
         'finished': collection["finished"],

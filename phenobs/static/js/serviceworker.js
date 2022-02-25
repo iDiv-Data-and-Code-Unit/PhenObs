@@ -1,5 +1,5 @@
 var today = new Date();
-const staticCacheName = "django-pwa-v98";
+const staticCacheName = "django-pwa-v99";
 var filesToCache = [
     '/observations/',
     '/offline/',

@@ -47,7 +47,7 @@ export async function fill(id, isOnline, isOrdered=false) {
     }
 
     setDate(new Date(collection["date"]));
-    $('#garden').text(collection['garden']);
+    $('#garden').text(collection['garden-name']);
     $('#creator').text(collection['creator']);
     $('#orderedList').unbind().click(async function() {
         const collection = await getCollection(id);

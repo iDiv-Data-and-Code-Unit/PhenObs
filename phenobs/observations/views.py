@@ -48,7 +48,8 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
                 "creator": collection.creator.username,
                 "finished": collection.finished,
                 "records": records,
-                "garden": collection.garden.name,
+                "garden": collection.garden.id,
+                "garden-name": collection.garden.name,
                 "last-collection-id": prev_collection.id
                 if (prev_collection is not None)
                 else None,
@@ -172,7 +173,7 @@ def upload(request: HttpRequest) -> JsonResponse:
 
         collection = Collection(
             id=data["id"],
-            garden=Garden.objects.filter(name=data["garden"]).get(),
+            garden=Garden.objects.filter(id=data["garden"]).get(),
             date=collection_date.date(),
             doy=doy.days,
             creator=User.objects.filter(username=data["creator"]).get(),
@@ -188,7 +189,7 @@ def upload(request: HttpRequest) -> JsonResponse:
                 id=record["id"],
                 plant=Plant.objects.filter(
                     order=record["order"],
-                    garden_id=Garden.objects.filter(name=data["garden"]).get().id,
+                    garden_id=Garden.objects.filter(id=data["garden"]).get().id,
                 ).get(),
                 timestamp_entry=timestamp,
                 timestamp_edit=timestamp,
@@ -367,7 +368,8 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "id": collection.id,
             "date": collection.date,
             "creator": collection.creator.username,
-            "garden": collection.garden.name,
+            "garden": collection.garden.id,
+            "garden-name": collection.garden.name,
             "records": records,
             "last-collection": prev_collection_json,
             "finished": collection.finished,
@@ -392,7 +394,8 @@ def get_older(collection):
         prev_collection_json = {
             "id": prev_collection_db.id,
             "creator": prev_collection_db.creator.username,
-            "garden": prev_collection_db.garden.name,
+            "garden": prev_collection_db.garden.id,
+            "garden-name": prev_collection_db.garden.name,
             "date": prev_collection_db.date,
             "records": prev_records_json,
             "uploaded": True,
@@ -405,7 +408,7 @@ def get_older(collection):
 @login_required(login_url="/accounts/login/")
 def last(request):
     data = json.loads(request.body)
-    garden = Garden.objects.filter(name=data["garden"]).get()
+    garden = Garden.objects.filter(id=data["garden"]).get()
 
     collection = Collection.objects.filter(id=data["id"]).get()
     collection.date = data['date']

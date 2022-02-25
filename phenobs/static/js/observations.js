@@ -27,7 +27,7 @@ async function insertRows(tableName) {
             // '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
             '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
             '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[key]["creator"] + '</td>\n' +
-            '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[key]["garden"] + '</td>\n' +
+            '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[key]["garden-name"] + '</td>\n' +
             '<td class="text-left d-table-cell icon-table-cell">\n';
 
         if (!collections[key]["finished"])
@@ -225,7 +225,7 @@ async function addOnlineCollections(collections) {
                 // '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
                 '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
                 '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[i]['creator'] + '</td>' +
-                '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[i]['garden'] + '</td>' +
+                '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[i]['garden-name'] + '</td>' +
                 '<td class="text-left d-table-cell icon-table-cell">\n';
 
             if (collections[i]["finished"] == true)
