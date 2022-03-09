@@ -104,8 +104,7 @@ export async function insertCollection(collection, isOnline) {
     Add remaining indices
     Create default records
      */
-    collections = formatRecords(collections, collection);
-    await setCollections(collections);
+    await setCollections(formatRecords(collections, collection));
     return collections[collection["id"]];
 }
 
@@ -209,10 +208,8 @@ export async function uploadCollection(id) {
 }
 
 export async function fetchCollection(id, isOnline) {
-    let result;
-
     try {
-        result = await $.ajax({
+        await $.ajax({
             url: "/observations/get/" + id,
             error: function (jqXHR) {
                 // alert("Could not establish a connection with database.");
@@ -225,10 +222,8 @@ export async function fetchCollection(id, isOnline) {
             complete: function(){
                 $("body").removeClass("loading");
             },
-            success: async (data) => await insertCollection(data, true),
+            success: async (data) => await insertCollection(data, isOnline),
         });
-
-        return result;
     } catch (error) {
         console.error(error);
     }

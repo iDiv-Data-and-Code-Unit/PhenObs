@@ -27,7 +27,8 @@ export async function setupPlants(id, orderedList=false) {
         let lastCollection = await getCollection(collection['last-collection-id']);
 
         if (lastCollection === undefined || lastCollection == null || !("last-collection-id" in lastCollection)) {
-            lastCollection = await fetchCollection(collection['last-collection-id']);
+            await fetchCollection(collection['last-collection-id']);
+            lastCollection = await getCollection(collection['last-collection-id']);
         }
 
         let lastCollectionDate = document.getElementById('last-obs-date');
@@ -236,6 +237,10 @@ export async function markDone(id) {
 export async function checkDefault(id, nextFlag, manual=false) {
     let collection = await getCollection(id);
     let plants = document.getElementById('plant');
+
+    if (!plants.selectedIndex)
+        return;
+
     let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];
     let defaultFlag = true;
 

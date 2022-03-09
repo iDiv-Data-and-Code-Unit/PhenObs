@@ -41,7 +41,8 @@ export async function fill(id, isOnline, isOrdered=false) {
     let collection = await getCollection(id);
 
     if (isOnline && collection === undefined || collection == null || !("last-collection-id" in collection)) {
-        collection = await fetchCollection(id, isOnline);
+        await fetchCollection(id, isOnline);
+        collection = await getCollection(id);
         if (!"no-observation" in collection)
             $('#no-obs-div').addClass('d-none');
     }
