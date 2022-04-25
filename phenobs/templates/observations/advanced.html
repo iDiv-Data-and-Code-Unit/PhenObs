@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block observations_active %}active{% endblock observations_active %}
+
+{% block nav %}
+  {% include 'nav.html' %}
+{% endblock nav %}
+
+{% block custom_javascript %}
+  <script type="module" defer src="{% static 'js/spreadsheet.js' %}"></script>
+{% endblock custom_javascript %}
+
+{% block content %}
+  <div class="overlay"></div>
+
+  <div class="jumbotron-fluid custom-jumbotron py-4 my-4 mx-5">
+    <div class="">
+      <div class="p-3 p-md-3 p-lg-4">
+        <h1>Observations</h1>
+        <label for="gardens">Garden:</label>
+        <select id="gardens" class="spreadsheet-cell" style="font-size: 14pt">
+          <option id="" class=""></option>
+          <option id="all" class="text-left font-weight-bold">All</option>
+          {% for garden in gardens %}
+            <option id="{{ garden.id }}" class="text-left font-weight-bold">{{ garden.name }}</option>
+            {% for subgarden in garden.subgardens %}
+              <option name="{{ garden.id }}" class="text-right" id="{{ subgarden.id }}">  {{ subgarden.name }}</option>
+            {% endfor %}
+          {% endfor %}
+        </select>
+      </div>
+{#      <div class="nav d-flex align-items-end">#}
+{#        <a class=" mr-3" id="downloadSelected">#}
+{#          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">#}
+{#            <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM3.517 14.841a1.13 1.13 0 0 0 .401.823c.13.108.289.192.478.252.19.061.411.091.665.091.338 0 .624-.053.859-.158.236-.105.416-.252.539-.44.125-.189.187-.408.187-.656 0-.224-.045-.41-.134-.56a1.001 1.001 0 0 0-.375-.357 2.027 2.027 0 0 0-.566-.21l-.621-.144a.97.97 0 0 1-.404-.176.37.37 0 0 1-.144-.299c0-.156.062-.284.185-.384.125-.101.296-.152.512-.152.143 0 .266.023.37.068a.624.624 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.092 1.092 0 0 0-.2-.566 1.21 1.21 0 0 0-.5-.41 1.813 1.813 0 0 0-.78-.152c-.293 0-.551.05-.776.15-.225.099-.4.24-.527.421-.127.182-.19.395-.19.639 0 .201.04.376.122.524.082.149.2.27.352.367.152.095.332.167.539.213l.618.144c.207.049.361.113.463.193a.387.387 0 0 1 .152.326.505.505 0 0 1-.085.29.559.559 0 0 1-.255.193c-.111.047-.249.07-.413.07-.117 0-.223-.013-.32-.04a.838.838 0 0 1-.248-.115.578.578 0 0 1-.255-.384h-.765ZM.806 13.693c0-.248.034-.46.102-.633a.868.868 0 0 1 .302-.399.814.814 0 0 1 .475-.137c.15 0 .283.032.398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.441 1.441 0 0 0-.489-.272 1.838 1.838 0 0 0-.606-.097c-.356 0-.66.074-.911.223-.25.148-.44.359-.572.632-.13.274-.196.6-.196.979v.498c0 .379.064.704.193.976.131.271.322.48.572.626.25.145.554.217.914.217.293 0 .554-.055.785-.164.23-.11.414-.26.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.799.799 0 0 1-.118.363.7.7 0 0 1-.272.25.874.874 0 0 1-.401.087.845.845 0 0 1-.478-.132.833.833 0 0 1-.299-.392 1.699 1.699 0 0 1-.102-.627v-.495Zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879l-1.327 4Z"/>#}
+{#          </svg>#}
+{#          Download#}
+{#        </a>#}
+{#        <a class=" mr-3" id="uploadSelected">#}
+{#          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cloud-arrow-up-fill" viewBox="0 0 16 16">#}
+{#            <path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2zm2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2z"/>#}
+{#          </svg>#}
+{#          Upload#}
+{#        </a>#}
+{#        <div>#}
+{#          <a class=" mr-1"><i class="bi bi-check-square-fill"></i><span id="selectAll"></span></a>#}
+{#          <a class=""><i class="bi bi-dash-square-fill"></i><span id="deselectAll"></span></a>#}
+{#        </div>#}
+{#      </div>#}
+{#    </div>#}
+
+{#    {% include "observations/view_collections.html" with subgarden=gardens.1.subgardens.0 %}#}
+    <ul class="nav nav-tabs pl-2" id="views" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="view-tab" data-toggle="tab" href="#view" role="tab" aria-controls="view" aria-selected="true">View</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="edit-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="false">Edit</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="viewsContent">
+      <div class="tab-pane fade show active" id="view" role="tabpanel" aria-labelledby="view-tab">
+        <div class="accordion" id="viewCollections"></div>
+      </div>
+      <div class="tab-pane fade" id="edit" role="tabpanel" aria-labelledby="edit-tab">
+        <div class="accordion" id="editCollections"></div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

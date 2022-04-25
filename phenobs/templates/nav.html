@@ -10,11 +10,18 @@
 
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
-          <li class="nav-item {% block home_active %}{% endblock home_active %}">
-            <a id="home" class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+          <li class="nav-item">
+            <a id="home" class="nav-link  {% block home_active %}{% endblock home_active %}" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
           </li>
-          <li class="nav-item {% block observations_active %}{% endblock observations_active %}">
-            <a class="nav-link" href="{% url 'observations:all' %}">Observations</a>
+          <li class="nav-item d-xl-none">
+            <a class="nav-link {% block observations_active %}{% endblock observations_active %}" href="{% url 'observations:all' %}">Observations</a>
+          </li>
+          <li class="nav-item dropdown d-xl-block d-none">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Observations</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'observations:all' %}">Default</a>
+              <a class="dropdown-item" href="{% url 'observations:advanced' %}">Advanced</a>
+            </div>
           </li>
         </ul>
         <ul class="navbar-nav">

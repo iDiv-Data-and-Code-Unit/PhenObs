@@ -1,0 +1,57 @@
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary m-0">
+    <div class="container-fluid px-2">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" id="uploadSelected" style="cursor: pointer;">
+              Save all
+            </a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" id="deselectAll"><i class="bi bi-dash-square-fill"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="selectAll"><i class="bi bi-check-square-fill"></i></a>
+          </li>
+        </ul>
+    </div>
+  </nav>
+  {% for garden in gardens %}
+    {% for subgarden in garden.subgardens %}
+      {% for collection in subgarden.collections %}
+        <div class="card">
+          <div class="row card-header align-items-center" id="heading-{{ collection.id }}">
+            <div style="" class="btn btn-link text-left col-11 {% if collection.finished == False %} text-danger {% endif %}" type="button" data-toggle="collapse"
+                 data-target="#collection-{{ collection.id }}" aria-expanded="true"
+                 aria-controls="collection-{{ collection.id }}">
+              <div class="row">
+                <span class="col-11 d-flex">
+                  <span class="col">{{ collection.date_full }}</span>
+                  <span class="col text-center"><strong id="garden-{{ collection.id }}" name="{{ subgarden.id }}">{{ garden.name }}</strong>: {{ subgarden.name }}</span>
+                  <span class="col text-center">{{ collection.creator }}</span>
+                </span>
+                {% if collection.finished == False %}
+                  <i class="bi bi-exclamation-circle-fill col-1 text-right"></i>
+                {% endif %}
+              </div>
+
+            </div>
+            <input class="col-1" id="selected-{{ collection.id }}" type="checkbox" style="height: 25px; width: 25px">
+          </div>
+
+          <div id="collection-{{ collection.id }}" class="collapse" aria-labelledby="heading-{{ collection.id }}" data-parent="#editCollections">
+            <div class="card-body" style="overflow: auto">
+              <label class="spreadsheet-col" for="date-{{ collection.id }}"><strong>Collection date: </strong></label>
+              <input type="date" class="spreadsheet-cell" value="{{ collection.date }}" id="date-{{ collection.id }}">
+              <hr>
+              {% include "observations/edit_records.html" with records=collection.records collection_id=collection.id %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      {% if subgarden.collections|length > 0 %}
+      <br>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}

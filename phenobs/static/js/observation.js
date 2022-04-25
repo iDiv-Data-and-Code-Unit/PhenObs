@@ -27,7 +27,7 @@ export async function setupPlants(id, orderedList=false) {
         let lastCollection = await getCollection(collection['last-collection-id']);
 
         if (lastCollection === undefined || lastCollection == null || !("last-collection-id" in lastCollection)) {
-            await fetchCollection(collection['last-collection-id']);
+            await fetchCollection(collection['last-collection-id'], true);
             lastCollection = await getCollection(collection['last-collection-id']);
         }
 
@@ -47,12 +47,12 @@ export async function setupPlants(id, orderedList=false) {
             names[plant["name"]] = plant;
         }
         ordered = Object.keys(names).sort().reduce(
-            (obj, key) => { 
-            obj[key] = collection["records"][names[key]["order"]]; 
+            (obj, key) => {
+            obj[key] = collection["records"][names[key]["order"]];
             return obj;
             }, {}
         );
-        
+
         $("#orderedList").attr("name", "numeric");
         $("#orderedList").removeClass("bi-sort-alpha-down");
         $("#orderedList").addClass("bi-sort-numeric-down");
@@ -168,7 +168,8 @@ export async function selectPlant(id, order) {
 
         // Display/Rename "Next" button
         if (collection['remaining'].length === 1 && collection['remaining'][0] === order && !collection["finished"]) {
-            $('#next-btn').val("Finish")
+            $('#next-btn').val("Finish");
+            $('#next-btn').removeClass("d-none");
         } else if (order == Math.max.apply(null,Object.keys(collection["records"]))) {
             $('#next-btn').addClass("d-none");
         }
@@ -202,7 +203,6 @@ export async function selectNextPlant(id, order) {
         // Select the next plant
         const next = parseInt(Object.keys(collection["records"]).find(num => num > order));
 
-        await markEdited(id);
         await selectPlant(id, next);
     }
 }
@@ -217,7 +217,7 @@ export async function selectPreviousPlant(id, order) {
         // Select the previous plant
         const prev = parseInt(Object.keys(collection["records"]).reverse().find(num => num < order));
 
-        await markEdited(id);
+
         await selectPlant(id, prev);
     }
 }
@@ -278,7 +278,7 @@ async function checkManual(manual, nextFlag, isValid, id, order) {
     } else if (!isValid) {
         alertModal("Please fill all fields!");
     } else {
-        await markEdited(id);
+
         await cacheRecord(id, order, true);
     }
 }

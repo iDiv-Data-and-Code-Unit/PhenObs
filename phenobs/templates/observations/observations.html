@@ -13,128 +13,96 @@
 {% endblock custom_javascript %}
 
 {% block content %}
-{#  {% include 'observations/last_observation.html' %}#}
   <div class="overlay"></div>
+  <div class="container">
+    <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
+      <div class="row py-4 justify-content-between">
+        <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">All collections</h1>
+        <div class="col-6 col-md-8 col-lg-6 justify-content-end col-xl-7 d-flex">
+          <button class="narrow-button col-5 mx-auto" id="get-collections">
+            <div class="d-inline gray-text">
+              <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/bootstrap-icons/cloud-fill.svg' %}" height="25" alt=""/>
+              <span class="d-none d-md-inline">All collections</span>
+            </div>
+          </button>
+          <button class="narrow-button col-5" id="add-collection">
+            <div class="d-inline gray-text">
+              <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/add_collection.png' %}" height="30" alt=""/>
+              <span class="d-none d-md-inline">Add collection</span>
+            </div>
+          </button>
+        </div>
+      </div>
 
-  <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
-    <div class="row justify-content-between">
-      <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">All collections</h1>
-      <div class="col-6 col-md-8 col-lg-6 justify-content-end col-xl-7 d-flex">
-        <button class="narrow-button col-5 mx-auto" id="get-collections">
-          <div class="d-inline gray-text">
-            <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/bootstrap-icons/cloud-fill.svg' %}" height="25" alt=""/>
-            <span class="d-none d-md-inline">All collections</span>
-          </div>
-        </button>
-        <button class="narrow-button col-5" id="add-collection">
-          <div class="d-inline gray-text">
-            <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/add_collection.png' %}" height="30" alt=""/>
-            <span class="d-none d-md-inline">Add collection</span>
-          </div>
-        </button>
+      <div class="mt-1" id="all-collections">
+        <table class="table" id="notsaved-collections-table">
+          <thead class="">
+            <tr class="d-table-row">
+              <th class="text-left d-table-cell date-table-cell">Date</th>
+              <th class="text-left d-table-cell creator-table-cell">Creator</th>
+              <th class="text-left d-table-cell garden-table-cell">Garden</th>
+              <th class="text-left d-table-cell icon-table-cell">Status</th>
+              <th class="text-left d-table-cell icon-table-cell">Save</th>
+              <th class="text-left d-table-cell icon-table-cell">Edit</th>
+              <th class="text-left d-table-cell icon-table-cell">Delete</th>
+            </tr>
+          </thead>
+          <tbody class="my-auto" id="notsaved-collections-body">
+  {#          <h3>Unfinished</h3>#}
+            <h3>Not saved</h3>
+          </tbody>
+        </table>
+
+  {#      <table class="table" id="ready-collections-table">#}
+  {#        <thead class="">#}
+  {#          <tr class="d-table-row">#}
+  {#            <th class="text-left d-table-cell date-table-cell">Date</th>#}
+  {#            <th class="text-left d-table-cell creator-table-cell">Creator</th>#}
+  {#            <th class="text-left d-table-cell garden-table-cell">Garden</th>#}
+  {#            <th class="text-left d-table-cell icon-table-cell">Status</th>#}
+  {#            <th class="text-left d-table-cell icon-table-cell">Upload</th>#}
+  {#            <th class="text-left d-table-cell icon-table-cell">Edit</th>#}
+  {#            <th class="text-left d-table-cell icon-table-cell">Delete</th>#}
+  {#          </tr>#}
+  {#        </thead>#}
+  {#        <tbody class="" id="ready-collections-body">#}
+  {#          <h3>Ready for upload</h3>#}
+  {#        </tbody>#}
+  {#      </table>#}
+
+        <table class="table" id="saved-collections-table">
+          <thead class="">
+            <tr class="d-table-row">
+              <th class="text-left d-table-cell date-table-cell">Date</th>
+              <th class="text-left d-table-cell creator-table-cell">Creator</th>
+              <th class="text-left d-table-cell garden-table-cell">Garden</th>
+              <th class="text-left d-table-cell icon-table-cell">Status</th>
+              <th class="text-left d-table-cell icon-table-cell"></th>
+              <th class="text-left d-table-cell icon-table-cell">Edit</th>
+              <th class="text-left d-table-cell icon-table-cell">Delete</th>
+            </tr>
+          </thead>
+          <tbody class="" id="saved-collections-body">
+  {#          <h3>Uploaded</h3>#}
+            <h3 class="mt-4">Saved</h3>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="align-items-center d-md-flex d-block">
+        <div class="row mx-2 my-2">
+          <img class="mr-2" src="/static/images/db_check.png" style="" height="23">
+          Available online
+        </div>
+        <div class="row align-items-center mr-2 ml-2 ml-sm-0">
+          <i class="bi bi-hdd-fill mr-2" style="font-size: 1.5rem; color: green;"></i>
+          Available locally
+        </div>
+        <div class="row align-items-center ml-2 ml-sm-0">
+          <i class="bi bi-exclamation-circle-fill mr-2" style="font-size: 1.5rem; color: red;"></i>
+          Incomplete
+        </div>
       </div>
     </div>
-
-    <div class="mt-1" id="all-collections">
-      <table class="table" id="unfinished-collections-table">
-        <thead class="">
-          <tr class="d-table-row">
-            <!-- <th class="text-left d-table-cell">ID</th> -->
-            <th class="text-left d-table-cell date-table-cell">Date</th>
-            <th class="text-left d-table-cell creator-table-cell">Creator</th>
-            <th class="text-left d-table-cell garden-table-cell">Garden</th>
-            <th class="text-left d-table-cell icon-table-cell">Status</th>
-            <th class="text-left d-table-cell icon-table-cell"></th>
-            <th class="text-left d-table-cell icon-table-cell">Edit</th>
-            <th class="text-left d-table-cell icon-table-cell">Delete</th>
-          </tr>
-        </thead>
-        <tbody class="" id="unfinished-collections-body">
-          <h3>Unfinished</h3>
-          {#     Insert rows here     #}
-        </tbody>
-      </table>
-
-      <table class="table" id="ready-collections-table">
-        <thead class="">
-          <tr class="d-table-row">
-            <!-- <th class="text-left d-table-cell">ID</th> -->
-            <th class="text-left d-table-cell date-table-cell">Date</th>
-            <th class="text-left d-table-cell creator-table-cell">Creator</th>
-            <th class="text-left d-table-cell garden-table-cell">Garden</th>
-            <th class="text-left d-table-cell icon-table-cell">Status</th>
-            <th class="text-left d-table-cell icon-table-cell">Upload</th>
-            <th class="text-left d-table-cell icon-table-cell">Edit</th>
-            <th class="text-left d-table-cell icon-table-cell">Delete</th>
-          </tr>
-        </thead>
-        <tbody class="" id="ready-collections-body">
-          <h3>Ready for upload</h3>
-          {#     Insert rows here     #}
-        </tbody>
-      </table>
-
-      <table class="table" id="uploaded-collections-table">
-        <thead class="">
-          <tr class="d-table-row">
-            <!-- <th class="text-left d-table-cell">ID</th> -->
-            <th class="text-left d-table-cell date-table-cell">Date</th>
-            <th class="text-left d-table-cell creator-table-cell">Creator</th>
-            <th class="text-left d-table-cell garden-table-cell">Garden</th>
-            <th class="text-left d-table-cell icon-table-cell">Status</th>
-            <th class="text-left d-table-cell icon-table-cell"></th>
-            <th class="text-left d-table-cell icon-table-cell">Edit</th>
-            <th class="text-left d-table-cell icon-table-cell">Delete</th>
-          </tr>
-        </thead>
-        <tbody class="" id="uploaded-collections-body">
-          <h3>Uploaded</h3>
-          {#     Insert rows here     #}
-        </tbody>
-      </table>
-
-{#      <table class="table" id="uploaded-collections-table">#}
-{#        <thead class="">#}
-{#          <tr class="d-table-row">#}
-{#            <th scope="col" class="text-left">Date</th>#}
-{#            <th scope="col" class="text-left">Creator</th>#}
-{#            <th scope="col" class="text-left">Status</th>#}
-{#            <th scope="col" class="text-left">Edit</th>#}
-{#          </tr>#}
-{#        </thead>#}
-{#        <tbody class="" id="uploaded-collections-body">#}
-{#          <h3>Uploaded and online</h3>#}
-{#          {% for collection in collections %}#}
-{#            <tr class="d-table-row">#}
-{#              <th scope="row" class="text-left">{{ collection.date }}</th>#}
-{#              <td class="text-left">{{ collection.creator }}</td>#}
-{#              <td>#}
-{#                <i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="{{ collection.id }}-online"></i>#}
-{#              </td>#}
-{#              <td>#}
-{#                <a href="edit/{{ collection.id }}">#}
-{#                  <i class="bi bi-pencil-fill" style="font-size: 1.5rem; color: gray;" id="{{ collection.id }}-edit"></i>#}
-{#                </a>#}
-{#              </td>#}
-{#            </tr>#}
-{#          {% endfor %}#}
-{#        </tbody>#}
-{#      </table>#}
-
-    </div>
-
-    <div class="align-items-center d-md-flex d-block">
-      <div>
-        <i class="bi bi-cloud-check-fill mr-2" style="font-size: 1.5rem; color: green;"></i>
-        Available online
-      </div>
-      <div>
-        <i class="bi bi-hdd-fill ml-md-3 mr-2" style="font-size: 1.5rem; color: green;"></i>
-        Available locally
-      </div>
-      <div>
-        <i class="bi bi-exclamation-circle-fill ml-md-3 mr-2" style="font-size: 1.5rem; color: red;"></i>
-        Incomplete
-      </div>
   </div>
 {% endblock content %}

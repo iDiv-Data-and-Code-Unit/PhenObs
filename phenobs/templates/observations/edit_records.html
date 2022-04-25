@@ -1,0 +1,71 @@
+<table class="table table-borderless gray-text">
+  <thead class="">
+    <tr class="">
+      <th scope="col" class=" spreadsheet-col">Name</th>
+      <th scope="col" class=" spreadsheet-col">Initial vegetative growth</th>
+      <th scope="col" class=" spreadsheet-col">Young leaves unfolding</th>
+      <th scope="col" class=" spreadsheet-col">Flower opening</th>
+      <th scope="col" class=" spreadsheet-col">Peak flowering</th>
+      <th scope="col" class=" spreadsheet-col">Peak flowering estimation</th>
+      <th scope="col" class=" spreadsheet-col">Flowering intensity</th>
+      <th scope="col" class=" spreadsheet-col">Ripe fruits</th>
+      <th scope="col" class=" spreadsheet-col">Senescence</th>
+      <th scope="col" class=" spreadsheet-col">Senescence intensity</th>
+
+{#      <th scope="col">Maintenance</th>#}
+
+      <th scope="col" class=" spreadsheet-col">Cut partly</th>
+      <th scope="col" class=" spreadsheet-col">Cut total</th>
+      <th scope="col" class=" spreadsheet-col">Covered natural</th>
+      <th scope="col" class=" spreadsheet-col">Covered artificial</th>
+      <th scope="col" class=" spreadsheet-col">Transplanted</th>
+      <th scope="col" class=" spreadsheet-col">Removed</th>
+
+      <th scope="col" class=" spreadsheet-col">Remarks</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for record in records %}
+        <tr id="record-{{ record.id }}">
+        {% for entry in record.values %}
+          {% if entry.id != "maintenance" %}
+            <td class="" style="vertical-align: bottom;">
+                {% if entry.id == "name" %}
+                  <p style="font-size: 12px;" class="m-0">{{ entry.value }}</p>
+                {% elif "order" in entry.id %}
+                  <input type="hidden" name="order" id="{{ record.id }}-{{ entry.id }}" value="{{ entry.value }}">
+                {% elif entry.value == True or entry.value == False %}
+                  <input class="spreadsheet-cell" name="{{ entry.id }}" id="{{ record.id }}-{{ entry.id }}" type="checkbox" {% if entry.value == True %}checked{% endif %}>
+                {% elif "intensity" in entry.id %}
+                  <input class="spreadsheet-cell" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}" type="number" max="100" min="0" value="{{ entry.value }}">
+                {% elif "remarks" in entry.id %}
+                  <input class="spreadsheet-cell" type="text" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}" value="{{ entry.value }}">
+                {% else %}
+                  <select class="spreadsheet-cell" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}">
+                    <option value="" {% if entry.value == '' %}selected{% endif %}></option>
+                    <option value="y" {% if entry.value == 'y' %}selected{% endif %}>yes</option>
+                    <option value="u" {% if entry.value == 'u' %}selected{% endif %}>unsure</option>
+                    <option value="m" {% if entry.value == 'm' %}selected{% endif %}>missed</option>
+                    <option value="no" {% if entry.value == 'no' %}selected{% endif %}>no</option>
+                  </select>
+                {% endif %}
+            </td>
+          {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    <tr>
+      {% for entry in records.0.values %}
+        {% if "remarks" in entry.id %}
+          <td class="d-flex justify-content-end">
+            <button class="btn btn-outline-danger mr-2" id="{{ collection_id }}-cancel">Cancel</button>
+            <button class="btn btn-outline-primary mr-2" id="{{ collection_id }}-save">Save</button>
+          </td>
+        {% elif "maintenance" not in entry.id %}
+          <td></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,56 @@
+<table class="table table-borderless gray-text">
+  <thead class="">
+    <tr class="">
+      <th scope="col" class=" spreadsheet-col">Name</th>
+      <th scope="col" class=" spreadsheet-col">Initial vegetative growth</th>
+      <th scope="col" class=" spreadsheet-col">Young leaves unfolding</th>
+      <th scope="col" class=" spreadsheet-col">Flower opening</th>
+      <th scope="col" class=" spreadsheet-col">Peak flowering</th>
+      <th scope="col" class=" spreadsheet-col">Peak flowering estimation</th>
+      <th scope="col" class=" spreadsheet-col">Flowering intensity</th>
+      <th scope="col" class=" spreadsheet-col">Ripe fruits</th>
+      <th scope="col" class=" spreadsheet-col">Senescence</th>
+      <th scope="col" class=" spreadsheet-col">Senescence intensity</th>
+
+      <th scope="col" class=" spreadsheet-col">Maintenance</th>
+
+{#      <th scope="col" class=" spreadsheet-col">Cut partly</th>#}
+{#      <th scope="col" class=" spreadsheet-col">Cut total</th>#}
+{#      <th scope="col" class=" spreadsheet-col">Covered natural</th>#}
+{#      <th scope="col" class=" spreadsheet-col">Covered artificial</th>#}
+{#      <th scope="col" class=" spreadsheet-col">Transplanted</th>#}
+{#      <th scope="col" class=" spreadsheet-col">Removed</th>#}
+
+      <th scope="col" class=" spreadsheet-col">Remarks</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for record in records %}
+        <tr id="view-record-{{ record.id }}">
+        {% for entry in record.values %}
+          {% if entry.value != True and entry.value != False %}
+            <td class="">
+              <p style="font-size: 12px;" class="m-0">
+                {% if entry.value == "u" %}
+                  unsure
+                {% elif entry.value == "m" %}
+                  missed
+                {% elif entry.value == "no" %}
+                  no
+                {% elif entry.value == "y" %}
+                  yes
+                {% elif "intensity" in entry.id and entry.value != None%}
+                  {{ entry.value }}%
+                {% elif entry.value != None and entry.id != "order" %}
+                  {{ entry.value }}
+                {% endif %}
+              </p>
+            </td>
+          {% endif %}
+        {% endfor %}
+        </tr>
+    {% endfor %}
+  </tbody>
+
+</table>

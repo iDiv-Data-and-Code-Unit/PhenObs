@@ -56,7 +56,7 @@ function formatRecords(collections, collection) {
     return collections;
 }
 
-export async function insertCollection(collection, isOnline) {
+export async function insertCollection(collection, isOnline, isOld=false) {
     let collections = await getCollections();
     let remaining = [];
 
@@ -90,7 +90,7 @@ export async function insertCollection(collection, isOnline) {
     };
 
     // Add the last collection to the list
-    if (collection['last-collection'] != null) {
+    if (!isOld && collection['last-collection'] != null) {
         collections[collection['last-collection']['id']] = collection['last-collection'];
         collections[collection['last-collection']['id']]['last-collection-id'] =
             collection['last-collection']['last-collection-id'];
@@ -190,7 +190,7 @@ export async function uploadCollection(id) {
             // alert("Could not establish a connection with database.");
             alertModal("Could not establish a connection with database.");
         },
-        beforeSend: function(){
+        beforeSend: function() {
             $("body").addClass("loading");
         },
         complete: function(){
@@ -207,7 +207,29 @@ export async function uploadCollection(id) {
     });
 }
 
-export async function fetchCollection(id, isOnline) {
+export async function uploadSelectedCollections(collections) {
+    await $.ajax({
+        url: "/observations/upload/",
+        data: JSON.stringify(collections),
+        method: "POST",
+        error: function (jqXHR) {
+            // alert("Could not establish a connection with database.");
+            alertModal("Could not establish a connection with database.");
+        },
+        beforeSend: function(){
+            $("body").addClass("loading");
+        },
+        complete: function(){
+            $("body").removeClass("loading");
+        },
+        success: async function () {
+            // alert("Collection successfully uploaded!");
+            alertModal("Collections successfully saved");
+        }
+    });
+}
+
+export async function fetchCollection(id, isOnline, isOld=false) {
     try {
         await $.ajax({
             url: "/observations/get/" + id,
@@ -222,7 +244,7 @@ export async function fetchCollection(id, isOnline) {
             complete: function(){
                 $("body").removeClass("loading");
             },
-            success: async (data) => await insertCollection(data, isOnline),
+            success: async (data) => await insertCollection(data, isOnline, true),
         });
     } catch (error) {
         console.error(error);

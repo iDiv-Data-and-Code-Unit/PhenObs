@@ -40,7 +40,7 @@ export async function fill(id, isOnline, isOrdered=false) {
 
     let collection = await getCollection(id);
 
-    if (isOnline && collection === undefined || collection == null || !("last-collection-id" in collection)) {
+    if (isOnline && (collection === undefined || collection == null || !("last-collection-id" in collection))) {
         await fetchCollection(id, isOnline);
         collection = await getCollection(id);
         if (!"no-observation" in collection)
@@ -51,7 +51,6 @@ export async function fill(id, isOnline, isOrdered=false) {
     $('#garden').text(collection['garden-name']);
     $('#creator').text(collection['creator']);
     $('#orderedList').unbind().click(async function() {
-        const collection = await getCollection(id);
         if ($(this).attr("name") === "alpha")
             await fill(id, isOnline, true)
         else

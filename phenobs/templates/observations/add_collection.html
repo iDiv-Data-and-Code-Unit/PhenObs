@@ -16,42 +16,44 @@
 {% block content %}
 {#  {% include 'observations/last_observation.html' %}#}
 
-  <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4 gray-text">
-    <h1>Add a collection</h1>
+  <div class="container">
+    <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4 gray-text">
+      <h1>Add a collection</h1>
 
-    <div class="row justify-content-between px-3 mt-4">
-      <div class="col-lg-3">
-        <input type="date" class="wide-button px-lg-3 col-12 gray-text" id="collection-date"/>
-      </div>
-      <div class="col-lg-6 mt-3 mt-lg-0">
-        <div class="wide-button px-lg-4 px-md-5 col-12 d-flex align-items-center justify-content-center">
-          <strong>Garden</strong>
-          <select class="text-right" style="border: none; background: transparent" id="subgarden">
-            {% for sub in subgardens %}
-            <option class="text-truncate" value="{{ sub.name }}" name="{{ sub.id }}" {% if sub.id == garden.id%} selected {% endif %}>
-              {% if sub.id == garden.id%}
-              {% else %}+
-              {% endif %}
-               {{ sub.name }}
-            </option>
-            {% endfor %}
-          </select>
+      <div class="row justify-content-between px-3 mt-4">
+        <div class="col-lg-3">
+          <input type="date" class="wide-button px-lg-3 col-12 gray-text" id="collection-date"/>
+        </div>
+        <div class="col-lg-6 mt-3 mt-lg-0">
+          <div class="wide-button px-lg-4 px-md-5 col-12 d-flex align-items-center justify-content-center">
+            <strong>Garden</strong>
+            <select class="text-right" style="border: none; background: transparent" id="subgarden">
+              {% for sub in subgardens %}
+              <option class="text-truncate" value="{{ sub.name }}" name="{{ sub.id }}" {% if sub.id == garden.id%} selected {% endif %}>
+                {% if sub.id == garden.id%}
+                {% else %}+
+                {% endif %}
+                 {{ sub.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-lg-3 mt-3 mt-lg-0">
+          <button class="wide-button px-lg-4 px-md-5 col-12 disabled-btn" disabled><strong>Creator</strong> <span id="creator"></span></button>
         </div>
       </div>
-      <div class="col-lg-3 mt-3 mt-lg-0">
-        <button class="wide-button px-lg-4 px-md-5 col-12 disabled-btn" disabled><strong>Creator</strong> <span id="creator"></span></button>
+
+      {% block observation %}
+      {% endblock observation %}
+
+      <div class="row justify-content-end p-3 p-md-3 p-lg-4">
+        <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 mt-md-0 text-white" id="cancel-btn">Cancel</button>
+        <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 ml-md-3 mt-md-0" id="done-btn"><span id="done-so-far"></span><span id="all-plants"></span> Done</button>
       </div>
+
+
     </div>
-
-    {% block observation %}
-    {% endblock observation %}
-
-    <div class="row justify-content-end p-3 p-md-3 p-lg-4">
-      <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 mt-md-0 text-white" id="cancel-btn">Cancel</button>
-      <button class="wide-button col-md-5 mt-3 mt-lg-0 col-lg-3 ml-md-3 mt-md-0" id="done-btn"><span id="done-so-far"></span><span id="all-plants"></span> Done</button>
-    </div>
-
-
   </div>
 
 {% endblock content %}

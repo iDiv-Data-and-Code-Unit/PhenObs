@@ -34,6 +34,8 @@ class Garden(models.Model):
 
     def __str__(self) -> str:
         """Returns name of the garden."""
+        if self.main_garden is not None:
+            return str(self.main_garden.name + ": " + self.name)
         return str(self.name)
 
     def is_subgarden(self):
