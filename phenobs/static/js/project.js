@@ -1,22 +1,23 @@
 import {alertModal, confirmModal, formatDate} from './modals.js';
 
-export function isReachable(url) {
-  return fetch(url, { method: 'HEAD', mode: 'no-cors' })
-    .then(function(resp) {
-      return resp && (resp.ok || resp.type === 'opaque');
-    })
-    .catch(function(err) {
-      console.warn('[conn test failure]:', err);
-    });
-}
+// export function isReachable(url) {
+//   return fetch(url, { method: 'HEAD', mode: 'no-cors' })
+//     .then(function(resp) {
+//       return resp && (resp.ok || resp.type === 'opaque');
+//     })
+//     .catch(function(err) {
+//       console.warn('[conn test failure]:', err);
+//     });
+// }
 
 function handleConnection() {
     if (navigator.onLine) {
-        isReachable('/200/').then(function(online) {
+        // isReachable('/200/').then(function(online) {
             if (online) {
                 $('#signout').removeClass('disabled');
                 $('#brand').attr("href", "/");
                 $('#home').removeClass('disabled');
+                $('#help').removeClass('disabled');
                 $('#myprofile').removeClass('disabled');
                 $('#online').removeClass('d-none');
                 $('#offline').addClass('d-none');
@@ -27,6 +28,7 @@ function handleConnection() {
                 $('#signout').addClass('disabled');
                 $('#brand').removeAttr("href");
                 $('#home').addClass('disabled');
+                $('#help').addClass('disabled');
                 $('#myprofile').addClass('disabled');
                 $('#offline').removeClass('d-none');
                 $('#online').addClass('d-none');
@@ -34,12 +36,13 @@ function handleConnection() {
 
                 return false;
             }
-        });
+        // });
     } else {
         $('#signout').addClass('disabled');
         $('#brand').removeAttr("href");
         $('#home').addClass('disabled');
         $('#myprofile').addClass('disabled');
+        $('#help').addClass('disabled');
         $('#offline').removeClass('d-none');
         $('#online').addClass('d-none');
         console.log('offline');
@@ -59,13 +62,13 @@ if (document.getElementById('home-date') != null)
 
 if (document.getElementById('add-collection') != null) {
     $('#add-collection').click(() => {
-        isReachable('/200').then(function(online) {
-            if (online) {
+        // isReachable('/200').then(function(onLine) {
+            if (navigator.onLine) {
                 location.href = '/observations/add/'
             } else {
                 alertModal('Add functionality is not available in offline mode');
             }
-        });
+        // });
     });
 }
 

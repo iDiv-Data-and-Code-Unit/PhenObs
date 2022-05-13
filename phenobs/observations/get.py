@@ -2,7 +2,7 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
@@ -58,7 +58,7 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 
 
 def get_collections(request, id):
-    context = {"gardens": []}
+    context = {"gardens": [], "range": range(5, 105, 5)}
 
     is_admin = False
 
@@ -79,7 +79,12 @@ def get_collections(request, id):
 
             for subgarden in subgardens:
                 garden_dict["subgardens"].append(
-                    {"id": subgarden.id, "name": subgarden.name, "collections": []}
+                    {
+                        "id": subgarden.id,
+                        "name": subgarden.name,
+                        "collections": [],
+                        "finished": 0,
+                    }
                 )
             context["gardens"].append(garden_dict)
 
@@ -91,7 +96,12 @@ def get_collections(request, id):
                     "id": garden.main_garden_id,
                     "name": garden.main_garden.name,
                     "subgardens": [
-                        {"id": garden.id, "name": garden.name, "collections": []}
+                        {
+                            "id": garden.id,
+                            "name": garden.name,
+                            "collections": [],
+                            "finished": 0,
+                        }
                     ],
                 }
             )
@@ -102,7 +112,12 @@ def get_collections(request, id):
 
             for subgarden in subgardens:
                 garden_dict["subgardens"].append(
-                    {"id": subgarden.id, "name": subgarden.name, "collections": []}
+                    {
+                        "id": subgarden.id,
+                        "name": subgarden.name,
+                        "collections": [],
+                        "finished": 0,
+                    }
                 )
 
             context["gardens"].append(garden_dict)
@@ -124,6 +139,10 @@ def get_collections(request, id):
                     "records": [],
                     "finished": collection.finished,
                 }
+
+                if collection.finished:
+                    subgarden["finished"] = subgarden["finished"] + 1
+
                 records = Record.objects.filter(collection=collection).all()
                 for record in records:
                     maintenance = []
@@ -198,10 +217,7 @@ def get_collections(request, id):
                     )
                 subgarden["collections"].append(collection_dict)
 
-    first = render(request, "observations/view_collections.html", context)
-    second = render(request, "observations/edit_collections.html", context)
-
-    return HttpResponse(content=[first.content, second.content])
+    return render(request, "observations/views_content.html", context)
 
 
 @login_required(login_url="/accounts/login/")

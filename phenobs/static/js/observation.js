@@ -20,7 +20,6 @@ export function getFields(isOld=false) {
 }
 
 export async function setupPlants(id, orderedList=false) {
-
     const collection = await getCollection(id);
 
     if (collection['last-collection-id'] != null) {
@@ -36,7 +35,13 @@ export async function setupPlants(id, orderedList=false) {
     }
 
     let plants = document.getElementById('plant');
-    plants.innerHTML = '<option value="" name="" id=""></option>';
+
+    let chosen = null;
+    console.log(plants.innerHTML);
+    if (plants.children.length > 0)
+        chosen = parseInt(plants.selectedOptions[0].id);
+
+    plants.innerHTML = '<option value="" name="" id="emptyOption"></option>';
 
     let ordered = collection["records"];
     if (orderedList) {
@@ -56,10 +61,15 @@ export async function setupPlants(id, orderedList=false) {
         $("#orderedList").attr("name", "numeric");
         $("#orderedList").removeClass("bi-sort-alpha-down");
         $("#orderedList").addClass("bi-sort-numeric-down");
+
+        $("#next-btn").addClass("d-none");
+        $("#prev-btn").addClass("d-none");
     } else {
         $("#orderedList").attr("name", "alpha");
         $("#orderedList").addClass("bi-sort-alpha-down");
         $("#orderedList").removeClass("bi-sort-numeric-down");
+        // $("#next-btn").removeClass("d-none");
+        // $("#prev-btn").removeClass("d-none");
     }
 
     for (let key in ordered) {
@@ -71,12 +81,20 @@ export async function setupPlants(id, orderedList=false) {
             '" name="' +
             plant["name"] +
             '" id="' +
-            plant["order"] + '">' +
+            plant["order"] + '"' +
+            ((plant["order"] === chosen) ? "selected" : "") +
+            '>' +
             plant["name"] +
             '</option>';
     }
 
-    plants.selectedIndex = 0;
+    if (chosen == null)
+        plants.selectedIndex = 0;
+    else
+        $("#emptyOption").remove();
+    $("#done-btn").prop("disabled", "disabled");
+    $("#next-btn").addClass("d-none");
+    $("#prev-btn").addClass("d-none");
 }
 
 function findOptionIndex(order) {
@@ -159,8 +177,10 @@ export async function selectPlant(id, order) {
     if (order in collection['records']) {
         await fillInFields(id, order);
 
+        $("#emptyOption").remove();
+
         // Display/Hide "Previous" button
-        if (order === Math.min.apply(null,Object.keys(collection["records"]))) {
+        if (order === Math.min.apply(null, Object.keys(collection["records"]))) {
             $('#prev-btn').addClass("d-none");
         } else {
             $('#prev-btn').removeClass("d-none");
@@ -168,13 +188,13 @@ export async function selectPlant(id, order) {
 
         // Display/Rename "Next" button
         if (collection['remaining'].length === 1 && collection['remaining'][0] === order && !collection["finished"]) {
-            $('#next-btn').val("Finish");
-            $('#next-btn').removeClass("d-none");
-        } else if (order == Math.max.apply(null,Object.keys(collection["records"]))) {
-            $('#next-btn').addClass("d-none");
-        }
-        else {
-            $('#next-btn').removeClass("d-none");
+            $('#finish-btn').removeClass("d-none");
+            // $('#next-btn').removeClass("d-none");
+        // } else if (order == Math.max.apply(null, Object.keys(collection["records"]))) {
+            // $('#next-btn').addClass("d-none");
+        } else {
+            // $('#next-btn').removeClass("d-none");
+            $('#finish-btn').addClass("d-none");
         }
 
         // Move the screen back to the top
@@ -238,7 +258,7 @@ export async function checkDefault(id, nextFlag, manual=false) {
     let collection = await getCollection(id);
     let plants = document.getElementById('plant');
 
-    if (!plants.selectedIndex)
+    if (!plants.selectedIndex && document.getElementById("emptyOption") != null)
         return;
 
     let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];

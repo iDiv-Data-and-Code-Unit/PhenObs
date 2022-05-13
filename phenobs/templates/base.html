@@ -44,7 +44,10 @@
       {% if user.is_authenticated %}
         <script type="text/javascript">
           sessionStorage.setItem("loggedIn", "{{user.username}}");
-          sessionStorage.setItem("gardenId", "{{garden.id}}");
+          sessionStorage.setItem("subgardenId", "{{garden.id}}");
+          sessionStorage.setItem("mainGardenName", "{{garden.main_garden}}");
+          sessionStorage.setItem("mainGardenId", "{{garden.main_garden.id}}");
+          sessionStorage.setItem("subgardenName", "{{garden.name}}");
         </script>
       {% endif %}
       <!-- place project specific Javascript in this file -->

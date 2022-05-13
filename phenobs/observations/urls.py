@@ -41,7 +41,7 @@ urlpatterns = [
         name="get",
     ),
     path(
-        "all_collections/",
+        "garden_collections/",
         get.get_all_collections,
         name="get_all_collections",
     ),
@@ -51,7 +51,7 @@ urlpatterns = [
         name="last",
     ),
     path(
-        "collections_table/<str:id>",
+        "collections/<str:id>/",
         get.get_collections,
         name="get_collections",
     ),

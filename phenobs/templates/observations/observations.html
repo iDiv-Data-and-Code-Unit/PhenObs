@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block observations_active %}active{% endblock observations_active %}
-
 {% block nav %}
-  {% include 'nav.html' %}
+  {% include 'nav.html' with observations_active='active' observations_default_active='active' %}
 {% endblock nav %}
 
 {% block custom_javascript %}
@@ -20,14 +18,14 @@
         <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">All collections</h1>
         <div class="col-6 col-md-8 col-lg-6 justify-content-end col-xl-7 d-flex">
           <button class="narrow-button col-5 mx-auto" id="get-collections">
-            <div class="d-inline gray-text">
-              <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/bootstrap-icons/cloud-fill.svg' %}" height="25" alt=""/>
+            <div class="d-flex gray-text align-items-center justify-content-center">
+              <img class="d-block d-md-none d-xl-inline-flex mr-2" src="{% static 'images/db.png' %}" height="20" alt=""/>
               <span class="d-none d-md-inline">All collections</span>
             </div>
           </button>
           <button class="narrow-button col-5" id="add-collection">
-            <div class="d-inline gray-text">
-              <img class="d-block d-md-none d-xl-inline-flex" src="{% static 'images/add_collection.png' %}" height="30" alt=""/>
+            <div class="d-flex gray-text align-items-center justify-content-center">
+              <i class="bi bi-plus-circle-fill mr-2"></i>
               <span class="d-none d-md-inline">Add collection</span>
             </div>
           </button>

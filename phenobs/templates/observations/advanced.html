@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block observations_active %}active{% endblock observations_active %}
-
 {% block nav %}
-  {% include 'nav.html' %}
+  {% include 'nav.html' with observations_active='active' observations_advanced_active='active' %}
 {% endblock nav %}
 
 {% block custom_javascript %}
@@ -60,12 +58,6 @@
       </li>
     </ul>
     <div class="tab-content" id="viewsContent">
-      <div class="tab-pane fade show active" id="view" role="tabpanel" aria-labelledby="view-tab">
-        <div class="accordion" id="viewCollections"></div>
-      </div>
-      <div class="tab-pane fade" id="edit" role="tabpanel" aria-labelledby="edit-tab">
-        <div class="accordion" id="editCollections"></div>
-      </div>
     </div>
   </div>
 {% endblock content %}

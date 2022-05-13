@@ -37,8 +37,18 @@
                   <input type="hidden" name="order" id="{{ record.id }}-{{ entry.id }}" value="{{ entry.value }}">
                 {% elif entry.value == True or entry.value == False %}
                   <input class="spreadsheet-cell" name="{{ entry.id }}" id="{{ record.id }}-{{ entry.id }}" type="checkbox" {% if entry.value == True %}checked{% endif %}>
-                {% elif "intensity" in entry.id %}
-                  <input class="spreadsheet-cell" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}" type="number" max="100" min="0" value="{{ entry.value }}">
+
+
+{#                {% elif "intensity" in entry.id %}#}
+{#                  <input class="spreadsheet-cell" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}" type="number" max="100" min="0" value="{{ entry.value }}">#}
+{#                  #}
+                {% elif 'intensity' in entry.id %}
+                  <select class="spreadsheet-cell" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}">
+                    <option {% if entry.value == '' %}selected{% endif %} value=""></option>
+                  {% for i in range %}
+                    <option {% if entry.value == i %}selected{% endif %} value="{{ i }}">{{ i }}%</option>
+                  {% endfor %}
+                  </select>
                 {% elif "remarks" in entry.id %}
                   <input class="spreadsheet-cell" type="text" id="{{ record.id }}-{{ entry.id }}" name="{{ entry.id }}" value="{{ entry.value }}">
                 {% else %}

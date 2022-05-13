@@ -112,7 +112,8 @@ export async function oldClickListeners(id) {
 
 export function setDate(dateToSet) {
     // Set #collection-date today
-    document.getElementById('collection-date').value =
+    const collectionDate = document.getElementById('collection-date');
+    collectionDate.value =
         `${dateToSet.getFullYear()}-` +
         `${String(dateToSet.getMonth() + 1).padStart(2, '0')}-` +
         `${String(dateToSet.getDate()).padStart(2, '0')}`;
@@ -152,9 +153,13 @@ async function getLast(id) {
 // Add event listeners
 // Unbind first to remove event listeners if we change subgardens
 export function cachingListeners(id) {
-    $("#collection-date").unbind().change(async () => {
-        await updateCollection(id);
-        await getLast(id);
+    $("#collection-date").unbind().change(async (e) => {
+        if (e.target.value.length > 0) {
+            await updateCollection(id);
+            await getLast(id);
+        } else {
+            alertModal("Please choose a valid date");
+        }
     });
 
     // Add event listener for next and previous buttons

@@ -22,6 +22,11 @@ urlpatterns = [
         TemplateView.as_view(template_name="pages/imprint.html"),
         name="imprint",
     ),
+    path(
+        "help/",
+        TemplateView.as_view(template_name="pages/help.html"),
+        name="help",
+    ),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management

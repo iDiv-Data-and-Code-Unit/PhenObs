@@ -1,6 +1,6 @@
 import {getCollections, deleteCollection, uploadCollection, insertCollection} from "./collection.js";
 import {confirmModal, alertModal, formatDate} from './modals.js';
-import {isReachable} from "./project.js";
+// import {isReachable} from "./project.js";
 
 async function insertRows(tableName) {
     let collections = await getCollections();
@@ -119,14 +119,14 @@ function addEditLink() {
         editButtons[i].parentElement.addEventListener(
             'click',
             () => {
-                isReachable('/200').then(function(online) {
-                    if (online) {
+                // isReachable('/200').then(function(onLine) {
+                    if (navigator.onLine) {
                         location.href = '/observations/edit/' + id;
                     } else {
                         // alert('Edit functionality is not available in offline mode');
                         alertModal('Edit functionality is not available in offline mode');
                     }
-                });
+                // });
             }
         );
         editButtons[i].parentElement.style.cursor = 'pointer';
@@ -179,7 +179,7 @@ async function getAllCollections() {
     }
 
     await $.ajax({
-        url: "/observations/all_collections/",
+        url: "/observations/garden_collections/",
         method: "POST",
         data: JSON.stringify(ids),
         error: function (jqXHR) {
@@ -193,6 +193,7 @@ async function getAllCollections() {
             $("body").removeClass("loading");
         },
         success: async function (data) {
+            console.log(data)
             await addOnlineCollections(data);
             addEditLink();
             addRemoveLink(data);
@@ -241,7 +242,7 @@ async function addOnlineCollections(collections) {
                     '<td class="text-left d-table-cell icon-table-cell">\n';
             else
                 rowHTML +=
-                    '<img src="/static/images/db.png" style="display: table-cell; vertical-align: middle;" width="18"  id="' + collections[i]['id'] + '-online">\n' +
+                    '<img src="/static/images/db_gray.png" style="display: table-cell; vertical-align: middle;" width="18"  id="' + collections[i]['id'] + '-online">\n' +
                     '<i class="bi bi-exclamation-circle-fill ml-2" style="font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';

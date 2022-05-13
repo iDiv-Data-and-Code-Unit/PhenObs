@@ -405,3 +405,18 @@ body.loading .overlay {
   padding: 10% 15%;
   background: white;
 }
+
+
+
+.page-contents {
+  display: block;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+
+
+.invalidField {
+  border-radius: 5px;
+  border: 2px red solid;
+}

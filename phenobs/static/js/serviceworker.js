@@ -1,5 +1,5 @@
 var today = new Date();
-const staticCacheName = "django-pwa-v102";
+const staticCacheName = "django-pwa-v103";
 var filesToCache = [
     '/observations/',
     '/offline/',
@@ -39,9 +39,12 @@ var filesToCache = [
     '/static/images/bootstrap-icons/pencil-fill.svg',
     '/static/images/bootstrap-icons/trash-fill.svg',
     '/static/images/bootstrap-icons/filetype-csv.svg',
+    '/static/images/bootstrap-icons/plus-circle-fill.svg',
 
     '/static/images/save_db_primary.png',
     '/static/images/db_check.png',
+    '/static/images/db_gray.png',
+    '/static/images/db.png',
 ];
 
 // Cache on install

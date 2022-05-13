@@ -1,12 +1,8 @@
 import { alertModal } from "./modals.js";
 
-async function fillCollections(id, continuous=false) {
-    console.log("fill collections");
-    let viewCollections = $('#viewCollections');
-    let editCollections = $('#editCollections');
-
+async function fillCollections(id, ready=false) {
     await $.ajax({
-        url: "/observations/collections_table/" + id,
+        url: "/observations/collections/" + id,
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
             alertModal("Could not establish a connection with database.");
@@ -18,28 +14,18 @@ async function fillCollections(id, continuous=false) {
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            const response = data.split("<nav");
-            viewCollections.html("<nav" + response[1]);
-            editCollections.html("<nav" + response[2]);
-            // collectionsElement.html(innerHTML + collectionsHTML);
+            console.log(data);
+            $("#viewsContent").html(data);
             initNav();
             $("#uploadSelected").unbind().click(uploadSelected);
         }
     });
 }
 
-async function fillForSubgardens(id) {
-    let subs = $('[name*="' + id + '"]');
-    if (!subs.length)
-        $('#collections').html('')
-    for (let j = 0; j < subs.length; j++)
-        await fillCollections(subs[j].id, !!j);
-}
-
 $("#gardens").change(async (e) => {
     if (e.target.selectedOptions[0].id.length)
         await fillCollections(e.target.selectedOptions[0].id);
-})
+});
 
 function formatCollection(id) {
     console.log();
@@ -70,7 +56,7 @@ function formatCollection(id) {
                 record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = inputs[j].value;
         }
         for (let j = 0; j < selects.length; j++)
-            record[selects[j].id.substr(inputs[j].id.match("-").index + 1)] = selects[j].value;
+            record[selects[j].id.substr(selects[j].id.match("-").index + 1)] = selects[j].value;
 
         collection["records"].push(record);
     }
@@ -168,8 +154,14 @@ async function uploadSelected(collection=null) {
     for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
         console.log(collection);
+
         for (let j = 0; j < collection["records"].length; j++) {
             const record = collection["records"][j];
+
+            const fields = $("[id*=" + record["id"] + "-]");
+            for (let k = 0; k < fields.length; k++) {
+                fields[k].classList.remove("invalidField")
+            }
 
             if ((record["senescence-intensity"] === 0 ||
                     record["senescence-intensity"] == null ||
@@ -183,10 +175,7 @@ async function uploadSelected(collection=null) {
                 invalid = true;
             } else if (record["senescence-intensity"] > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
-                $('#' + record["id"] + '-senescence').css({
-                    "border-radius": "5px",
-                    "border": "2px red solid"
-                });
+                $('#' + record["id"] + '-senescence').addClass("invalidField");
                 invalid = true;
             }
             if ((record["flowering-intensity"] === 0 ||
@@ -194,17 +183,11 @@ async function uploadSelected(collection=null) {
                     record["flowering-intensity"].length === 0) &&
                 record["flowers-opening"] === "y") {
                 alertModal("Fill in all the required fields.")
-                $('#' + record["id"] + '-flowering-intensity').css({
-                    "border-radius": "5px",
-                    "border": "2px red solid"
-                });
+                $('#' + record["id"] + '-flowering-intensity').addClass("invalidField");
                 invalid = true;
             } else if (record["flowering-intensity"] > 0 && record["flowers-opening"] !== "y") {
                 alertModal("Fill in all the required fields.")
-                $('#' + record["id"] + '-flowers-opening').css({
-                    "border-radius": "5px",
-                    "border": "2px red solid"
-                });
+                $('#' + record["id"] + '-flowers-opening').addClass("invalidField");
                 invalid = true;
             }
 
@@ -215,10 +198,7 @@ async function uploadSelected(collection=null) {
                     else if (key === "flowering-intensity" && record["flowering-intensity"].length === 0 && record["flowers-opening"] !== "y")
                         continue;
                     alertModal("Fields cannot be left empty.");
-                    $('#' + record["id"] + '-' + key).css({
-                        "border-radius": "5px",
-                        "border": "2px red solid"
-                    });
+                    $('#' + record["id"] + '-' + key).addClass("invalidField");
                     invalid = true;
                 }
             }
@@ -249,7 +229,7 @@ async function uploadSelected(collection=null) {
                 // const response = data.split("<nav");
                 // initNav();
                 // $("#uploadSelected").unbind().click(uploadSelected);
-                await fillCollections(document.getElementById("gardens").selectedOptions[0].id)
+                await fillCollections(document.getElementById("gardens").selectedOptions[0].id);
             }
         });
     } else {

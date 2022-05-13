@@ -8,7 +8,7 @@ import {
 
 // Set today on "#collection-date"
 // Create an empty collection
-$(document).ready(async () => await emptyCollection());
+// $(document).ready(async () => await emptyCollection());
 
 $("#subgarden").change(
     async (e) => {
@@ -18,5 +18,7 @@ $("#subgarden").change(
                 e.target.selectedOptions[0].innerText.replace("+", " ")
         } else
             await fill(parseInt(e.target.selectedOptions[0].id), false);
+
+        $("#empty").remove();
     }
 );

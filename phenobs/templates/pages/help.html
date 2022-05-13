@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block nav %}
+  {% include 'nav.html' with help_active='active' %}
+{% endblock nav %}
+
+{% block content %}
+  <div class="container">
+    <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
+        <h1 class="display-4">Help</h1>
+        <p>
+          You may find the useful tutorials down below to guide you through data collection process.
+        </p>
+
+        <div class="accordion" id="pages">
+
+
+          <div class="card">
+            <div class="card-header" id="home_help_heading">
+              <h2 class="mb-0">
+                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#home_help" aria-expanded="false" aria-controls="home_help">
+                  Default view
+                </button>
+              </h2>
+            </div>
+            <div id="home_help" class="collapse" aria-labelledby="home_help_heading" data-parent="#pages">
+              <div class="card-body">
+                {% include 'help/default_help.html' %}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="card">
+            <div class="card-header" id="default_help_heading">
+              <h2 class="mb-0">
+                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#default_help" aria-expanded="false" aria-controls="default_help">
+                  Advanced view
+                </button>
+              </h2>
+            </div>
+            <div id="default_help" class="collapse" aria-labelledby="default_help_heading" data-parent="#pages">
+              <div class="card-body">
+                {% include 'help/advanced_help.html' %}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="card">
+            <div class="card-header" id="advanced_help_heading">
+              <h2 class="mb-0">
+                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#advanced_help" aria-expanded="false" aria-controls="advanced_help">
+                  Admin view
+                </button>
+              </h2>
+            </div>
+            <div id="advanced_help" class="collapse" aria-labelledby="advanced_help_heading" data-parent="#pages">
+              <div class="card-body">
+                {% include 'help/admin_help.html' %}
+              </div>
+            </div>
+          </div>
+
+
+
+        </div>
+    </div>
+  </div>
+{% endblock content %}
