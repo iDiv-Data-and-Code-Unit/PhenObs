@@ -1,6 +1,6 @@
 import { alertModal } from "./modals.js";
 
-async function fillCollections(id, ready=false) {
+async function fillCollections(id, edit=null) {
     await $.ajax({
         url: "/observations/collections/" + id,
         error: function (jqXHR) {
@@ -18,6 +18,22 @@ async function fillCollections(id, ready=false) {
             $("#viewsContent").html(data);
             initNav();
             $("#uploadSelected").unbind().click(uploadSelected);
+
+            if (edit != null) {
+                $("#edit-tab").addClass("active");
+                $("#view-tab").removeClass("active");
+                $("#edit").addClass("active");
+                $("#edit").addClass("show");
+                $("#view").removeClass("active");
+                $("#view").removeClass("show");
+            } else {
+                $("#edit-tab").removeClass("active");
+                $("#view-tab").addClass("active");
+                $("#edit").removeClass("active");
+                $("#edit").removeClass("show");
+                $("#view").addClass("active");
+                $("#view").addClass("show");
+            }
         }
     });
 }
@@ -160,7 +176,8 @@ async function uploadSelected(collection=null) {
 
             const fields = $("[id*=" + record["id"] + "-]");
             for (let k = 0; k < fields.length; k++) {
-                fields[k].classList.remove("invalidField")
+                console.log(fields[k].id)
+                fields[k].classList.remove("invalidField");
             }
 
             if ((record["senescence-intensity"] === 0 ||
@@ -168,10 +185,7 @@ async function uploadSelected(collection=null) {
                     record["senescence-intensity"].length === 0) &&
                 record["senescence"] === "y") {
                 alertModal("Fill in all the required fields.")
-                $('#' + record["id"] + '-senescence-intensity').css({
-                    "border-radius": "5px",
-                    "border": "2px red solid"
-                });
+                $('#' + record["id"] + '-senescence-intensity').addClass("invalidField");
                 invalid = true;
             } else if (record["senescence-intensity"] > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
@@ -229,7 +243,7 @@ async function uploadSelected(collection=null) {
                 // const response = data.split("<nav");
                 // initNav();
                 // $("#uploadSelected").unbind().click(uploadSelected);
-                await fillCollections(document.getElementById("gardens").selectedOptions[0].id);
+               await fillCollections(document.getElementById("gardens").selectedOptions[0].id,true)
             }
         });
     } else {
