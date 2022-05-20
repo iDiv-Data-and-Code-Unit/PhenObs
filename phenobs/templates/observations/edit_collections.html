@@ -1,6 +1,6 @@
 <div class="tab-pane fade" id="edit" role="tabpanel" aria-labelledby="edit-tab">
   <div class="accordion" id="editCollections">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary m-0">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success m-0">
       <div class="container-fluid px-2">
           <ul class="navbar-nav">
             <li class="nav-item">
@@ -24,7 +24,7 @@
         {% for collection in subgarden.collections %}
           <div class="card">
             <div class="row card-header align-items-center" id="heading-{{ collection.id }}">
-              <div style="" class="btn btn-link text-left col-11 {% if collection.finished == False %} text-danger {% endif %}" type="button" data-toggle="collapse"
+              <div style="" class="btn btn-link text-left col-11 {% if collection.finished == False %} text-danger {% else %} text-dark {% endif %}" type="button" data-toggle="collapse"
                    data-target="#collection-{{ collection.id }}" aria-expanded="true"
                    aria-controls="collection-{{ collection.id }}">
                 <div class="row">

@@ -274,7 +274,7 @@ a:active {
 
 
 .new-value-btn {
-  border: solid 1px #ab47bc;
+  border: solid 1px rgb(253,199,36);
 }
 
 
@@ -429,7 +429,41 @@ body.loading .overlay {
 
 
 
-.required-intensity {
-  -webkit-box-shadow: 0 0 6px 1px rgba(255,0,0,1));
-  box-shadow: 0 0 6px 1px rgba(255,0,0,1);
+.required-field {
+  /*-webkit-box-shadow: 0 0 6px 1px rgba(255,0,0,1);*/
+  /*box-shadow: 0 0 6px 1px rgba(255,0,0,1);*/
+  border: solid 1px rgb(255,0,0);
+  color: rgb(255,0,0);
+}
+
+
+
+.online-feature {
+  /*-webkit-box-shadow: 0 0 6px 1px rgb(40,167,69);*/
+  /*box-shadow: 0 0 6px 1px rgb(40,167,69);*/
+  border: solid 1px rgb(40,167,69);
+  filter: invert(52%) sepia(35%) saturate(920%) hue-rotate(82deg) brightness(94%) contrast(92%);
+  color: rgb(40,167,69);
+}
+
+.offline-feature {
+  border: solid 1px rgb(253,199,36);
+  color: rgb(253,199,36);
+  filter: invert(69%) sepia(79%) saturate(454%) hue-rotate(357deg) brightness(102%) contrast(98%);
+}
+
+.online-feature::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 2px;
+  opacity: 0.6;
+  filter: invert(52%) sepia(35%) saturate(920%) hue-rotate(82deg) brightness(94%) contrast(92%);
+}
+
+.text-warning.dropdown-item.active {
+  background-color: #ffedb8;
+}
+
+.text-success.dropdown-item.active {
+  background-color: #a0fab5;
 }

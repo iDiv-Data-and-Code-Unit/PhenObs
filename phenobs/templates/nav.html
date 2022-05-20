@@ -19,8 +19,8 @@
           <li class="nav-item dropdown d-xl-block d-none">
             <a class="nav-link dropdown-toggle {{ observations_active }}" data-toggle="dropdown" role="button" aria-expanded="false">Observations</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item {{ observations_default_active }}" href="{% url 'observations:all' %}">Default</a>
-              <a class="dropdown-item {{ observations_advanced_active }}" href="{% url 'observations:advanced' %}">Advanced</a>
+              <a class="dropdown-item {{ observations_default_active }} text-warning" href="{% url 'observations:all' %}">Local</a>
+              <a class="dropdown-item {{ observations_advanced_active }} text-success" href="{% url 'observations:advanced' %}">Overview</a>
             </div>
           </li>
         </ul>

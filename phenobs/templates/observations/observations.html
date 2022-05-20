@@ -15,17 +15,17 @@
   <div class="container">
     <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
       <div class="row py-4 justify-content-between">
-        <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">All collections</h1>
+        <h1 class="col-6 col-md-4 col-lg-6 col-xl-5 gray-text">{{ garden.main_garden }} collections</h1>
         <div class="col-6 col-md-8 col-lg-6 justify-content-end col-xl-7 d-flex">
-          <button class="narrow-button col-5 mx-auto" id="get-collections">
+          <button class="narrow-button col-5 mx-auto online-feature" id="get-collections">
             <div class="d-flex gray-text align-items-center justify-content-center">
               <img class="d-block d-md-none d-xl-inline-flex mr-2" src="{% static 'images/db.png' %}" height="20" alt=""/>
-              <span class="d-none d-md-inline">All collections</span>
+              <span class="d-none d-md-inline">Get collections</span>
             </div>
           </button>
-          <button class="narrow-button col-5" id="add-collection">
+          <button class="narrow-button col-5 online-feature" id="add-collection">
             <div class="d-flex gray-text align-items-center justify-content-center">
-              <i class="bi bi-plus-circle-fill mr-2"></i>
+              <i class="bi bi-plus-circle-fill mr-2 d-block d-md-none d-xl-inline-flex"></i>
               <span class="d-none d-md-inline">Add collection</span>
             </div>
           </button>
@@ -38,7 +38,7 @@
             <tr class="d-table-row">
               <th class="text-left d-table-cell date-table-cell">Date</th>
               <th class="text-left d-table-cell creator-table-cell">Creator</th>
-              <th class="text-left d-table-cell garden-table-cell">Garden</th>
+              <th class="text-left d-table-cell garden-table-cell">Subgarden</th>
               <th class="text-left d-table-cell icon-table-cell">Status</th>
               <th class="text-left d-table-cell icon-table-cell">Save</th>
               <th class="text-left d-table-cell icon-table-cell">Edit</th>
@@ -73,7 +73,7 @@
             <tr class="d-table-row">
               <th class="text-left d-table-cell date-table-cell">Date</th>
               <th class="text-left d-table-cell creator-table-cell">Creator</th>
-              <th class="text-left d-table-cell garden-table-cell">Garden</th>
+              <th class="text-left d-table-cell garden-table-cell">Subgarden</th>
               <th class="text-left d-table-cell icon-table-cell">Status</th>
               <th class="text-left d-table-cell icon-table-cell"></th>
               <th class="text-left d-table-cell icon-table-cell">Edit</th>
@@ -89,11 +89,11 @@
 
       <div class="align-items-center d-md-flex d-block">
         <div class="row mx-2 my-2">
-          <img class="mr-2" src="/static/images/db_check.png" style="" height="23">
+          <img class="mr-2" src="/static/images/db_check_primary.png" style="" height="23">
           Available online
         </div>
         <div class="row align-items-center mr-2 ml-2 ml-sm-0">
-          <i class="bi bi-hdd-fill mr-2" style="font-size: 1.5rem; color: green;"></i>
+          <i class="bi bi-hdd-fill mr-2 text-primary" style="font-size: 1.5rem;"></i>
           Available locally
         </div>
         <div class="row align-items-center ml-2 ml-sm-0">

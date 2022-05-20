@@ -59,12 +59,12 @@ export function fillInOldData(lastCollection, plant) {
         senescenceIntensityBtn.prop("disabled", true);
         $("#senescence-intensity-old").prop("required", false);
         senescenceIntensityBtn.addClass("disabled-old");
-        $("#senescence-intensity-button").removeClass("required-intensity");
+        $("#senescence-intensity-button").removeClass("required-field");
     } else {
         if (old_record["senescence-intensity"] == null || old_record["senescence-intensity"].length === 0)
-            senescenceIntensityBtn.addClass("required-intensity");
+            senescenceIntensityBtn.addClass("required-field");
         else
-            senescenceIntensityBtn.removeClass("required-intensity");
+            senescenceIntensityBtn.removeClass("required-field");
 
         senescenceIntensityBtn.prop("disabled", false);
         $("#senescence-intensity-old").prop("required", true);
@@ -75,12 +75,12 @@ export function fillInOldData(lastCollection, plant) {
         floweringIntensityBtn.prop("disabled", true);
         $("#flowering-intensity-old").prop("required", false);
         floweringIntensityBtn.addClass("disabled-old");
-        floweringIntensityBtn.removeClass("required-intensity");
+        floweringIntensityBtn.removeClass("required-field");
     } else {
         if (old_record["flowering-intensity"] == null || old_record["flowering-intensity"].length === 0)
-            floweringIntensityBtn.addClass("required-intensity");
+            floweringIntensityBtn.addClass("required-field");
         else
-            floweringIntensityBtn.removeClass("required-intensity");
+            floweringIntensityBtn.removeClass("required-field");
 
         floweringIntensityBtn.prop("disabled", false);
         $("#flowering-intensity-old").prop("required", true);

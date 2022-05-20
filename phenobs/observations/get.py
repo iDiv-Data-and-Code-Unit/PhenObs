@@ -232,7 +232,11 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
         {}: A JSON object containing the collection and related records' data
 
     """
-    collection = Collection.objects.filter(id=id).get()
+    try:
+        collection = Collection.objects.filter(id=id).get()
+    except Collection.DoesNotExist:
+        return JsonResponse({"id": -1})
+
     collection_records = Record.objects.filter(collection=collection).all()
     prev_collection_json = get_older(collection)
 

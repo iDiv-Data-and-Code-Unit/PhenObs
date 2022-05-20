@@ -234,8 +234,7 @@ export async function fetchCollection(id, isOnline, isOld=false) {
         await $.ajax({
             url: "/observations/get/" + id,
             error: function (jqXHR) {
-                // alert("Could not establish a connection with database.");
-                alertModal("Could not establish a connection with database.");
+                alert("Could not establish a connection with database.");
                 return null;
             },
             beforeSend: function(){
@@ -244,7 +243,12 @@ export async function fetchCollection(id, isOnline, isOld=false) {
             complete: function(){
                 $("body").removeClass("loading");
             },
-            success: async (data) => await insertCollection(data, isOnline, true),
+            success: async function (data) {
+                if (data["id"] !== -1)
+                    await insertCollection(data, isOnline, true);
+                else
+                    alertModal("Collection with ID " + id + " was not found in database. Please delete the collection from local storage, if possible.");
+            }
         });
     } catch (error) {
         console.error(error);
