@@ -139,7 +139,7 @@ export async function emptyCollection(id=null) {
             $("body").addClass("loading");
         },
         complete: function(data){
-            console.log(data["id"]);
+            // console.log(data["id"]);
             $("body").removeClass("loading");
         },
         success: async function (data) {

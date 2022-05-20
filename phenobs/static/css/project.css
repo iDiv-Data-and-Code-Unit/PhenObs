@@ -420,3 +420,16 @@ body.loading .overlay {
   border-radius: 5px;
   border: 2px red solid;
 }
+
+
+
+.disabled-old {
+  background: rgb(200, 200, 200);
+}
+
+
+
+.required-intensity {
+  -webkit-box-shadow: 0 0 6px 1px rgba(255,0,0,1));
+  box-shadow: 0 0 6px 1px rgba(255,0,0,1);
+}

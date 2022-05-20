@@ -77,12 +77,12 @@ function getEditId() {
 }
 
 export async function changeListeners(fields, id, editFlag) {
-    console.log(id);
+    // console.log(id);
     for (let key in fields) {
         for (let i = 0; i < fields[key].length; i++) {
             $(fields[key][i]).unbind().change(async function() {
                 let collection = await getCollection(id);
-                console.log(collection);
+                // console.log(collection);
                 let plants = document.getElementById("plant");
                 let isDone = collection["records"][parseInt(plants.selectedOptions[0].id)]["done"];
                 await cacheRecord(id, parseInt(plants.selectedOptions[0].id), isDone);
@@ -163,14 +163,21 @@ export function cachingListeners(id) {
     });
 
     // Add event listener for next and previous buttons
-    $("#next-btn").unbind().click(async () => await checkDefault(id, true));
-    $("#prev-btn").unbind().click(async () => await checkDefault(id, false));
+    // $("#next-btn").unbind().click(async () => await checkDefault(id, true));
+    // $("#prev-btn").unbind().click(async () => await checkDefault(id, false));
+    $("#finish-btn").unbind().click(async () => await checkDefault(id, null, true));
 
     // Add event listener for #no-observation
     $("#no-observation").unbind().change((e) => noObservationPossible(e.target.checked));
 
     // Add event listener for done collection button
-    $("#done-btn").unbind().click(async () => await uploadCollection(id));
+    $("#done-btn").unbind().click(
+        async () => {
+            const isReady = await checkDefault(id, null, true);
+            if (isReady)
+                await uploadCollection(id);
+        }
+    );
 
     // Add event listener for cancel collection button
     $("#cancel-btn").unbind().click(() => {

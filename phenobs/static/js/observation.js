@@ -37,7 +37,7 @@ export async function setupPlants(id, orderedList=false) {
     let plants = document.getElementById('plant');
 
     let chosen = null;
-    console.log(plants.innerHTML);
+
     if (plants.children.length > 0)
         chosen = parseInt(plants.selectedOptions[0].id);
 
@@ -259,7 +259,7 @@ export async function checkDefault(id, nextFlag, manual=false) {
     let plants = document.getElementById('plant');
 
     if (!plants.selectedIndex && document.getElementById("emptyOption") != null)
-        return;
+        return false;
 
     let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];
     let defaultFlag = true;
@@ -284,8 +284,9 @@ export async function checkDefault(id, nextFlag, manual=false) {
         $('#confirm-yes').unbind().click(
             async () => await checkManual(manual, nextFlag, checkValid(), id, order)
         );
+        return true;
     } else {
-        await checkManual(manual, nextFlag, checkValid(), id, order);
+        return await checkManual(manual, nextFlag, checkValid(), id, order);
     }
 }
 
@@ -297,9 +298,10 @@ async function checkManual(manual, nextFlag, isValid, id, order) {
             await selectPreviousPlant(id, order);
     } else if (!isValid) {
         alertModal("Please fill all fields!");
+        return false;
     } else {
-
         await cacheRecord(id, order, true);
+        return true;
     }
 }
 
