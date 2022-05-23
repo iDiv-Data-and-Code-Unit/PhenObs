@@ -19,7 +19,7 @@ export function getFields(isOld=false) {
     };
 }
 
-export async function setupPlants(id, orderedList=false) {
+export async function setupPlants(id, orderedList=false, fillCall=false) {
     const collection = await getCollection(id);
 
     if (collection['last-collection-id'] != null) {
@@ -38,7 +38,7 @@ export async function setupPlants(id, orderedList=false) {
 
     let chosen = null;
 
-    if (plants.children.length > 0)
+    if (plants.children.length > 0 && !$("#emptyOption").length && !fillCall)
         chosen = parseInt(plants.selectedOptions[0].id);
 
     plants.innerHTML = '<option value="" name="" id="emptyOption"></option>';
@@ -88,9 +88,11 @@ export async function setupPlants(id, orderedList=false) {
             '</option>';
     }
 
-    if (chosen == null)
+    if (chosen == null) {
         plants.selectedIndex = 0;
-    else
+        toggleButtons(true);
+        $("#done-btn").text("Done");
+    } else
         $("#emptyOption").remove();
     $("#done-btn").prop("disabled", "disabled");
     $("#next-btn").addClass("d-none");

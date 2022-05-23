@@ -33,7 +33,7 @@ if (location.href.indexOf('edit') !== -1) {
     })();
 }
 
-export async function fill(id, isOnline, isOrdered=false) {
+export async function fill(id, isOnline, isOrdered=false, orderedListCall=false) {
     window.onbeforeunload = function() {
         return confirm("Do you want the page to be reloaded?");
     }
@@ -52,11 +52,11 @@ export async function fill(id, isOnline, isOrdered=false) {
     $('#creator').text(collection['creator']);
     $('#orderedList').unbind().click(async function() {
         if ($(this).attr("name") === "alpha")
-            await fill(id, isOnline, true)
+            await fill(id, isOnline, true, true)
         else
-            await fill(id, isOnline);
+            await fill(id, isOnline, false, true);
     })
-    await setupPlants(parseInt(collection["id"]), isOrdered);
+    await setupPlants(parseInt(collection["id"]), isOrdered, !orderedListCall);
     // await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
