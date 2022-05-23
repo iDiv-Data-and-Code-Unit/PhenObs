@@ -274,7 +274,7 @@ a:active {
 
 
 .new-value-btn {
-  border: solid 1px rgb(253,199,36);
+  border: solid 1px #b33eed;
 }
 
 
@@ -347,15 +347,15 @@ body.loading .overlay {
 
 
 .done-btn-ready {
-  background: rgba(0, 205, 0, 0.6);
+  background: rgba(0,123,255, 1);
 }
 
 .done-btn-ready:hover {
-  background: rgba(0, 180, 0, 0.7);
+  background: rgba(2, 111, 227, 1);
 }
 
 .done-btn-ready:focus {
-  background: rgba(0, 130, 0, 0.8);
+  background: rgba(0, 80, 166, 1);
 }
 
 
@@ -441,29 +441,31 @@ body.loading .overlay {
 .online-feature {
   /*-webkit-box-shadow: 0 0 6px 1px rgb(40,167,69);*/
   /*box-shadow: 0 0 6px 1px rgb(40,167,69);*/
-  border: solid 1px rgb(40,167,69);
-  filter: invert(52%) sepia(35%) saturate(920%) hue-rotate(82deg) brightness(94%) contrast(92%);
-  color: rgb(40,167,69);
+  filter: invert(36%) sepia(50%) saturate(6082%) hue-rotate(201deg) brightness(104%) contrast(106%);
 }
 
 .offline-feature {
-  border: solid 1px rgb(253,199,36);
-  color: rgb(253,199,36);
-  filter: invert(69%) sepia(79%) saturate(454%) hue-rotate(357deg) brightness(102%) contrast(98%);
+  border: solid 1px #b33eed;
+  color: #b33eed;
+  filter: invert(53%) sepia(96%) saturate(6622%) hue-rotate(269deg) brightness(101%) contrast(86%);
 }
 
 .online-feature::-webkit-calendar-picker-indicator {
   cursor: pointer;
   border-radius: 4px;
   margin-right: 2px;
-  opacity: 0.6;
-  filter: invert(52%) sepia(35%) saturate(920%) hue-rotate(82deg) brightness(94%) contrast(92%);
+  opacity: 1;
+  /*filter: invert(36%) sepia(50%) saturate(6082%) hue-rotate(201deg) brightness(104%) contrast(106%);*/
 }
 
-.text-warning.dropdown-item.active {
-  background-color: #ffedb8;
+.text-offline.dropdown-item.active {
+  background-color: #f4e1fc;
 }
 
-.text-success.dropdown-item.active {
-  background-color: #a0fab5;
+.text-primary.dropdown-item.active {
+  background-color: #dbedff;
+}
+
+.text-offline {
+  color: #b33eed!important;
 }

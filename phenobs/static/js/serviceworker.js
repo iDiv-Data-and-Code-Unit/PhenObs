@@ -43,7 +43,7 @@ var filesToCache = [
     '/static/images/bootstrap-icons/plus-circle-fill.svg',
 
     '/static/images/save_db_primary.png',
-    '/static/images/db_check.png',
+    '/static/images/db_check_success.png',
     '/static/images/db_gray.png',
     '/static/images/db.png',
 ];

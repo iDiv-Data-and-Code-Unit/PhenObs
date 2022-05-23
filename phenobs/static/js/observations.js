@@ -38,10 +38,10 @@ async function insertRows(tableName) {
 
         if (collections[key]["finished"] && collections[key]["uploaded"])
             rowHTML +=
-                '<div class="d-flex align-items-center text-primary">' +
+                '<div class="d-flex align-items-center text-success">' +
                 '  <i class="bi bi-hdd-fill" style="font-size: 1.5rem;  border: 0" id="' + key + '-local"></i>\n' +
                 // '  <i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + key + '-online"></i>\n' +
-                '   <img class="ml-2" src="/static/images/db_check_primary.png" style="display: table-cell; vertical-align: middle; " height="23"  id="' + key + '-online">\n' +
+                '   <img class="ml-2" src="/static/images/db_check_success.png" style="display: table-cell; vertical-align: middle; " height="23"  id="' + key + '-online">\n' +
                 '</div>' +
             '</td>\n';
 
@@ -55,7 +55,7 @@ async function insertRows(tableName) {
                 '<td class="d-table-cell icon-table-cell" style="vertical-align: middle">\n' +
                 '  <a onclick="" class="">\n' +
                 // '    <i class="bi bi-cloud-arrow-up-fill" style="font-size: 1.5rem; color: blue;" id="' + key + '-upload"></i>\n' +
-                '    <img class="bi" src="/static/images/save_db_success.png" style="" width="21"  id="' + key + '-upload">\n' +
+                '    <img class="bi" src="/static/images/save_db_primary.png" style="" width="21"  id="' + key + '-upload">\n' +
                 '  </a>\n' +
                 '</div>\n';
 
@@ -67,14 +67,14 @@ async function insertRows(tableName) {
         rowHTML +=
             '<td class="text-left d-table-cell icon-table-cell" style="vertical-align: middle">\n' +
             // '  <a href="edit/' + key + '">\n' +
-            '    <i class="bi bi-pencil-fill text-success" style="font-size: 1.5rem;" id="' + key + '-edit"></i>\n' +
+            '    <i class="bi bi-pencil-fill text-primary" style="font-size: 1.5rem;" id="' + key + '-edit"></i>\n' +
             '  </a>\n' +
             '</td>\n';
 
         rowHTML +=
             '<td class="text-left d-table-cell icon-table-cell" style="vertical-align: middle">\n' +
             '  <a onclick="">\n' +
-            '    <i class="bi bi-trash-fill text-warning" style="font-size: 1.5rem;" id="' + key + '-cancel"></i>\n' +
+            '    <i class="bi bi-trash-fill text-offline" style="font-size: 1.5rem;" id="' + key + '-cancel"></i>\n' +
             '  </a>\n' +
             '</td>\n' +
             '</tr>';
@@ -237,20 +237,20 @@ async function addOnlineCollections(collections) {
             if (collections[i]["finished"] == true)
                 rowHTML +=
                     // '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
-                    '<img src="/static/images/db_check_primary.png" style="display: table-cell; vertical-align: middle;" height="23"  id="' + collections[i]['id'] + '-online">\n' +
+                    '<img src="/static/images/db_check_success.png" style="display: table-cell; vertical-align: middle;" height="23"  id="' + collections[i]['id'] + '-online">\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';
             else
                 rowHTML +=
-                    '<img src="/static/images/db_gray.png" style="display: table-cell; vertical-align: middle;" width="18"  id="' + collections[i]['id'] + '-online">\n' +
-                    '<i class="bi bi-exclamation-circle-fill ml-2" style="font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
+                    '<img src="/static/images/db_gray.png" style="display: table-cell; vertical-align: middle;" height="22"  id="' + collections[i]['id'] + '-online">\n' +
+                    '<i class="bi bi-exclamation-circle-fill ml-2" style="  font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';
                 // '<a href="edit/' + collections[i]['id'] + '">\n' +
             rowHTML +=
                 '</td>\n' +
                 '<td class="text-left d-table-cell icon-table-cell">\n';
-            rowHTML += '<i class="bi bi-pencil-fill text-success" style="font-size: 1.5rem;" id="' + collections[i]['id'] + '-edit"></i>\n' +
+            rowHTML += '<i class="bi bi-pencil-fill text-primary" style="font-size: 1.5rem;" id="' + collections[i]['id'] + '-edit"></i>\n' +
                 '</a>\n' +
                 '</td>';
             rowHTML +=

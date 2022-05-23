@@ -16,14 +16,14 @@
     </div>
 
     <div class="justify-content-start">
-      <button class="wide-button mr-3 mb-3 px-4 col-12 col-md-5 col-lg-4 col-xl-3" onclick="location.href='{% url 'observations:all' %}'">
+      <button class="wide-button mr-3 mb-3 px-4 col-12 col-md-5 col-lg-4 col-xl-3 offline-feature" onclick="location.href='{% url 'observations:all' %}'">
         <div class="d-flex align-items-center justify-content-center">
           <i class="bi bi-list-check mr-2"></i>
-          Observations
+          Local observations
         </div>
       </button>
 
-      <button class="wide-button px-4 col-12 col-md-5 col-lg-4 col-xl-3" id="add-collection">
+      <button class="wide-button px-4 col-12 col-md-5 col-lg-4 col-xl-3 online-feature" id="add-collection">
         <div class="d-flex align-items-center justify-content-center">
           <i class="bi bi-plus-circle-fill mr-2"></i>
           Add collection

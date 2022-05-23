@@ -6,7 +6,7 @@
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a id="brand" class="navbar-brand" href="{% url 'home' %}">PhenObs | <span class="text-success d-none" id="online">Online</span><span class="text-warning d-none" id="offline">Offline</span></a>
+      <a id="brand" class="navbar-brand" href="{% url 'home' %}">PhenObs | <span class="text-primary d-none" id="online">Online</span><span class="text-offline d-none" id="offline">Offline</span></a>
 
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
@@ -19,8 +19,8 @@
           <li class="nav-item dropdown d-xl-block d-none">
             <a class="nav-link dropdown-toggle {{ observations_active }}" data-toggle="dropdown" role="button" aria-expanded="false">Observations</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item {{ observations_default_active }} text-warning" href="{% url 'observations:all' %}">Local</a>
-              <a class="dropdown-item {{ observations_advanced_active }} text-success" href="{% url 'observations:advanced' %}">Overview</a>
+              <a class="dropdown-item {{ observations_default_active }} text-offline" href="{% url 'observations:all' %}">Local</a>
+              <a class="dropdown-item {{ observations_advanced_active }} text-primary" href="{% url 'observations:advanced' %}">Overview</a>
             </div>
           </li>
         </ul>
