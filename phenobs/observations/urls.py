@@ -11,9 +11,9 @@ urlpatterns = [
         name="all",
     ),
     path(
-        "advanced/",
-        views.advanced,
-        name="advanced",
+        "overview/",
+        views.overview,
+        name="overview",
     ),
     path(
         "add/",

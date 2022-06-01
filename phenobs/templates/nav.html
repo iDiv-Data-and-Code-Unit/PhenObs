@@ -20,7 +20,7 @@
             <a class="nav-link dropdown-toggle {{ observations_active }}" data-toggle="dropdown" role="button" aria-expanded="false">Observations</a>
             <div class="dropdown-menu">
               <a class="dropdown-item {{ observations_default_active }} text-offline" href="{% url 'observations:all' %}">Local</a>
-              <a class="dropdown-item {{ observations_advanced_active }} text-primary" href="{% url 'observations:advanced' %}">Overview</a>
+              <a class="dropdown-item {{ observations_overview_active }} text-primary" href="{% url 'observations:overview' %}">Overview</a>
             </div>
           </li>
         </ul>

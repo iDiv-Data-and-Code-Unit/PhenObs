@@ -30,7 +30,7 @@ def all(request: HttpRequest) -> HttpResponse:
 
 
 @login_required(login_url="/accounts/login/")
-def advanced(request: HttpRequest) -> HttpResponse:
+def overview(request: HttpRequest) -> HttpResponse:
     """The page showing all local and online collections
 
     Args:
@@ -62,7 +62,7 @@ def advanced(request: HttpRequest) -> HttpResponse:
             garden_dict["subgardens"].append(subgarden_dict)
         context["gardens"].append(garden_dict)
 
-    return render(request, "observations/advanced.html", context)
+    return render(request, "observations/overview.html", context)
 
 
 @login_required(login_url="/accounts/login/")
