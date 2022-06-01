@@ -6,66 +6,119 @@
 {% endblock nav %}
 
 {% block content %}
-  <div class="container">
-    <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4">
-        <h1 class="display-4">Help</h1>
-        <p>
-          You may find the useful tutorials down below to guide you through data collection process.
-        </p>
+{#  <div class="container d-md-flex">#}
+{#    <nav class="nav flex-md-column p-2 p-md-2 p-lg-4 my-3">#}
+{#      <ul class="nav nav-pills mb-3 pb-3 flex-md-column d-block mx-sm-auto mx-md-0" id="pills-tab" role="tablist">#}
+{#        <div class="font-weight-bold" style="color: #00b8d4">#}
+{#          <i class="bi bi-list-check"></i> Collecting#}
+{#        </div>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link active small py-1" aria-current="page" href="#" id="pills-profile-tab" data-bs-toggle="pill"#}
+{#             data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Interface elements</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"#}
+{#             type="button" role="tab" aria-controls="pills-profile" aria-selected="false" href="#">Add a new collection</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"#}
+{#             type="button" role="tab" aria-controls="pills-profile" aria-selected="false" href="#">Edit a collection</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"#}
+{#             type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Update local collections</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"#}
+{#             type="button" role="tab" aria-controls="pills-profile" aria-selected="false" href="#">Download collections</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"#}
+{#             type="button" role="tab" aria-controls="pills-profile" aria-selected="false" href="#">Delete local collections</a>#}
+{#        </li>#}
+{#      </ul>#}
+{#      <ul class="nav flex-md-column d-block mx-sm-auto mx-md-0">#}
+{#        <div class="font-weight-bold" style="color: #00bfa5">#}
+{#          <i class="bi bi-tools"></i> Administration#}
+{#        </div>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link active small py-1" aria-current="page" href="#">Adding a new garden</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" href="#">Creating a new user</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" href="#">Creating an admin user</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1">Deleting a collection</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" href="#">Deactivate a plant</a>#}
+{#        </li>#}
+{#        <li class="nav-item">#}
+{#          <a class="nav-link small py-1" href="#">Assigning a user to subgarden</a>#}
+{#        </li>#}
+{#      </ul>#}
+{#    </nav>#}
+{#    <div class="p-2 p-md-2 p-lg-4 my-3 flex-column">#}
+{#      <h1 class="display-4">Help</h1>#}
+{#      <p>#}
+{#        You may find the useful tutorials down below to guide you through data collection process.#}
+{#      </p>#}
+{#    </div>#}
+{#  </div>#}
 
-        <div class="accordion" id="pages">
 
 
-          <div class="card">
-            <div class="card-header" id="home_help_heading">
-              <h2 class="mb-0">
-                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#home_help" aria-expanded="false" aria-controls="home_help">
-                  Default view
-                </button>
-              </h2>
-            </div>
-            <div id="home_help" class="collapse" aria-labelledby="home_help_heading" data-parent="#pages">
-              <div class="card-body">
-                {% include 'help/default_help.html' %}
-              </div>
-            </div>
-          </div>
-
-
-          <div class="card">
-            <div class="card-header" id="default_help_heading">
-              <h2 class="mb-0">
-                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#default_help" aria-expanded="false" aria-controls="default_help">
-                  Advanced view
-                </button>
-              </h2>
-            </div>
-            <div id="default_help" class="collapse" aria-labelledby="default_help_heading" data-parent="#pages">
-              <div class="card-body">
-                {% include 'help/advanced_help.html' %}
-              </div>
-            </div>
-          </div>
-
-
-          <div class="card">
-            <div class="card-header" id="advanced_help_heading">
-              <h2 class="mb-0">
-                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#advanced_help" aria-expanded="false" aria-controls="advanced_help">
-                  Admin view
-                </button>
-              </h2>
-            </div>
-            <div id="advanced_help" class="collapse" aria-labelledby="advanced_help_heading" data-parent="#pages">
-              <div class="card-body">
-                {% include 'help/admin_help.html' %}
-              </div>
-            </div>
-          </div>
-
-
-
+  <div class="container d-flex">
+    <div class="col-3">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <div class="font-weight-bold" style="color: #00b8d4">
+          <i class="bi bi-list-check"></i> Collecting
         </div>
+
+        <a class="nav-link active" id="v-pills-interface-tab" data-toggle="pill" href="#v-pills-interface" role="tab" aria-controls="v-pills-interface" aria-selected="true">Interface elements</a>
+        <a class="nav-link" id="v-pills-add-tab" data-toggle="pill" href="#v-pills-add" role="tab" aria-controls="v-pills-add" aria-selected="false">Adding a new collection</a>
+        <a class="nav-link" id="v-pills-edit-tab" data-toggle="pill" href="#v-pills-edit" role="tab" aria-controls="v-pills-edit" aria-selected="false">Edit a collection</a>
+        <a class="nav-link" id="v-pills-update-tab" data-toggle="pill" href="#v-pills-update" role="tab" aria-controls="v-pills-update" aria-selected="false">Update local collections</a>
+        <a class="nav-link" id="v-pills-download-tab" data-toggle="pill" href="#v-pills-download" role="tab" aria-controls="v-pills-download" aria-selected="false">Download collections</a>
+        <a class="nav-link" id="v-pills-delete-tab" data-toggle="pill" href="#v-pills-delete" role="tab" aria-controls="v-pills-delete" aria-selected="false">Delete local collections</a>
+
+        <div class="font-weight-bold mt-4" style="color: #00bfa5">
+          <i class="bi bi-list-check"></i> Administration
+        </div>
+
+        <a class="nav-link" id="v-pills-addgarden-tab" data-toggle="pill" href="#v-pills-addgarden" role="tab" aria-controls="v-pills-addgarden" aria-selected="false">Adding a new garden</a>
+        <a class="nav-link" id="v-pills-newuser-tab" data-toggle="pill" href="#v-pills-newuser" role="tab" aria-controls="v-pills-newuser" aria-selected="false">Creating a new user</a>
+        <a class="nav-link" id="v-pills-adminuser-tab" data-toggle="pill" href="#v-pills-adminuser" role="tab" aria-controls="v-pills-adminuser" aria-selected="false">Creating an admin user</a>
+        <a class="nav-link" id="v-pills-deletecollection-tab" data-toggle="pill" href="#v-pills-deletecollection" role="tab" aria-controls="v-pills-deletecollection" aria-selected="false">Deleting a collection</a>
+        <a class="nav-link" id="v-pills-deactivate-tab" data-toggle="pill" href="#v-pills-deactivate" role="tab" aria-controls="v-pills-deactivate" aria-selected="false">Deactivate a plant</a>
+        <a class="nav-link" id="v-pills-assign-tab" data-toggle="pill" href="#v-pills-assign" role="tab" aria-controls="v-pills-assign" aria-selected="false">Assigning a user to subgarden</a>
+      </div>
+
+
+    </div>
+    <div class="col-9">
+
+      <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="v-pills-interface" role="tabpanel" aria-labelledby="v-pills-interface-tab">Interface elements</div>
+        <div class="tab-pane fade" id="v-pills-add" role="tabpanel" aria-labelledby="v-pills-add-tab">Adding a new collection</div>
+        <div class="tab-pane fade" id="v-pills-edit" role="tabpanel" aria-labelledby="v-pills-edit-tab">Editing a collection</div>
+        <div class="tab-pane fade" id="v-pills-update" role="tabpanel" aria-labelledby="v-pills-update-tab">Update local collections</div>
+        <div class="tab-pane fade" id="v-pills-download" role="tabpanel" aria-labelledby="v-pills-download-tab">Download collections</div>
+        <div class="tab-pane fade" id="v-pills-delete" role="tabpanel" aria-labelledby="v-pills-delete-tab">Delete local collections</div>
+        <div class="tab-pane fade" id="v-pills-addgarden" role="tabpanel" aria-labelledby="v-pills-addgarden-tab">Adding a new garden</div>
+        <div class="tab-pane fade" id="v-pills-newuser" role="tabpanel" aria-labelledby="v-pills-newuser-tab">Creating a new user</div>
+        <div class="tab-pane fade" id="v-pills-adminuser" role="tabpanel" aria-labelledby="v-pills-adminuser-tab">Creating an admin user</div>
+        <div class="tab-pane fade" id="v-pills-deletecollection" role="tabpanel" aria-labelledby="v-pills-deletecollection-tab">Deleting a collection</div>
+        <div class="tab-pane fade" id="v-pills-deactivate" role="tabpanel" aria-labelledby="v-pills-deactivate-tab">Deactivate a plant</div>
+        <div class="tab-pane fade" id="v-pills-assign" role="tabpanel" aria-labelledby="v-pills-assign-tab">Assigning a user to subgarden</div>
+      </div>
+
     </div>
   </div>
+
+
+
 {% endblock content %}

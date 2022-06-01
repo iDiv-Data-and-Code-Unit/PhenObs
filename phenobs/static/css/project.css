@@ -445,7 +445,7 @@ body.loading .overlay {
 }
 
 .offline-feature {
-  border: solid 1px #b33eed;
+  /*border: solid 1px #b33eed;*/
   color: #b33eed;
   filter: invert(53%) sepia(96%) saturate(6622%) hue-rotate(269deg) brightness(101%) contrast(86%);
 }
@@ -468,4 +468,10 @@ body.loading .overlay {
 
 .text-offline {
   color: #b33eed!important;
+}
+
+
+
+.help-nav-link {
+  background: yellow;
 }

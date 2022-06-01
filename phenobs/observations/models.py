@@ -20,11 +20,11 @@ class Collection(models.Model):
 
     garden = models.ForeignKey(Garden, on_delete=models.CASCADE)
     date = models.DateField(
-        default=timezone.localdate,
+        default=timezone.localdate(),
         help_text="Date and time of collection",
     )
     doy = models.IntegerField(help_text="Day of year")
-    
+
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     finished = models.BooleanField(default=False)
 

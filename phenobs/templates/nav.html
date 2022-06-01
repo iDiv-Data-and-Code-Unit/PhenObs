@@ -26,9 +26,9 @@
         </ul>
         <ul class="navbar-nav">
           {% if request.user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link {{ help_active }}" id="help" href="{% url 'help' %}">{% translate "Help" %}</a>
-            </li>
+{#            <li class="nav-item">#}
+{#              <a class="nav-link {{ help_active }}" id="help" href="{% url 'help' %}">{% translate "Help" %}</a>#}
+{#            </li>#}
             <li class="nav-item">
               {# URL provided by django-allauth/account/urls.py #}
               <a class="nav-link disabled" id="signout" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>

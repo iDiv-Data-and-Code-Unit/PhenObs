@@ -61,10 +61,13 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
 
+    if (collection["last-collection-id"] == null) {
+        await getLast(parseInt(collection["id"]));
+        collection = await getCollection(id);
+    }
+
     if (collection["last-collection-id"] != null) {
         await oldClickListeners(parseInt(collection["last-collection-id"]));
-    } else {
-        console.log(collection);
     }
 
     await cachingListeners(parseInt(collection["id"]));

@@ -43,6 +43,7 @@ def upload_selected(request):
         return JsonResponse("OK", safe=False)
 
 
+# FAT models
 def update_collection(data, username):
     collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
     doy = collection_date.date() - date(collection_date.year, 1, 1)
@@ -56,6 +57,12 @@ def update_collection(data, username):
         creator=Collection.objects.filter(id=data["id"]).get().creator,
     )
     collection.save()
+
+    # 1. Validate
+    # 2. Normalize
+    # 3. Process
+    # TODO: JSON schema for validation
+    # CreateFromJSON function in a Model (FAT models)
 
     for record in data["records"]:
         if type(record) == str:
