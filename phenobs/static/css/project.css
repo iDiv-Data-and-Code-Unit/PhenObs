@@ -162,6 +162,7 @@ a:active {
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   font-size: 14pt;
   height: 100px;
+  color: inherit;
 }
 
 .wide-button:hover {
@@ -182,6 +183,7 @@ a:active {
   box-shadow: 0 3px 6px 1px rgba(0,0,0,0.16);
   font-size: 14pt;
   height: 50px;
+  color: inherit;
 }
 
 .narrow-button:hover {
