@@ -11,13 +11,9 @@ from .models import Plant
 
 
 class CsvImportForm(forms.Form):
-    gardens = Garden.objects.filter(main_garden=None).all()
-    garden_choices = []
-
-    for garden in gardens:
-        garden_choices.append((garden.id, str(garden.name)))
-
-    garden = forms.IntegerField(widget=forms.Select(choices=garden_choices))
+    garden = forms.ModelChoiceField(
+        queryset=Garden.objects.filter(main_garden=None).all()
+    )
     csv_upload = forms.FileField()
 
 
