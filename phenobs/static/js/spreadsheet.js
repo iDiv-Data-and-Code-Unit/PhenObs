@@ -14,7 +14,6 @@ async function fillCollections(id, edit=null) {
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            console.log(data);
             $("#viewsContent").html(data);
             initNav();
             $("#uploadSelected").unbind().click(uploadSelected);
@@ -34,6 +33,12 @@ async function fillCollections(id, edit=null) {
                 $("#view").addClass("active");
                 $("#view").addClass("show");
             }
+
+            const collectionCardsEdit = $('[id^="collection-"]');
+            const collectionCardsView = $('[id^="view-collection-"]');
+
+            assignListeners(collectionCardsEdit, true);
+            assignListeners(collectionCardsView, false);
         }
     });
 }
@@ -44,7 +49,6 @@ $("#gardens").change(async (e) => {
 });
 
 function formatCollection(id) {
-    console.log();
 
     let collection = {
         "id": parseInt(id),
@@ -93,10 +97,14 @@ function selectAll(view=false) {
 
 function checkAll(checked=true, view=false) {
     const ids = "selected" + ((view) ? "view-" : "-");
-    console.log(ids)
     const checkboxes = $('input[id*="' + ids + '"]');
-    for (let i = 0; i < checkboxes.length; i++)
-        checkboxes[i].checked = checked;
+
+    console.log(checkboxes)
+
+    for (let i = 0; i < checkboxes.length; i++) {
+        if (!(checkboxes[i].classList.contains("d-none")))
+            checkboxes[i].checked = checked;
+    }
 }
 
 function downloadFile(filetype){
@@ -165,18 +173,15 @@ async function uploadSelected(collection=null) {
     for (let i = 0; i < selected.length; i++)
         collections.push(formatCollection(selected[i]));
 
-    console.log(collections);
 
     for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
-        console.log(collection);
 
         for (let j = 0; j < collection["records"].length; j++) {
             const record = collection["records"][j];
 
             const fields = $("[id*=" + record["id"] + "-]");
             for (let k = 0; k < fields.length; k++) {
-                console.log(fields[k].id)
                 fields[k].classList.remove("invalidField");
             }
 
@@ -251,4 +256,45 @@ async function uploadSelected(collection=null) {
     }
 
     return collections;
+}
+
+function assignListeners(cards, edit=false) {
+    for (let i = 0; i < cards.length; i++) {
+        const idSplit = cards[i].id.split('-');
+        $(cards[i]).on("show.bs.collapse",
+            async () => {
+                if ($(`#${(edit) ? "edit" : "view"}-records-${idSplit[idSplit.length - 1]}`).html().length === 0) {
+                    await fillInContent(
+                        parseInt(idSplit[idSplit.length - 1]),
+                        edit
+                    );
+                    if (edit)
+                        $(`#selected-${idSplit[idSplit.length - 1]}`).removeClass("d-none");
+                }
+            }
+        )
+    }
+}
+
+async function fillInContent(id, edit=false) {
+    const url = (edit) ?
+        `/observations/edit_collection/${id}/` :
+        `/observations/view_collection/${id}/`;
+
+    await $.ajax({
+        url: url,
+        type: "GET",
+        error: function (jqXHR) {
+            alertModal("Could not establish a connection with database.");
+        },
+        beforeSend: function () {
+            $("body").addClass("loading");
+        },
+        complete: function () {
+            $("body").removeClass("loading");
+        },
+        success: async function (content) {
+            $(`#${(edit) ? "edit" : "view"}-records-${id}`).html(content);
+        }
+    });
 }

@@ -55,6 +55,16 @@ urlpatterns = [
         get.get_collections,
         name="get_collections",
     ),
+    path(
+        "edit_collection/<int:id>/",
+        get.edit_collection_content,
+        name="edit_collection_content",
+    ),
+    path(
+        "view_collection/<int:id>/",
+        get.view_collection_content,
+        name="view_collection_content",
+    ),
     path("download/<str:filetype>/<str:ids>", download.download, name="download"),
     path("save/", upload.upload_selected, name="save"),
 ]

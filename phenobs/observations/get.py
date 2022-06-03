@@ -143,81 +143,103 @@ def get_collections(request, id):
                 if collection.finished:
                     subgarden["finished"] = subgarden["finished"] + 1
 
-                records = Record.objects.filter(collection=collection).all()
-                for record in records:
-                    maintenance = []
-                    for option in record.maintenance:
-                        if option != "None":
-                            maintenance.append(option.replace("_", " "))
-
-                    collection_dict["records"].append(
-                        {
-                            "id": record.id,
-                            "values": [
-                                {"id": "name", "value": record.plant.garden_name},
-                                {
-                                    "id": "initial-vegetative-growth",
-                                    "value": record.initial_vegetative_growth,
-                                },
-                                {
-                                    "id": "young-leaves-unfolding",
-                                    "value": record.young_leaves_unfolding,
-                                },
-                                {"id": "flowers-opening", "value": record.flowers_open},
-                                {
-                                    "id": "peak-flowering",
-                                    "value": record.peak_flowering,
-                                },
-                                {
-                                    "id": "peak-flowering-estimation",
-                                    "value": record.peak_flowering_estimation,
-                                },
-                                {
-                                    "id": "flowering-intensity",
-                                    "value": record.flowering_intensity,
-                                },
-                                {"id": "ripe-fruits", "value": record.ripe_fruits},
-                                {"id": "senescence", "value": record.senescence},
-                                {
-                                    "id": "senescence-intensity",
-                                    "value": record.senescence_intensity,
-                                },
-                                {
-                                    "id": "cut-partly",
-                                    "value": "cut_partly" in record.maintenance,
-                                },
-                                {
-                                    "id": "cut-total",
-                                    "value": "cut_total" in record.maintenance,
-                                },
-                                {
-                                    "id": "covered-natural",
-                                    "value": "covered_natural" in record.maintenance,
-                                },
-                                {
-                                    "id": "covered-artificial",
-                                    "value": "covered_artificial" in record.maintenance,
-                                },
-                                {
-                                    "id": "transplanted",
-                                    "value": "transplanted" in record.maintenance,
-                                },
-                                {
-                                    "id": "removed",
-                                    "value": "removed" in record.maintenance,
-                                },
-                                {
-                                    "id": "maintenance",
-                                    "value": str(maintenance)[1:-1].replace("'", ""),
-                                },
-                                {"id": "remarks", "value": record.remarks},
-                                {"id": "order", "value": record.plant.order},
-                            ],
-                        }
-                    )
                 subgarden["collections"].append(collection_dict)
 
     return render(request, "observations/views_content.html", context)
+
+
+@login_required
+def edit_collection_content(request, id):
+    context = collection_content(id)
+    return render(request, "observations/edit_records.html", context)
+
+
+@login_required
+def view_collection_content(request, id):
+    context = collection_content(id)
+    return render(request, "observations/view_records.html", context)
+
+
+def collection_content(collection_id):
+    collection = Collection.objects.filter(id=collection_id).get()
+    records = Record.objects.filter(collection=collection).all()
+    records_values = []
+
+    for record in records:
+        maintenance = []
+        for option in record.maintenance:
+            if option != "None":
+                maintenance.append(option.replace("_", " "))
+
+        records_values.append(
+            {
+                "id": record.id,
+                "values": [
+                    {"id": "name", "value": record.plant.garden_name},
+                    {
+                        "id": "initial-vegetative-growth",
+                        "value": record.initial_vegetative_growth,
+                    },
+                    {
+                        "id": "young-leaves-unfolding",
+                        "value": record.young_leaves_unfolding,
+                    },
+                    {"id": "flowers-opening", "value": record.flowers_open},
+                    {
+                        "id": "peak-flowering",
+                        "value": record.peak_flowering,
+                    },
+                    {
+                        "id": "peak-flowering-estimation",
+                        "value": record.peak_flowering_estimation,
+                    },
+                    {
+                        "id": "flowering-intensity",
+                        "value": record.flowering_intensity,
+                    },
+                    {"id": "ripe-fruits", "value": record.ripe_fruits},
+                    {"id": "senescence", "value": record.senescence},
+                    {
+                        "id": "senescence-intensity",
+                        "value": record.senescence_intensity,
+                    },
+                    {
+                        "id": "cut-partly",
+                        "value": "cut_partly" in record.maintenance,
+                    },
+                    {
+                        "id": "cut-total",
+                        "value": "cut_total" in record.maintenance,
+                    },
+                    {
+                        "id": "covered-natural",
+                        "value": "covered_natural" in record.maintenance,
+                    },
+                    {
+                        "id": "covered-artificial",
+                        "value": "covered_artificial" in record.maintenance,
+                    },
+                    {
+                        "id": "transplanted",
+                        "value": "transplanted" in record.maintenance,
+                    },
+                    {
+                        "id": "removed",
+                        "value": "removed" in record.maintenance,
+                    },
+                    {
+                        "id": "maintenance",
+                        "value": str(maintenance)[1:-1].replace("'", ""),
+                    },
+                    {"id": "remarks", "value": record.remarks},
+                    {"id": "order", "value": record.plant.order},
+                ],
+            }
+        )
+
+    context = {"records": records_values, "range": range(5, 105, 5)}
+
+    return context
 
 
 @login_required(login_url="/accounts/login/")

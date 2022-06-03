@@ -55,7 +55,8 @@
   {#                <strong>Collection date: </strong>{{ collection.date }}#}
   {#              </p>#}
   {#              <hr>#}
-                {% include "observations/view_records.html" with records=collection.records %}
+                <div id="view-records-{{ collection.id }}"></div>
+{#                {% include "observations/view_records.html" with records=collection.records %}#}
               </div>
             </div>
           </div>
