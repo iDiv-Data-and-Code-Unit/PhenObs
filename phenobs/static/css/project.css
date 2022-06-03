@@ -276,7 +276,7 @@ a:active {
 
 
 .new-value-btn {
-  border: solid 1px #b33eed;
+  border: solid 1px #ff9800;
 }
 
 
@@ -448,8 +448,8 @@ body.loading .overlay {
 
 .offline-feature {
   /*border: solid 1px #b33eed;*/
-  color: #b33eed;
-  filter: invert(53%) sepia(96%) saturate(6622%) hue-rotate(269deg) brightness(101%) contrast(86%);
+  /*color: #ff9800;*/
+  filter: invert(76%) sepia(44%) saturate(6149%) hue-rotate(360deg) brightness(103%) contrast(105%);
 }
 
 .online-feature::-webkit-calendar-picker-indicator {
@@ -461,7 +461,7 @@ body.loading .overlay {
 }
 
 .text-offline.dropdown-item.active {
-  background-color: #f4e1fc;
+  background-color: #ffedd3;
 }
 
 .text-primary.dropdown-item.active {
@@ -469,7 +469,7 @@ body.loading .overlay {
 }
 
 .text-offline {
-  color: #b33eed!important;
+  color: #ff9800!important;
 }
 
 
