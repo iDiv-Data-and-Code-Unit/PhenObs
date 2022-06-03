@@ -151,6 +151,7 @@ def get_collections(request, id):
 @login_required
 def edit_collection_content(request, id):
     context = collection_content(id)
+    context["collection_id"] = id
     return render(request, "observations/edit_records.html", context)
 
 

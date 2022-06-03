@@ -124,45 +124,6 @@ function initNav() {
     $("#viewDeselectAll").unbind().click((e) => {e.preventDefault(); checkAll(false, true)});
 
     document.getElementById("uploadSelected").addEventListener("click", async () => await uploadSelected());
-
-    const saveButtons = $('button[id*="-save"]');
-    const cancelButtons = $('button[id*="-cancel"]');
-
-    for (let i = 0; i < saveButtons.length; i++) {
-        saveButtons[i].addEventListener(
-            'click',
-            () => uploadSelected(parseInt(saveButtons[i].id.split('-')[0]))
-        );
-
-        const oldValues = formatCollection(saveButtons[i].id.split('-')[0]);
-
-        cancelButtons[i].addEventListener(
-            'click',
-            () => {
-                const id = oldValues["id"];
-
-                document.getElementById("date-" + id).value = oldValues["date"];
-
-                for (let j = 0; j < oldValues["records"].length; j++) {
-                    const recordId = oldValues["records"][j]["id"];
-                    for (let key in oldValues["records"][j]) {
-                        if (key === "id" || key === "no-observation" || key === "done")
-                            continue;
-                        else {
-                            if (oldValues["records"][j][key] === true || oldValues["records"][j][key] === false) {
-                                document.getElementById(recordId + "-" + key).checked = oldValues["records"][j][key];
-                            }
-                            else {
-                                document.getElementById(recordId + "-" + key).value = oldValues["records"][j][key];
-                            }
-                        }
-                    }
-                }
-
-                $("#collection-" + id).collapse('hide');
-            }
-        )
-    }
 }
 
 async function uploadSelected(collection=null) {
@@ -261,19 +222,58 @@ async function uploadSelected(collection=null) {
 function assignListeners(cards, edit=false) {
     for (let i = 0; i < cards.length; i++) {
         const idSplit = cards[i].id.split('-');
+        const collectionId = idSplit[idSplit.length - 1];
+
         $(cards[i]).on("show.bs.collapse",
             async () => {
-                if ($(`#${(edit) ? "edit" : "view"}-records-${idSplit[idSplit.length - 1]}`).html().length === 0) {
+                if ($(`#${(edit) ? "edit" : "view"}-records-${collectionId}`).html().length === 0) {
                     await fillInContent(
-                        parseInt(idSplit[idSplit.length - 1]),
+                        parseInt(collectionId),
                         edit
                     );
-                    if (edit)
-                        $(`#selected-${idSplit[idSplit.length - 1]}`).removeClass("d-none");
+
+                    if (edit) {
+                        $(`#selected-${collectionId}`).removeClass("d-none");
+                        cancelAndSaveButtons(collectionId);
+                    }
                 }
             }
         )
     }
+}
+
+function cancelAndSaveButtons(collectionId) {
+    document.getElementById(`${collectionId}-save`).addEventListener(
+        'click',
+        () => uploadSelected(parseInt(collectionId))
+    );
+
+    const oldValues = formatCollection(collectionId);
+
+    document.getElementById(`${collectionId}-cancel`).addEventListener(
+        'click',
+        () => {
+            const id = oldValues["id"];
+
+            document.getElementById("date-" + id).value = oldValues["date"];
+
+            for (let j = 0; j < oldValues["records"].length; j++) {
+                const recordId = oldValues["records"][j]["id"];
+                for (let key in oldValues["records"][j]) {
+                    if (!(key === "id" || key === "no-observation" || key === "done")) {
+                        if (oldValues["records"][j][key] === true || oldValues["records"][j][key] === false) {
+                            document.getElementById(recordId + "-" + key).checked = oldValues["records"][j][key];
+                        }
+                        else {
+                            document.getElementById(recordId + "-" + key).value = oldValues["records"][j][key];
+                        }
+                    }
+                }
+            }
+
+            $("#collection-" + id).collapse('hide');
+        }
+    )
 }
 
 async function fillInContent(id, edit=false) {
