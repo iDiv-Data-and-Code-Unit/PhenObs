@@ -3,7 +3,6 @@ from django.contrib import admin, messages
 from django.shortcuts import render
 from django.urls import path
 from pandas import read_csv
-from pandas.errors import EmptyDataError
 
 from ..gardens.models import Garden
 from ..species.models import Species
@@ -15,6 +14,8 @@ class CsvImportForm(forms.Form):
         queryset=Garden.objects.filter(main_garden=None).all()
     )
     csv_upload = forms.FileField()
+    DELIMITER_CHOICES = [("1", "Semicolon (;)"), ("2", "Comma (,)")]
+    delimiter = forms.ChoiceField(widget=forms.RadioSelect, choices=DELIMITER_CHOICES)
 
 
 @admin.register(Plant)
@@ -37,28 +38,32 @@ class PlantAdmin(admin.ModelAdmin):
         if request.method == "POST":
             csv_file = request.FILES["csv_upload"]
 
+            # delimiter = 1 for semicolon
+            # delimiter = 2 for comma
+            delimiter = request.POST["delimiter"]
+
             if not csv_file.name.endswith(".csv"):
                 messages.warning(
                     request,
                     "The wrong file type was uploaded. Please upload a CSV file",
                 )
 
-            try:
-                file_data = read_csv(csv_file, sep=",")
-                print("COMMA SEPARATED")
-                print(file_data)
-                add_plants(request, file_data)
-            except EmptyDataError:
+            if delimiter == "2":
+                try:
+                    file_data = read_csv(csv_file, sep=",")
+                    print("COMMA SEPARATED")
+                    print(file_data)
+                    add_plants(request, file_data)
+                except Exception as e:
+                    messages.warning(request, e)
+            else:
                 try:
                     file_data = read_csv(csv_file, sep=";")
                     print("SEMICOLON SEPARATED")
                     print(file_data)
                     add_plants(request, file_data)
-                except EmptyDataError:
-                    messages.warning(
-                        request,
-                        "The uploaded file could not be parsed. Please check the file.",
-                    )
+                except Exception as e:
+                    messages.warning(request, e)
 
         form = CsvImportForm()
         context = {"form": form}
