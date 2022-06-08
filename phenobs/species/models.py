@@ -10,7 +10,7 @@ class Species(models.Model):
 
     """
 
-    reference_name = models.CharField(max_length=100)
+    reference_name = models.CharField(max_length=100, unique=True)
     reference_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self) -> str:
