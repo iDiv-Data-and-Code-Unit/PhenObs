@@ -246,8 +246,6 @@ export async function fetchCollection(id, isOnline, isOld=false) {
             success: async function (data) {
                 if (data["id"] !== -1)
                     await insertCollection(data, isOnline, true);
-                else
-                    alertModal("Collection with ID " + id + " was not found in database. Please delete the collection from local storage, if possible.");
             }
         });
     } catch (error) {

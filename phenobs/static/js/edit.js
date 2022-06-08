@@ -26,7 +26,7 @@ import {
     formatDate
 } from "./modals.js";
 
-if (location.href.indexOf('edit') !== -1) {
+if (location.href.indexOf('edit') !== -1 && location.href.indexOf('not found') === -1) {
     (async () => {
         const id = parseInt(getEditId());
         await fill(id, true);

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -159,6 +159,14 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
 
     """
     garden = Garden.objects.filter(auth_users=request.user).get()
+
+    try:
+        Collection.objects.filter(id=id).get()
+    except Collection.DoesNotExist:
+        raise Http404(
+            "Collection was not found in database. Please delete the collection from your device, if available."
+        )
+
     context = {
         "garden": garden,
         "id": id,
