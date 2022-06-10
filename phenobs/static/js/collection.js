@@ -187,6 +187,7 @@ export async function uploadCollection(id) {
         data: JSON.stringify(collection),
         method: "POST",
         error: function (jqXHR) {
+            console.log(jqXHR);
             // alert("Could not establish a connection with database.");
             alertModal("Could not establish a connection with database.");
         },
@@ -196,12 +197,13 @@ export async function uploadCollection(id) {
         complete: function(){
             $("body").removeClass("loading");
         },
-        success: async function () {
+        success: async function (data) {
             collection['uploaded'] = true;
             collection['finished'] = true;
             collection['edited'] = false;
             await setCollection(collection);
             // alert("Collection successfully uploaded!");
+            console.log(data);
             alertModal("Collection successfully uploaded!");
         }
     });
@@ -222,7 +224,7 @@ export async function uploadSelectedCollections(collections) {
         complete: function(){
             $("body").removeClass("loading");
         },
-        success: async function () {
+        success: async function (data) {
             // alert("Collection successfully uploaded!");
             alertModal("Collections successfully saved");
         }

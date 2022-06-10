@@ -1,15 +1,17 @@
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from jsonschema import validate
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
 from ..users.models import User
 from .models import Collection, Record
+from .schemas import collection_schema
 
 
 @csrf_exempt
@@ -45,8 +47,11 @@ def upload_selected(request):
 
 # FAT models
 def update_collection(data, username):
+    # TODO: Exception handling for JSON validation
+    validate(instance=data, schema=collection_schema)
+
     collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
-    doy = collection_date.date() - date(collection_date.year, 1, 1)
+    doy = collection_date.date() - date(collection_date.year, 1, 1) + timedelta(1)
 
     collection = Collection(
         id=data["id"],
@@ -61,7 +66,6 @@ def update_collection(data, username):
     # 1. Validate
     # 2. Normalize
     # 3. Process
-    # TODO: JSON schema for validation
     # CreateFromJSON function in a Model (FAT models)
 
     for record in data["records"]:
@@ -126,3 +130,4 @@ def update_collection(data, username):
         )
 
         new_record.save()
+        return "OK"
