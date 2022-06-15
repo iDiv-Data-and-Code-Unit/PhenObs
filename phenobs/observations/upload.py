@@ -2,10 +2,11 @@ import json
 from datetime import date, datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, JsonResponse
+from django.http import Http404, HttpRequest, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -27,27 +28,57 @@ def upload(request: HttpRequest) -> JsonResponse:
 
     """
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse("Upload failed. JSON decoding error.", safe=False)
+
         print(request.body)
-        update_collection(data, request.user.username)
+        try:
+            update_collection(data, request.user.username)
+        except ValidationError:
+            return JsonResponse(
+                "Upload failed. Received JSON could not be validated against schema."
+            )
+        except ValueError as e:
+            return JsonResponse("Upload failed. Received the following error:\n%s" % e)
 
         return JsonResponse("OK", safe=False)
+    else:
+        raise Http404()
 
 
 @csrf_exempt
 def upload_selected(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                "Upload failed. JSON decoding error was raised.", safe=False
+            )
 
         for collection in data:
-            update_collection(collection, request.user.username)
+            try:
+                update_collection(collection, request.user.username)
+            except ValidationError:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. Received JSON could not be validated."
+                    % collection["id"]
+                )
+            except ValueError as e:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. Received the following error:\n%s"
+                    % (collection["id"], e)
+                )
 
         return JsonResponse("OK", safe=False)
+    else:
+        raise Http404()
 
 
 # FAT models
 def update_collection(data, username):
-    # TODO: Exception handling for JSON validation
     validate(instance=data, schema=collection_schema)
 
     collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
@@ -130,4 +161,3 @@ def update_collection(data, username):
         )
 
         new_record.save()
-        return "OK"
