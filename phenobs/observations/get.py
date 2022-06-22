@@ -2,12 +2,15 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from ..gardens.models import Garden
 from .models import Collection, Record
+from .schemas import collection_schema, collections_schema
 
 
 @csrf_exempt
@@ -22,148 +25,231 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         collections_json: JSON object consisting of all the received collections
 
     """
-    garden = Garden.objects.filter(auth_users=request.user).get()
-    collections = (
-        Collection.objects.filter(garden__main_garden=garden.main_garden)
-        .order_by("date")
-        .all()
-    )
-    collections_json = []
-    data = json.loads(request.body)
+    try:
+        garden = Garden.objects.get(auth_users=request.user)
 
-    for collection in collections:
-        records = None
-        if collection.id in data:
-            records = format_records(Record.objects.filter(collection=collection).all())
+        if garden.is_subgarden():
+            collections = Collection.objects.filter(
+                garden__main_garden=garden.main_garden
+            ).order_by("date")
+        else:
+            collections = Collection.objects.filter(
+                garden__main_garden=garden
+            ).order_by("date")
 
-        prev_collection = Collection.objects.filter(
-            date__lt=collection.date, garden=collection.garden, finished=True
-        ).last()
+        collections_json = []
 
-        collections_json.append(
-            {
-                "id": collection.id,
-                "date": collection.date,
-                "creator": collection.creator.username,
-                "finished": collection.finished,
-                "records": records,
-                "garden": collection.garden.id,
-                "garden-name": collection.garden.name,
-                "last-collection-id": prev_collection.id
-                if (prev_collection is not None)
-                else None,
-            }
+        data = json.loads(request.body)
+        validate(instance=data, schema=collections_schema)
+
+        for collection in collections:
+            records = None
+            if collection.id in data:
+                records = format_records(Record.objects.filter(collection=collection))
+
+            prev_collection = Collection.objects.filter(
+                date__lt=collection.date, garden=collection.garden, finished=True
+            ).last()
+
+            if prev_collection is not None:
+                last_collection_id = prev_collection.id
+            else:
+                last_collection_id = None
+
+            collections_json.append(
+                {
+                    "id": collection.id,
+                    "date": collection.date,
+                    "creator": collection.creator.username,
+                    "finished": collection.finished,
+                    "records": records,
+                    "garden": collection.garden.id,
+                    "garden-name": collection.garden.name,
+                    "last-collection-id": last_collection_id,
+                }
+            )
+        return JsonResponse(collections_json, safe=False)
+
+    except Garden.DoesNotExist:
+        response = JsonResponse(
+            "No subgarden has been assigned to the user.", safe=False
         )
-    return JsonResponse(collections_json, safe=False)
+        response.status_code = 404
+        return response
+
+    except Garden.MultipleObjectsReturned:
+        response = JsonResponse(
+            "Multiple subgardens are assigned to the user. Please assign only one subgarden per user.",
+            safe=False,
+        )
+        response.status_code = 409
+        return response
+
+    except json.JSONDecodeError:
+        response = JsonResponse("JSON decoding error was raised.", safe=False)
+        response.status_code = 400
+        return response
+
+    except ValidationError:
+        response = JsonResponse("Received JSON could not be validated.", safe=False)
+        response.status_code = 400
+        return response
+
+    except Exception as e:
+        response = JsonResponse(e, safe=False)
+        response.status_code = 500
+        return response
 
 
 def get_collections(request, id):
-    context = {"gardens": [], "range": range(5, 105, 5)}
+    try:
+        context = {"gardens": [], "range": range(5, 105, 5)}
 
-    is_admin = False
+        is_admin = False
 
-    if request.user.groups.filter(name="Admins").exists():
-        is_admin = True
+        if request.user.groups.filter(name="Admins").exists():
+            is_admin = True
 
-    if id == "all":
-        if is_admin:
-            gardens = Garden.objects.all()
-        else:
-            sub = Garden.objects.filter(auth_users=request.user).get()
-            gardens = [sub.main_garden]
+        if id == "all":
+            if is_admin:
+                gardens = Garden.objects.all()
+            else:
+                sub = Garden.objects.get(auth_users=request.user)
+                gardens = [sub.main_garden]
 
-        for garden in gardens:
-            subgardens = Garden.objects.filter(main_garden=garden).all()
+            for garden in gardens:
+                subgardens = Garden.objects.filter(main_garden=garden)
 
-            garden_dict = {"id": garden.id, "name": garden.name, "subgardens": []}
+                garden_dict = {"id": garden.id, "name": garden.name, "subgardens": []}
 
-            for subgarden in subgardens:
-                garden_dict["subgardens"].append(
-                    {
-                        "id": subgarden.id,
-                        "name": subgarden.name,
-                        "collections": [],
-                        "finished": 0,
-                    }
-                )
-            context["gardens"].append(garden_dict)
-
-    else:
-        garden = Garden.objects.filter(id=int(id)).get()
-        if garden.is_subgarden():
-            context["gardens"].append(
-                {
-                    "id": garden.main_garden_id,
-                    "name": garden.main_garden.name,
-                    "subgardens": [
+                for subgarden in subgardens:
+                    garden_dict["subgardens"].append(
                         {
-                            "id": garden.id,
-                            "name": garden.name,
+                            "id": subgarden.id,
+                            "name": subgarden.name,
                             "collections": [],
                             "finished": 0,
                         }
-                    ],
-                }
-            )
+                    )
+                context["gardens"].append(garden_dict)
+
         else:
-            subgardens = Garden.objects.filter(main_garden=garden).all()
-
-            garden_dict = {"id": garden.id, "name": garden.name, "subgardens": []}
-
-            for subgarden in subgardens:
-                garden_dict["subgardens"].append(
+            garden = Garden.objects.get(id=int(id))
+            if garden.is_subgarden():
+                context["gardens"].append(
                     {
-                        "id": subgarden.id,
-                        "name": subgarden.name,
-                        "collections": [],
-                        "finished": 0,
+                        "id": garden.main_garden_id,
+                        "name": garden.main_garden.name,
+                        "subgardens": [
+                            {
+                                "id": garden.id,
+                                "name": garden.name,
+                                "collections": [],
+                                "finished": 0,
+                            }
+                        ],
                     }
                 )
+            else:
+                subgardens = Garden.objects.filter(main_garden=garden)
 
-            context["gardens"].append(garden_dict)
+                garden_dict = {"id": garden.id, "name": garden.name, "subgardens": []}
 
-    for garden in context["gardens"]:
-        for subgarden in garden["subgardens"]:
-            collections = (
-                Collection.objects.filter(garden_id=subgarden["id"])
-                .order_by("date")
-                .all()
+                for subgarden in subgardens:
+                    garden_dict["subgardens"].append(
+                        {
+                            "id": subgarden.id,
+                            "name": subgarden.name,
+                            "collections": [],
+                            "finished": 0,
+                        }
+                    )
+
+                context["gardens"].append(garden_dict)
+
+        for garden in context["gardens"]:
+            for subgarden in garden["subgardens"]:
+                collections = Collection.objects.filter(
+                    garden_id=subgarden["id"]
+                ).order_by("date")
+                for collection in collections:
+                    collection_dict = {
+                        "id": collection.id,
+                        "date_full": collection.date,
+                        "date": collection.date.strftime("%Y-%m-%d"),
+                        "creator": collection.creator.username,
+                        "garden": collection.garden.name,
+                        "records": [],
+                        "finished": collection.finished,
+                    }
+
+                    if collection.finished:
+                        subgarden["finished"] = subgarden["finished"] + 1
+
+                    subgarden["collections"].append(collection_dict)
+
+        return render(request, "observations/views_content.html", context)
+
+    except Garden.DoesNotExist:
+        context = {
+            "exception": Exception(
+                "No subgarden has been assigned to the user. Please assign user to a subgarden."
             )
-            for collection in collections:
-                collection_dict = {
-                    "id": collection.id,
-                    "date_full": collection.date,
-                    "date": collection.date.strftime("%Y-%m-%d"),
-                    "creator": collection.creator.username,
-                    "garden": collection.garden.name,
-                    "records": [],
-                    "finished": collection.finished,
-                }
+        }
+        return render(request, "error.html", context, status=404)
 
-                if collection.finished:
-                    subgarden["finished"] = subgarden["finished"] + 1
+    except Garden.MultipleObjectsReturned:
+        context = {
+            "exception": Exception(
+                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+            )
+        }
 
-                subgarden["collections"].append(collection_dict)
+        return render(request, "error.html", context, status=409)
 
-    return render(request, "observations/views_content.html", context)
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
 
 
 @login_required
 def edit_collection_content(request, id):
-    context = collection_content(id)
-    context["collection_id"] = id
-    return render(request, "observations/edit_records.html", context)
+    try:
+        context = collection_content(id)
+        context["collection_id"] = id
+        return render(request, "observations/edit_records.html", context)
+
+    except Collection.DoesNotExist:
+        response = HttpResponse("Collection could not be retrieved.")
+        response.status_code = 404
+        return response
+
+    except Exception as e:
+        response = HttpResponse(e)
+        response.status_code = 500
+        return response
 
 
 @login_required
 def view_collection_content(request, id):
-    context = collection_content(id)
-    return render(request, "observations/view_records.html", context)
+    try:
+        context = collection_content(id)
+        return render(request, "observations/view_records.html", context)
+
+    except Collection.DoesNotExist:
+        response = HttpResponse("Collection could not be retrieved.")
+        response.status_code = 404
+        return response
+
+    except Exception as e:
+        response = HttpResponse(e)
+        response.status_code = 500
+        return response
 
 
 def collection_content(collection_id):
-    collection = Collection.objects.filter(id=collection_id).get()
-    records = Record.objects.filter(collection=collection).all()
+    collection = Collection.objects.get(id=collection_id)
+    records = Record.objects.filter(collection=collection)
     records_values = []
 
     for record in records:
@@ -258,7 +344,9 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
     try:
         collection = Collection.objects.filter(id=id).get()
     except Collection.DoesNotExist:
-        return JsonResponse({"id": -1})
+        response = JsonResponse("Collection could not be retrieved.", safe=False)
+        response.status_code = 404
+        return response
 
     collection_records = Record.objects.filter(collection=collection).all()
     prev_collection_json = get_older(collection)
@@ -292,7 +380,7 @@ def get_older(collection):
     prev_collection_json = None
 
     if prev_collection_db is not None:
-        prev_records_db = Record.objects.filter(collection=prev_collection_db).all()
+        prev_records_db = Record.objects.filter(collection=prev_collection_db)
         prev_records_json = format_records(prev_records_db)
         prev_collection_json = {
             "id": prev_collection_db.id,
@@ -311,11 +399,33 @@ def get_older(collection):
 @csrf_exempt
 @login_required(login_url="/accounts/login/")
 def last(request):
-    data = json.loads(request.body)
-    collection = Collection.objects.filter(id=data["id"]).get()
-    collection.date = data["date"]
+    try:
+        data = json.loads(request.body)
+        validate(instance=data, schema=collection_schema)
+        collection = Collection.objects.filter(id=data["id"]).get()
+        collection.date = data["date"]
 
-    return JsonResponse(get_older(collection), safe=False)
+        return JsonResponse(get_older(collection), safe=False)
+
+    except json.JSONDecodeError:
+        response = JsonResponse("JSON decoding error was raised.", safe=False)
+        response.status_code = 400
+        return response
+
+    except ValidationError:
+        response = JsonResponse("Received JSON could not be validated.", safe=False)
+        response.status_code = 400
+        return response
+
+    except Collection.DoesNotExist:
+        response = JsonResponse("Collection could not be retrieved.", safe=False)
+        response.status_code = 404
+        return response
+
+    except Exception as e:
+        response = JsonResponse(e, safe=False)
+        response.status_code = 500
+        return response
 
 
 def format_records(collection_records: QuerySet):

@@ -1,3 +1,5 @@
+collections_schema = {"type": "array", "items": {"type": "integer"}}
+
 collection_schema = {
     "type": "object",
     "properties": {

@@ -130,7 +130,7 @@ async function getLast(id) {
         method: "POST",
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
-            alertModal("Could not establish a connection with database.");
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");

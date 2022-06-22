@@ -30,3 +30,27 @@ def default_user(user, user_group):
     user.is_staff = False
     user.groups.set([user_group])
     return user
+
+
+@pytest.fixture
+def valid_garden_user(garden, user):
+    garden.auth_users.set([user])
+    return user
+
+
+@pytest.fixture
+def multiple_gardens_user(garden_factory, user):
+    garden_1 = garden_factory()
+    garden_2 = garden_factory()
+    garden_1.auth_users.set([user])
+    garden_2.auth_users.set([user])
+
+    return user
+
+
+@pytest.fixture
+def subgarden_user(subgarden_factory, user):
+    subgarden = subgarden_factory()
+    subgarden.auth_users.set([user])
+
+    return user

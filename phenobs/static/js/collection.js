@@ -133,7 +133,7 @@ export async function emptyCollection(id=null) {
         method: "POST",
         error: function (jqXHR) {
             // alert(jqXHR.responseText);
-            alertModal(jqXHR.responseText);
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -187,9 +187,8 @@ export async function uploadCollection(id) {
         data: JSON.stringify(collection),
         method: "POST",
         error: function (jqXHR) {
-            console.log(jqXHR);
             // alert("Could not establish a connection with database.");
-            alertModal("Could not establish a connection with database.");
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function() {
             $("body").addClass("loading");
@@ -216,7 +215,7 @@ export async function uploadSelectedCollections(collections) {
         method: "POST",
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
-            alertModal("Could not establish a connection with database.");
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -236,7 +235,7 @@ export async function fetchCollection(id, isOnline, isOld=false) {
         await $.ajax({
             url: "/observations/get/" + id,
             error: function (jqXHR) {
-                alert("Could not establish a connection with database.");
+                alertModal(jqXHR.responseJSON);
                 return null;
             },
             beforeSend: function(){

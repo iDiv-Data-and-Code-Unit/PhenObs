@@ -1,25 +1,6 @@
-import random
-
 import pytest
-from django.http import Http404
 
 from phenobs.observations.views import add, all, edit, new, overview
-
-
-@pytest.fixture
-def valid_garden_user(garden, user):
-    garden.auth_users.set([user])
-    return user
-
-
-@pytest.fixture
-def multiple_gardens_user(garden_factory, user):
-    garden_1 = garden_factory()
-    garden_2 = garden_factory()
-    garden_1.auth_users.set([user])
-    garden_2.auth_users.set([user])
-
-    return user
 
 
 @pytest.mark.django_db
@@ -43,7 +24,7 @@ def test_all_invalid_garden(request_factory, user):
 
 
 @pytest.mark.django_db
-def test_all_multiple_gardens(garden_factory, request_factory, multiple_gardens_user):
+def test_all_multiple_gardens(request_factory, multiple_gardens_user):
     request = request_factory.get("/observations/")
     request.user = multiple_gardens_user
 
@@ -53,7 +34,7 @@ def test_all_multiple_gardens(garden_factory, request_factory, multiple_gardens_
 
 
 @pytest.mark.django_db
-def test_add_valid_garden(garden, request_factory, valid_garden_user):
+def test_add_valid_garden(request_factory, valid_garden_user):
     request = request_factory.get("/observations/add/")
     request.user = valid_garden_user
 
@@ -98,43 +79,40 @@ def test_edit_valid_garden_valid_collection(
 
 @pytest.mark.django_db
 def test_edit_valid_garden_invalid_collection(request_factory, valid_garden_user):
-    try:
-        request = request_factory.get("/observations/edit/%d/" % random.randint(1, 100))
-        request.user = valid_garden_user
+    request = request_factory.get("/observations/edit/%d/" % -1)
+    request.user = valid_garden_user
 
-        edit(request, random.randint(1, 100))
+    response = edit(request, -1)
 
-        assert False
-    except Http404:
-        assert True
+    assert response.status_code == 404
 
 
 @pytest.mark.django_db
 def test_edit_invalid_garden(request_factory, user):
-    request = request_factory.get("/observations/edit/%d/" % random.randint(1, 100))
+    request = request_factory.get("/observations/edit/%d/" % -1)
     request.user = user
 
-    response = edit(request, random.randint(1, 100))
+    response = edit(request, -1)
 
     assert response.status_code == 404
 
 
 @pytest.mark.django_db
 def test_edit_multiple_gardens(request_factory, multiple_gardens_user):
-    request = request_factory.get("/observations/edit/%d/" % random.randint(1, 100))
+    request = request_factory.get("/observations/edit/%d/" % -1)
     request.user = multiple_gardens_user
 
-    response = edit(request, random.randint(1, 100))
+    response = edit(request, -1)
 
     assert response.status_code == 409
 
 
 @pytest.mark.django_db
 def test_new_invalid_method(request_factory, user):
-    request = request_factory.get("/observations/new/%d/" % random.randint(1, 100))
+    request = request_factory.get("/observations/new/%d/" % -1)
     request.user = user
 
-    response = new(request, random.randint(1, 100))
+    response = new(request, -1)
 
     assert response.status_code == 405
     assert response.content == b'"Method not allowed."'

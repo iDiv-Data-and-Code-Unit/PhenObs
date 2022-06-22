@@ -5,7 +5,7 @@ async function fillCollections(id, edit=null) {
         url: "/observations/collections/" + id,
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
-            alertModal("Could not establish a connection with database.");
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -196,7 +196,7 @@ async function uploadSelected(collection=null) {
             contentType: "application/json; charset=utf-8",
             error: function (jqXHR) {
                 // alert("Could not establish a connection with database.");
-                alertModal("Could not establish a connection with database.");
+                alertModal(jqXHR.responseJSON);
             },
             beforeSend: function () {
                 $("body").addClass("loading");
@@ -285,7 +285,7 @@ async function fillInContent(id, edit=false) {
         url: url,
         type: "GET",
         error: function (jqXHR) {
-            alertModal("Could not establish a connection with database.");
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function () {
             $("body").addClass("loading");

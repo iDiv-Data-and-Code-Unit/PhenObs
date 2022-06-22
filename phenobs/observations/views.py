@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -47,6 +47,10 @@ def all(request: HttpRequest) -> HttpResponse:
         }
 
         return render(request, "error.html", context, status=409)
+
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
 
 
 @login_required(login_url="/accounts/login/")
@@ -102,6 +106,10 @@ def overview(request: HttpRequest) -> HttpResponse:
         }
 
         return render(request, "error.html", context, status=409)
+
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
 
 
 @login_required(login_url="/accounts/login/")
@@ -168,6 +176,10 @@ def add(request: HttpRequest) -> HttpResponse:
 
         return render(request, "error.html", context, status=409)
 
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
+
 
 @csrf_exempt
 @login_required(login_url="/accounts/login/")
@@ -176,6 +188,7 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
 
     Args:
         request: The received request with metadata
+        garden_id: ID of the subgarden new collection will be made for
 
     Returns:
         {}: A JSON object containing new collection and related records' data
@@ -244,6 +257,11 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
             )
             response.status_code = 404
             return response
+
+        except Exception as e:
+            response = JsonResponse(e, safe=False)
+            response.status_code = 500
+            return response
     else:
         response = JsonResponse("Method not allowed.", safe=False)
         response.status_code = 405
@@ -269,9 +287,13 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         try:
             Collection.objects.filter(id=id).get()
         except Collection.DoesNotExist:
-            raise Http404(
-                "Collection was not found in database. Please delete the collection from your device, if available."
-            )
+            context = {
+                "exception": Exception(
+                    "Collection was not found in database. "
+                    "Please delete the collection from your device, if available."
+                )
+            }
+            return render(request, "error.html", context, status=404)
 
         context = {
             "garden": garden,
@@ -314,6 +336,10 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         }
 
         return render(request, "error.html", context, status=409)
+
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
 
 
 def check_garden_auth_user(user, garden):

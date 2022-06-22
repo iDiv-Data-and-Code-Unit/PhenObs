@@ -41,3 +41,7 @@ def home(request: HttpRequest) -> HttpResponse:
             )
         }
         return render(request, "error.html", context)
+
+    except Exception as e:
+        context = {"exception": e}
+        return render(request, "error.html", context, status=500)
