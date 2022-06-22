@@ -60,8 +60,8 @@ collection_schema = {
                     },
                 }
             },
-            "remaining": {"type": "array", "items": {"type": "integer"}},
-            "uploaded": {"type": "boolean"},
         },
+        "remaining": {"type": "array", "items": {"type": "integer"}},
+        "uploaded": {"type": "boolean"},
     },
 }

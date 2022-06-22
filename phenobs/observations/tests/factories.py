@@ -1,4 +1,6 @@
 import factory
+import pytest
+from django.test import RequestFactory
 from pytest_factoryboy import register
 
 from phenobs.gardens.models import Garden
@@ -6,6 +8,7 @@ from phenobs.observations.models import Collection, Record
 from phenobs.plants.models import Plant
 from phenobs.species.models import Species
 from phenobs.users.models import Organization, User
+from phenobs.users.tests.factories import UserFactory as DjangoUserFactory
 
 
 @register
@@ -17,18 +20,15 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class UserFactory(factory.django.DjangoModelFactory):
+class UserFactory(DjangoUserFactory):
     class Meta:
         model = User
 
-    name = factory.Faker("name")
-    username = factory.Faker("pystr", max_chars=150)
     status = factory.Faker(
         "words", nb=1, ext_word_list=["staff", "student"], unique=True
     )
     is_staff = factory.Faker("pybool")
     is_active = factory.Faker("pybool")
-    password = factory.Faker("password")
     organization = factory.SubFactory(OrganizationFactory)
 
 
@@ -99,24 +99,14 @@ class RecordFactory(factory.django.DjangoModelFactory):
     timestamp_edit = factory.Faker("date_time_this_year")
     editor = factory.SubFactory(UserFactory)
     initial_vegetative_growth = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
+        "word", ext_word_list=["y", "u", "no", "m"]
     )
-    young_leaves_unfolding = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
-    )
-    flowers_open = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
-    )
-    peak_flowering = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
-    )
+    young_leaves_unfolding = factory.Faker("word", ext_word_list=["y", "u", "no", "m"])
+    flowers_open = factory.Faker("word", ext_word_list=["y", "u", "no", "m"])
+    peak_flowering = factory.Faker("word", ext_word_list=["y", "u", "no", "m"])
     flowering_intensity = factory.Faker("random_int", min=5, max=100, step=5)
-    ripe_fruits = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
-    )
-    senescence = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
-    )
+    ripe_fruits = factory.Faker("word", ext_word_list=["y", "u", "no", "m"])
+    senescence = factory.Faker("word", ext_word_list=["y", "u", "no", "m"])
     senescence_intensity = factory.Faker("random_int", min=5, max=100, step=5)
     maintenance = factory.Faker(
         "random_elements",
@@ -132,6 +122,11 @@ class RecordFactory(factory.django.DjangoModelFactory):
     )
     remarks = factory.Faker("pystr", max_chars=255)
     peak_flowering_estimation = factory.Faker(
-        "words", nb=1, ext_word_list=["y", "u", "no", "m"], unique=True
+        "word", ext_word_list=["y", "u", "no", "m"]
     )
     done = factory.Faker("pybool")
+
+
+@pytest.fixture
+def request_factory():
+    return RequestFactory()

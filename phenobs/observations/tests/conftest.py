@@ -19,15 +19,14 @@ def user_group():
 
 
 @pytest.fixture
-def admin_user(user, admin_group):
-    user.is_staff = True
-    user.status = "staff"
-    user.groups.add(admin_group)
+def admin_user(admin_group, user_factory):
+    user = user_factory(is_staff=True, status="staff")
+    user.groups.set([admin_group])
     return user
 
 
 @pytest.fixture
 def default_user(user, user_group):
     user.is_staff = False
-    user.groups.add(user_group)
+    user.groups.set([user_group])
     return user

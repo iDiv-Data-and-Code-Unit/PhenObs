@@ -1,12 +1,12 @@
-from django.shortcuts import redirect, render
-from django.utils.timezone import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from django.utils.timezone import datetime
 
 from phenobs.gardens.models import Garden
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url="/accounts/login/")
 def home(request: HttpRequest) -> HttpResponse:
     """Home page showing garden, date and user information
 
@@ -17,9 +17,27 @@ def home(request: HttpRequest) -> HttpResponse:
         context: JSON object consisting of the garden and date details
 
     """
-    garden = Garden.objects.filter(auth_users=request.user).get()
-    date = datetime.now().date()
+    try:
+        garden = Garden.objects.filter(auth_users=request.user).get()
+        date = datetime.now().date()
 
-    context = {"garden": garden, "date": date}
+        context = {"garden": garden, "date": date}
 
-    return render(request, "pages/home.html", context)
+        return render(request, "pages/home.html", context)
+
+    except Garden.DoesNotExist:
+        context = {
+            "exception_title": "No subgarden assigned",
+            "exception": Exception(
+                "No subgarden has been assigned to the user. Please assign user to a subgarden."
+            ),
+        }
+        return render(request, "error.html", context)
+
+    except Garden.MultipleObjectsReturned:
+        context = {
+            "exception": Exception(
+                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+            )
+        }
+        return render(request, "error.html", context)

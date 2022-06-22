@@ -34,6 +34,7 @@ def upload(request: HttpRequest) -> JsonResponse:
             return JsonResponse("Upload failed. JSON decoding error.", safe=False)
 
         print(request.body)
+
         try:
             update_collection(data, request.user.username)
         except ValidationError:
@@ -42,6 +43,27 @@ def upload(request: HttpRequest) -> JsonResponse:
             )
         except ValueError as e:
             return JsonResponse("Upload failed. Received the following error:\n%s" % e)
+        except Collection.DoesNotExist:
+            return JsonResponse(
+                "Upload failed. Collection could not be retrieved from database."
+            )
+        except Garden.DoesNotExist:
+            return JsonResponse(
+                "Upload failed. Garden could not be retrieved from database."
+            )
+        except Record.DoesNotExist as e:
+            return JsonResponse(
+                "Upload failed. Error occurred while retrieving a record:\n%s" % e
+            )
+        except Plant.DoesNotExist as e:
+            return JsonResponse(
+                "Upload failed. Error occurred while retrieving the plant for a record:\n%s"
+                % e
+            )
+        except Exception as e:
+            return JsonResponse(
+                "Upload failed. Following error message was received:\n%s" % e
+            )
 
         return JsonResponse("OK", safe=False)
     else:
@@ -63,13 +85,42 @@ def upload_selected(request):
                 update_collection(collection, request.user.username)
             except ValidationError:
                 return JsonResponse(
-                    "Upload failed for collection with ID: %s. Received JSON could not be validated."
-                    % collection["id"]
+                    "Upload failed for collection with ID: %s. "
+                    "Received JSON could not be validated." % collection["id"]
                 )
             except ValueError as e:
                 return JsonResponse(
-                    "Upload failed for collection with ID: %s. Received the following error:\n%s"
+                    "Upload failed for collection with ID: %s. "
+                    "Received the following error:\n%s" % (collection["id"], e)
+                )
+            except Collection.DoesNotExist:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. "
+                    "Collection could not be retrieved from database."
+                    % collection["id"]
+                )
+            except Garden.DoesNotExist:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. "
+                    "Garden with the ID=%s could not be retrieved from database."
+                    % (collection["id"], collection["garden"])
+                )
+            except Record.DoesNotExist as e:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. "
+                    "Error occurred while retrieving a record:\n%s"
                     % (collection["id"], e)
+                )
+            except Plant.DoesNotExist as e:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. "
+                    "rror occurred while retrieving the plant for a record:\n%s"
+                    % (collection["id"], e)
+                )
+            except Exception as e:
+                return JsonResponse(
+                    "Upload failed for collection with ID: %s. "
+                    "Following error message was received:\n%s" % (collection["id"], e)
                 )
 
         return JsonResponse("OK", safe=False)
@@ -77,87 +128,89 @@ def upload_selected(request):
         raise Http404()
 
 
-# FAT models
+def normalize_record(record):
+    if record["no-observation"] is True:
+        record["initial-vegetative-growth"] = None
+        record["young-leaves-unfolding"] = None
+        record["flowers-opening"] = None
+        record["peak-flowering"] = None
+        record["flowering-intensity"] = None
+        record["ripe-fruits"] = None
+        record["senescence"] = None
+        record["senescence-intensity"] = None
+        record["peak-flowering-estimation"] = None
+
+    if (
+        len(str(record["flowering-intensity"])) == 0
+        or record["flowering-intensity"] is None
+        or record["flowers-opening"] != "y"
+    ):
+        record["flowering-intensity"] = None
+    else:
+        record["flowering-intensity"] = int(record["flowering-intensity"])
+
+    if (
+        len(str(record["senescence-intensity"])) == 0
+        or record["senescence-intensity"] is None
+        or record["senescence"] != "y"
+    ):
+        record["senescence-intensity"] = None
+    else:
+        record["senescence-intensity"] = int(record["senescence-intensity"])
+
+    record["maintenance"] = [
+        "cut_partly" if (record["cut-partly"]) else None,
+        "cut_total" if (record["cut-total"]) else None,
+        "covered_natural" if (record["covered-natural"]) else None,
+        "covered_artificial" if (record["covered-artificial"]) else None,
+        "transplanted" if (record["transplanted"]) else None,
+        "removed" if (record["removed"]) else None,
+    ]
+
+    return record
+
+
 def update_collection(data, username):
     validate(instance=data, schema=collection_schema)
 
     collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
     doy = collection_date.date() - date(collection_date.year, 1, 1) + timedelta(1)
 
-    collection = Collection(
-        id=data["id"],
-        garden=Garden.objects.filter(id=data["garden"]).get(),
-        date=collection_date.date(),
-        doy=doy.days,
-        finished=True,
-        creator=Collection.objects.filter(id=data["id"]).get().creator,
-    )
+    collection = Collection.objects.get(id=data["id"])
+    collection.garden = Garden.objects.filter(id=data["garden"]).get()
+    collection.date = collection_date.date()
+    collection.doy = doy.days
+    collection.finished = True
+    collection.creator = Collection.objects.filter(id=data["id"]).get().creator
     collection.save()
 
-    # 1. Validate
-    # 2. Normalize
-    # 3. Process
-    # CreateFromJSON function in a Model (FAT models)
-
     for record in data["records"]:
-        if type(record) == str:
-            record = data["records"][record]
+        current_record = normalize_record(
+            data["records"][record] if type(record) == str else record
+        )
         timestamp = timezone.now()
         new_record = Record(
             collection=collection,
-            id=int(record["id"]),
+            id=int(current_record["id"]),
             plant=Plant.objects.filter(
-                order=record["order"],
+                order=int(current_record["order"]),
                 garden_id=int(data["garden"]),
             ).get(),
             timestamp_entry=timestamp,
             timestamp_edit=timestamp,
             editor=User.objects.filter(username=username).get(),
-            initial_vegetative_growth=record["initial-vegetative-growth"]
-            if (record["no-observation"] is False)
-            else None,
-            young_leaves_unfolding=record["young-leaves-unfolding"]
-            if (record["no-observation"] is False)
-            else None,
-            flowers_open=record["flowers-opening"]
-            if (record["no-observation"] is False)
-            else None,
-            peak_flowering=record["peak-flowering"]
-            if (record["no-observation"] is False)
-            else None,
-            flowering_intensity=None
-            if (
-                len(str(record["flowering-intensity"])) == 0
-                or record["flowering-intensity"] is None
-                or record["flowers-opening"] != "y"
-            )
-            else int(record["flowering-intensity"]),
-            ripe_fruits=record["ripe-fruits"]
-            if (record["no-observation"] is False)
-            else None,
-            senescence=record["senescence"]
-            if (record["no-observation"] is False)
-            else None,
-            senescence_intensity=None
-            if (
-                len(str(record["senescence-intensity"])) == 0
-                or record["senescence-intensity"] is None
-                or record["senescence"] != "y"
-            )
-            else int(record["senescence-intensity"]),
-            maintenance=[
-                "cut_partly" if (record["cut-partly"]) else None,
-                "cut_total" if (record["cut-total"]) else None,
-                "covered_natural" if (record["covered-natural"]) else None,
-                "covered_artificial" if (record["covered-artificial"]) else None,
-                "transplanted" if (record["transplanted"]) else None,
-                "removed" if (record["removed"]) else None,
-            ],
-            remarks=record["remarks"],
-            peak_flowering_estimation=record["peak-flowering-estimation"]
-            if (record["no-observation"] is False)
-            else None,
-            done=record["done"],
+            initial_vegetative_growth=current_record["initial-vegetative-growth"],
+            young_leaves_unfolding=current_record["young-leaves-unfolding"],
+            flowers_open=current_record["flowers-opening"],
+            peak_flowering=current_record["peak-flowering"],
+            flowering_intensity=current_record["flowering-intensity"],
+            ripe_fruits=current_record["ripe-fruits"],
+            senescence=current_record["senescence"],
+            senescence_intensity=current_record["senescence-intensity"],
+            maintenance=current_record["maintenance"],
+            remarks=current_record["remarks"],
+            peak_flowering_estimation=current_record["peak-flowering-estimation"],
+            done=current_record["done"],
         )
 
         new_record.save()

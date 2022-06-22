@@ -1,12 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Page not found{% endblock %}
+{% block title %}{% if exception_title %}{{ exception_title }}{% else %}Error{% endif %}{% endblock %}
 {% load static %}
 
 {% block nav %}
   {% include 'nav.html' %}
 {% endblock nav %}
-
-{% block observations_active %}active{% endblock observations_active %}
 
 {% block custom_javascript %}
   <script type="module" defer src="{% static 'js/add.js' %}"></script>
@@ -17,8 +15,8 @@
 {% block content %}
   <div class="container">
     <div class="jumbotron-fluid custom-jumbotron p-3 p-md-3 p-lg-4 my-4 gray-text">
-      <h1>{% if exception_title %}{{ exception_title }}{% else %}Error 404{% endif %}</h1>
-      <p>{% if exception %}{{ exception }}{% else %}This is not the page you were looking for.{% endif %}</p>
+      <h1>{% if exception_title %}{{ exception_title }}{% else %}Error{% endif %}</h1>
+      <p>{% if exception %}{{ exception }}{% else %}An error occurred.{% endif %}</p>
     </div>
   </div>
 
