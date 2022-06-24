@@ -2,7 +2,7 @@ import json
 from datetime import date, datetime, timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpRequest, JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
@@ -38,36 +38,59 @@ def upload(request: HttpRequest) -> JsonResponse:
         try:
             update_collection(data, request.user.username)
         except ValidationError:
-            return JsonResponse(
-                "Upload failed. Received JSON could not be validated against schema."
+            response = JsonResponse(
+                "Upload failed. Received JSON could not be validated.", safe=False
             )
+            response.status_code = 500
+            return response
         except ValueError as e:
-            return JsonResponse("Upload failed. Received the following error:\n%s" % e)
+            response = JsonResponse(
+                "Upload failed. Received the following error:\n%s" % e
+            )
+            response.status_code = 500
+            return response
         except Collection.DoesNotExist:
-            return JsonResponse(
-                "Upload failed. Collection could not be retrieved from database."
+            response = JsonResponse(
+                "Upload failed. Collection could not be retrieved from database.",
+                safe=False,
             )
+            response.status_code = 404
+            return response
         except Garden.DoesNotExist:
-            return JsonResponse(
-                "Upload failed. Garden could not be retrieved from database."
+            response = JsonResponse(
+                "Upload failed. Garden could not be retrieved from database.",
+                safe=False,
             )
+            response.status_code = 404
+            return response
         except Record.DoesNotExist as e:
-            return JsonResponse(
-                "Upload failed. Error occurred while retrieving a record:\n%s" % e
+            response = JsonResponse(
+                "Upload failed. Error occurred while retrieving a record:\n%s" % e,
+                safe=False,
             )
+            response.status_code = 404
+            return response
         except Plant.DoesNotExist as e:
-            return JsonResponse(
+            response = JsonResponse(
                 "Upload failed. Error occurred while retrieving the plant for a record:\n%s"
-                % e
+                % e,
+                safe=False,
             )
+            response.status_code = 404
+            return response
         except Exception as e:
-            return JsonResponse(
-                "Upload failed. Following error message was received:\n%s" % e
+            response = JsonResponse(
+                "Upload failed. Following error message was received:\n%s" % e,
+                safe=False,
             )
+            response.status_code = 500
+            return response
 
         return JsonResponse("OK", safe=False)
     else:
-        raise Http404()
+        response = JsonResponse("Method not allowed.", safe=False)
+        response.status_code = 405
+        return response
 
 
 @csrf_exempt
@@ -84,48 +107,70 @@ def upload_selected(request):
             try:
                 update_collection(collection, request.user.username)
             except ValidationError:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
-                    "Received JSON could not be validated." % collection["id"]
+                    "Received JSON could not be validated." % collection["id"],
+                    safe=False,
                 )
+                response.status_code = 500
+                return response
             except ValueError as e:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
-                    "Received the following error:\n%s" % (collection["id"], e)
+                    "Received the following error:\n%s" % (collection["id"], e),
+                    safe=False,
                 )
+                response.status_code = 500
+                return response
             except Collection.DoesNotExist:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
                     "Collection could not be retrieved from database."
-                    % collection["id"]
+                    % collection["id"],
+                    safe=False,
                 )
+                response.status_code = 404
+                return response
             except Garden.DoesNotExist:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
                     "Garden with the ID=%s could not be retrieved from database."
-                    % (collection["id"], collection["garden"])
+                    % (collection["id"], collection["garden"]),
+                    safe=False,
                 )
+                response.status_code = 404
+                return response
             except Record.DoesNotExist as e:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
                     "Error occurred while retrieving a record:\n%s"
-                    % (collection["id"], e)
+                    % (collection["id"], e),
+                    safe=False,
                 )
+                response.status_code = 404
+                return response
             except Plant.DoesNotExist as e:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
-                    "rror occurred while retrieving the plant for a record:\n%s"
-                    % (collection["id"], e)
+                    "Error occurred while retrieving the plant for a record:\n%s"
+                    % (collection["id"], e),
+                    safe=False,
                 )
+                response.status_code = 404
+                return response
             except Exception as e:
-                return JsonResponse(
+                response = JsonResponse(
                     "Upload failed for collection with ID: %s. "
-                    "Following error message was received:\n%s" % (collection["id"], e)
+                    "Following error message was received:\n%s" % (collection["id"], e),
+                    safe=False,
                 )
-
+                response.status_code = 500
+                return response
         return JsonResponse("OK", safe=False)
     else:
-        raise Http404()
+        response = JsonResponse("Method not allowed.", safe=False)
+        response.status_code = 405
+        return response
 
 
 def normalize_record(record):

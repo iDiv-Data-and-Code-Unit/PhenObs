@@ -1,10 +1,13 @@
 import json
+import random
 from datetime import datetime
 from unittest.mock import patch
 
 import pytest
 
 from phenobs.observations.get import (
+    check_maintenance_option,
+    check_no_observation,
     collection_content,
     edit_collection_content,
     format_records,
@@ -15,8 +18,7 @@ from phenobs.observations.get import (
     last,
     view_collection_content,
 )
-
-# from phenobs.observations.tests.test_upload import collection_valid_json
+from phenobs.observations.models import Collection, Record
 
 
 @pytest.fixture
@@ -157,7 +159,7 @@ def test_get_all_collections_valid_garden_valid_json_invalid_schema(
 
     response = get_all_collections(request)
 
-    assert response.status_code == 400
+    assert response.status_code == 500
     assert response.content == b'"Received JSON could not be validated."'
 
 
@@ -421,7 +423,7 @@ def test_last_valid_json_invalid_schema(request_factory, user, collection_valid_
 
     response = last(request)
 
-    assert response.status_code == 400
+    assert response.status_code == 500
     assert response.content == b'"Received JSON could not be validated."'
 
 
@@ -453,9 +455,7 @@ def test_get_older_valid_collection_with_previous_collection(
 
     assert collection_1.date != collection_2.date
 
-    with patch(
-        "phenobs.observations.get.format_records", side_effect=format_records
-    ) as format_records_mock:
+    with patch("phenobs.observations.get.format_records") as format_records_mock:
         if collection_1.date > collection_2.date:
             returned = get_older(collection_1)
             older = collection_2
@@ -471,3 +471,133 @@ def test_get_older_valid_collection_with_previous_collection(
     assert returned["date"] == datetime.strptime(older.date, "%Y-%m-%d").date()
     assert returned["uploaded"] is True
     assert returned["finished"] == older.finished
+
+
+@pytest.mark.django_db
+def test_get_older_valid_collection_no_previous_collection(
+    collection_factory, subgarden_factory, user
+):
+    subgarden = subgarden_factory()
+    subgarden.auth_users.set([user])
+
+    collection = collection_factory(garden=subgarden, finished=True)
+
+    with patch("phenobs.observations.get.format_records") as format_records_mock:
+        returned = get_older(collection)
+
+    format_records_mock.assert_not_called()
+    assert returned is None
+
+
+@pytest.mark.django_db
+def test_get_older_invalid_collection():
+    try:
+        get_older({})
+        assert False
+    except Collection.DoesNotExist:
+        assert True
+
+
+@pytest.mark.django_db
+def test_format_records_invalid_collection_records():
+    returned = format_records({})
+
+    assert returned == {}
+
+
+@pytest.mark.django_db
+def test_format_records_empty_collection_records():
+    collection_records = Record.objects.all()
+
+    with patch(
+        "phenobs.observations.get.check_no_observation"
+    ) as check_no_observation_mock:
+        returned = format_records(collection_records)
+
+    check_no_observation_mock.assert_not_called()
+
+    assert returned == {}
+
+
+@pytest.mark.django_db
+def test_format_records_valid_collection_records(record_factory):
+    number_of_records = random.randint(1, 10)
+
+    for i in range(number_of_records):
+        record_factory()
+
+    collection_records = Record.objects.all()
+
+    with patch(
+        "phenobs.observations.get.check_no_observation"
+    ) as check_no_observation_mock:
+        with patch(
+            "phenobs.observations.get.check_maintenance_option"
+        ) as check_maintenance_option_mock:
+            returned = format_records(collection_records)
+
+    check_no_observation_mock.assert_called()
+    check_maintenance_option_mock.assert_called()
+
+    assert check_no_observation_mock.call_count == number_of_records
+    assert check_maintenance_option_mock.call_count == number_of_records * 6
+    assert len(returned.keys()) == number_of_records
+
+
+@pytest.mark.django_db
+def test_check_no_observation_valid_record_no_observation_true(record_factory):
+    record = record_factory(
+        initial_vegetative_growth=None,
+        young_leaves_unfolding=None,
+        flowers_open=None,
+        peak_flowering=None,
+        ripe_fruits=None,
+        senescence=None,
+        peak_flowering_estimation=None,
+        remarks="test",
+    )
+
+    no_obs = check_no_observation(record)
+
+    assert no_obs is True
+
+
+@pytest.mark.django_db
+def test_check_no_observation_valid_record_no_observation_false(record_factory):
+    record = record_factory(remarks="")
+
+    no_obs = check_no_observation(record)
+
+    assert no_obs is False
+
+
+def test_check_no_observation_invalid_record():
+    try:
+        check_no_observation({})
+        assert False
+    except AttributeError:
+        assert True
+
+
+def test_check_maintenance_option_valid_maintenance_valid_option():
+    assert check_maintenance_option(["cut_partly"], "cut_partly") is True
+
+
+def test_check_maintenance_option_valid_maintenance_invalid_option():
+    assert check_maintenance_option(["cut_partly"], "removed") is False
+
+
+def test_check_maintenance_option_empty_maintenance():
+    assert check_maintenance_option([], "removed") is False
+
+
+def test_check_maintenance_option_none_maintenance():
+    assert check_maintenance_option(None, "removed") is None
+
+
+def test_check_maintenance_option_invalid_maintenance():
+    try:
+        check_maintenance_option(12, "removed")
+        assert False
+    except TypeError as e:
+        assert str(e) == "argument of type 'int' is not iterable"

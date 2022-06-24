@@ -92,7 +92,7 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 
     except ValidationError:
         response = JsonResponse("Received JSON could not be validated.", safe=False)
-        response.status_code = 400
+        response.status_code = 500
         return response
 
     except Exception as e:
@@ -368,6 +368,9 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
 
 
 def get_older(collection):
+    if type(collection) is not Collection:
+        raise Collection.DoesNotExist("Collection is not valid.")
+
     prev_collection_db = (
         Collection.objects.filter(
             date__lt=collection.date, garden=collection.garden, finished=True
@@ -414,7 +417,7 @@ def last(request):
 
     except ValidationError:
         response = JsonResponse("Received JSON could not be validated.", safe=False)
-        response.status_code = 400
+        response.status_code = 500
         return response
 
     except Collection.DoesNotExist:
@@ -439,24 +442,20 @@ def format_records(collection_records: QuerySet):
 
     """
     records = {}
+
+    if (
+        type(collection_records) is not QuerySet
+        or collection_records.model is not Record
+    ):
+        return records
+
     for record in collection_records:
-        no_obs = False
-        if (
-            record.initial_vegetative_growth is None
-            and record.young_leaves_unfolding is None
-            and record.flowers_open is None
-            and record.peak_flowering is None
-            and record.ripe_fruits is None
-            and record.senescence is None
-            and record.peak_flowering_estimation is None
-            and len(record.remarks) > 0
-        ):
-            no_obs = True
+        no_obs = check_no_observation(record)
 
         records[record.plant.order] = {
             "id": record.id,
             "order": record.plant.order,
-            "done": False if (record.done is None) else record.done,
+            "done": False if record.done is None else record.done,
             "name": record.plant.garden_name,
             "initial-vegetative-growth": record.initial_vegetative_growth,
             "young-leaves-unfolding": record.young_leaves_unfolding,
@@ -466,27 +465,43 @@ def format_records(collection_records: QuerySet):
             "ripe-fruits": record.ripe_fruits,
             "senescence": record.senescence,
             "senescence-intensity": record.senescence_intensity,
-            "covered-artificial": None
-            if (record.maintenance is None)
-            else "covered_artificial" in record.maintenance,
-            "covered-natural": None
-            if (record.maintenance is None)
-            else "covered_natural" in record.maintenance,
-            "cut-partly": None
-            if (record.maintenance is None)
-            else "cut_partly" in record.maintenance,
-            "cut-total": None
-            if (record.maintenance is None)
-            else "cut_total" in record.maintenance,
-            "transplanted": None
-            if (record.maintenance is None)
-            else "transplanted" in record.maintenance,
-            "removed": None
-            if (record.maintenance is None)
-            else "removed" in record.maintenance,
+            "covered-artificial": check_maintenance_option(
+                record.maintenance, "covered_artificial"
+            ),
+            "covered-natural": check_maintenance_option(
+                record.maintenance, "covered_natural"
+            ),
+            "cut-partly": check_maintenance_option(record.maintenance, "cut_partly"),
+            "cut-total": check_maintenance_option(record.maintenance, "cut_total"),
+            "transplanted": check_maintenance_option(
+                record.maintenance, "transplanted"
+            ),
+            "removed": check_maintenance_option(record.maintenance, "removed"),
             "remarks": record.remarks,
             "peak-flowering-estimation": record.peak_flowering_estimation,
             "no-observation": no_obs,
         }
 
     return records
+
+
+def check_no_observation(record):
+    if (
+        record.initial_vegetative_growth is None
+        and record.young_leaves_unfolding is None
+        and record.flowers_open is None
+        and record.peak_flowering is None
+        and record.ripe_fruits is None
+        and record.senescence is None
+        and record.peak_flowering_estimation is None
+        and len(record.remarks) > 0
+    ):
+        return True
+    return False
+
+
+def check_maintenance_option(maintenance, option):
+    if maintenance is None:
+        return None
+    else:
+        return option in maintenance

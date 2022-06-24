@@ -32,7 +32,7 @@ def home(request: HttpRequest) -> HttpResponse:
                 "No subgarden has been assigned to the user. Please assign user to a subgarden."
             ),
         }
-        return render(request, "error.html", context)
+        return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
         context = {
@@ -40,7 +40,7 @@ def home(request: HttpRequest) -> HttpResponse:
                 "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
             )
         }
-        return render(request, "error.html", context)
+        return render(request, "error.html", context, status=500)
 
     except Exception as e:
         context = {"exception": e}

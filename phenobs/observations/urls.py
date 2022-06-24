@@ -65,6 +65,6 @@ urlpatterns = [
         get.view_collection_content,
         name="view_collection_content",
     ),
-    path("download/<str:filetype>/<str:ids>", download.download, name="download"),
+    path("download/<str:filetype>/", download.download, name="download"),
     path("save/", upload.upload_selected, name="save"),
 ]

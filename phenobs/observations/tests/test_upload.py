@@ -2,7 +2,7 @@ import json
 from unittest.mock import patch
 
 import pytest
-from django.http.response import Http404, JsonResponse
+from django.http.response import JsonResponse
 from jsonschema.exceptions import ValidationError
 
 from phenobs.observations.upload import (
@@ -82,11 +82,9 @@ def test_upload_with_post(post_request_upload_valid_json):
 
 @pytest.mark.django_db
 def test_upload_with_get(get_request_upload_valid_json):
-    try:
-        upload(get_request_upload_valid_json)
-        assert False
-    except Http404:
-        assert True
+    response = upload(get_request_upload_valid_json)
+
+    assert response.status_code == 405
 
 
 @pytest.mark.django_db
@@ -123,11 +121,9 @@ def test_upload_selected_invalid_json(post_request_upload_selected_invalid_json)
 
 @pytest.mark.django_db
 def test_upload_selected_with_get(get_request_upload_selected_valid_json):
-    try:
-        upload(get_request_upload_selected_valid_json)
-        assert False
-    except Http404:
-        assert True
+    response = upload(get_request_upload_selected_valid_json)
+
+    assert response.status_code == 405
 
 
 @pytest.fixture
