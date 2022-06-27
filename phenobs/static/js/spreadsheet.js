@@ -110,61 +110,63 @@ function checkAll(checked=true, view=false) {
 async function downloadFile(filetype){
     const collections = selectAll(true);
     if (collections.length) {
-        await $.ajax({
-            url: `/observations/download/${filetype}/`,
-            data: JSON.stringify(selectAll(true)),
-            method: "POST",
-            xhrFields: {
-                responseType: 'blob'
-            },
-            error: function (jqXHR) {
-                // alert("Could not establish a connection with database.");
-                alertModal(jqXHR.responseJSON);
-            },
-            beforeSend: function() {
-                $("body").addClass("loading");
-            },
-            complete: function(){
-                $("body").removeClass("loading");
-            },
-            success: function(blob, status, xhr) {
-                // check for a filename
-                let filename = "";
-                let disposition = xhr.getResponseHeader('Content-Disposition');
-                if (disposition && disposition.indexOf('attachment') !== -1) {
-                    let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                    let matches = filenameRegex.exec(disposition);
-                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
-                }
+        const data = JSON.stringify(selectAll(true))
 
-                if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
-                    window.navigator.msSaveBlob(blob, filename);
-                } else {
-                    let URL = window.URL || window.webkitURL;
-                    let downloadUrl = URL.createObjectURL(blob);
-
-                    if (filename) {
-                        // use HTML5 a[download] attribute to specify filename
-                        let a = document.createElement("a");
-                        // safari doesn't support this yet
-                        if (typeof a.download === 'undefined') {
-                            window.location.href = downloadUrl;
-                        } else {
-                            a.href = downloadUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                        }
-                    } else {
-                        window.location.href = downloadUrl;
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if(request.readyState === 4) {
+                if (request.status === 200) {
+                    console.log(typeof request.response); // should be a blob
+                    let filename = "";
+                    let disposition = request.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        let matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
                     }
 
-                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(request.response, filename);
+                    } else if (typeof window.navigator.msSaveBlob === 'undefined') {
+                        let URL = window.URL || window.webkitURL;
+                        let downloadUrl = URL.createObjectURL(request.response);
+
+                        if (filename) {
+                            // use HTML5 a[download] attribute to specify filename
+                            let a = document.createElement("a");
+                            // safari doesn't support this yet
+                            if (typeof a.download === 'undefined') {
+                                window.location.href = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location.href = downloadUrl;
+                        }
+
+                        setTimeout(function () {
+                            URL.revokeObjectURL(downloadUrl);
+                        }, 100); // cleanup
+                    } else if (request.responseText !== "") {
+                        console.log(request.responseText);
+                    }
                 }
+            } else if (request.readyState === 2) {
+                if (request.status === 200) {
+                    request.responseType = "blob";
+                } else {
+                    request.responseType = "text";
+                }
+            } else if (request.readyState === 3 && request.responseType !== "blob") {
+                alertModal(request.response);
             }
-        });
-        // location.href = `/observations/download/${filetype}/[${selectAll(true)}]`;
+        };
+        request.open("POST", `/observations/download/${filetype}/`, true);
+        request.send(data);
     }
     else
         alertModal("You have not selected any collection.");

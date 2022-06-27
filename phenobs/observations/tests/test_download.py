@@ -56,6 +56,7 @@ def test_download_invalid_method(request_factory, user):
     response = download(request, filetype)
 
     assert response.status_code == 405
+    assert response.content == b"Method not allowed."
 
 
 @pytest.mark.django_db
@@ -67,6 +68,7 @@ def test_download_valid_method_invalid_filetype(request_factory, user):
     response = download(request, "test")
 
     assert response.status_code == 404
+    assert response.content == b"Filetype was not recognized."
 
 
 @pytest.mark.django_db
@@ -80,6 +82,7 @@ def test_download_valid_method_filetype_csv_invalid_json(request_factory, user):
     response = download(request, filetype)
 
     assert response.status_code == 500
+    assert response.content == b"JSON decoding error was raised."
 
 
 @pytest.mark.django_db
@@ -90,11 +93,12 @@ def test_download_valid_method_valid_filetype_valid_json_invalid_schema(
 
     request = request_factory.post("observations/download/%s/" % filetype)
     request.user = user
-    request._body = "['test', 'test']"
+    request._body = '[1, 5, "test"]'
 
     response = download(request, filetype)
 
     assert response.status_code == 500
+    assert response.content == b"Received JSON could not be validated."
 
 
 @pytest.mark.django_db
@@ -110,6 +114,7 @@ def test_download_valid_method_valid_filetype_valid_json_valid_schema_invalid_co
     response = download(request, filetype)
 
     assert response.status_code == 404
+    assert response.content == b"Collection with ID: %d could not be retrieved" % -1
 
 
 @pytest.fixture
@@ -134,57 +139,45 @@ def columns():
 
 
 @pytest.mark.django_db
-def test_return_csv_valid_collections(request_factory, user, collection, columns):
+def test_return_csv_valid_collections(collection, columns):
     collections = [collection]
 
-    request = request_factory.post("observations/download/csv/")
-    request.user = user
-    request._body = "[%d]" % collection.id
-
-    response = return_csv(request, columns, collections)
+    response = return_csv(columns, collections)
 
     assert type(response) == HttpResponse
+    assert response.status_code == 200
     assert response["content-type"] == "text/csv"
     assert response["Content-Disposition"] == 'attachment; filename="collections.csv"'
 
 
 @pytest.mark.django_db
-def test_return_csv_invalid_collections(request_factory, user, collection, columns):
+def test_return_csv_invalid_collections(collection, columns):
     collections = collection
 
-    request = request_factory.post("observations/download/csv/")
-    request.user = user
-    request._body = "[%d]" % collection.id
-
-    response = return_csv(request, columns, collections)
+    response = return_csv(columns, collections)
 
     assert response.status_code == 500
+    assert response.content == b"Invalid argument received."
 
 
 @pytest.mark.django_db
-def test_return_csv_invalid_collection(request_factory, user, record, columns):
+def test_return_csv_invalid_collection(record, columns):
     collections = [record]
 
-    request = request_factory.post("observations/download/csv/")
-    request.user = user
-    request._body = "1"
-
-    response = return_csv(request, columns, collections)
+    response = return_csv(columns, collections)
 
     assert response.status_code == 500
+    assert response.content == b"Received list contains invalid collection."
 
 
 @pytest.mark.django_db
-def test_return_xlsx_valid_collections(request_factory, user, collection, columns):
+def test_return_xlsx_valid_collections(collection, columns):
     collections = [collection]
 
-    request = request_factory.post("observations/download/xlsx/")
-    request.user = user
-    request._body = "[%d]" % collection.id
-
-    response = return_xlsx(request, columns, collections)
+    response = return_xlsx(columns, collections)
 
     assert type(response) == HttpResponse
+    assert response.status_code == 200
     assert (
         response["content-type"]
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -193,26 +186,20 @@ def test_return_xlsx_valid_collections(request_factory, user, collection, column
 
 
 @pytest.mark.django_db
-def test_return_xlsx_invalid_collections(request_factory, user, collection, columns):
+def test_return_xlsx_invalid_collections(collection, columns):
     collections = collection
 
-    request = request_factory.post("observations/download/xlsx/")
-    request.user = user
-    request._body = "[%d]" % collection.id
-
-    response = return_xlsx(request, columns, collections)
+    response = return_xlsx(columns, collections)
 
     assert response.status_code == 500
+    assert response.content == b"Invalid argument received."
 
 
 @pytest.mark.django_db
-def test_return_xlsx_invalid_collection(request_factory, user, record, columns):
+def test_return_xlsx_invalid_collection(record, columns):
     collections = [record]
 
-    request = request_factory.post("observations/download/xlsx/")
-    request.user = user
-    request._body = "1"
-
-    response = return_xlsx(request, columns, collections)
+    response = return_xlsx(columns, collections)
 
     assert response.status_code == 500
+    assert response.content == b"Received list contains invalid collection."

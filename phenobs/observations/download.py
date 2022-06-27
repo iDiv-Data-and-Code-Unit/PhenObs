@@ -5,7 +5,6 @@ import json
 import xlsxwriter
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -29,16 +28,13 @@ def download(request, filetype):
                 try:
                     collections.append(Collection.objects.get(id=int(parsed_id)))
                 except Collection.DoesNotExist:
-                    context = {
-                        "exception": Exception(
-                            "Collection with ID: %d could not be retrieved"
-                            % int(parsed_id)
-                        )
-                    }
-                    return render(request, "error.html", context, status=404)
+                    return HttpResponse(
+                        "Collection with ID: %d could not be retrieved"
+                        % int(parsed_id),
+                        status=404,
+                    )
                 except Exception as e:
-                    context = {"exception": e}
-                    return render(request, "error.html", context, status=500)
+                    return HttpResponse(str(e), status=500)
 
             columns = [
                 "Garden",
@@ -59,31 +55,24 @@ def download(request, filetype):
             ]
 
             if filetype.lower() == "csv":
-                return return_csv(request, columns, collections)
+                return return_csv(columns, collections)
             elif filetype.lower() == "xlsx":
-                return return_xlsx(request, columns, collections)
+                return return_xlsx(columns, collections)
             else:
-                context = {"exception": Exception("Filetype was not recognized.")}
-                return render(request, "error.html", context, status=404)
+                return HttpResponse("Filetype was not recognized.", status=404)
         except json.JSONDecodeError:
-            context = {"exception": Exception("JSON decoding error was raised.")}
-            return render(request, "error.html", context, status=500)
+            return HttpResponse("JSON decoding error was raised.", status=500)
         except ValidationError:
-            context = {"exception": Exception("Received JSON could not be validated.")}
-            return render(request, "error.html", context, status=500)
+            return HttpResponse("Received JSON could not be validated.", status=500)
         except Exception as e:
-            context = {"exception": e}
-            return render(request, "error.html", context, status=500)
+            return HttpResponse(str(e), status=500)
     else:
-        context = {"exception": Exception("Method not allowed.")}
-
-        return render(request, "error.html", context, status=405)
+        return HttpResponse("Method not allowed.", status=405)
 
 
-def return_xlsx(request, columns, collections):
+def return_xlsx(columns, collections):
     if type(collections) is not list:
-        context = {"exception": "Invalid argument received."}
-        return render(request, "error.html", context, status=500)
+        return HttpResponse("Invalid argument received.", status=500)
 
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output)
@@ -96,8 +85,9 @@ def return_xlsx(request, columns, collections):
 
     for collection in collections:
         if type(collection) is not Collection:
-            context = {"exception": "Received list contains invalid collection."}
-            return render(request, "error.html", context, status=500)
+            return HttpResponse(
+                "Received list contains invalid collection.", status=500
+            )
         records = Record.objects.filter(collection=collection).values_list(
             # 'collection__garden__name',
             # 'collection__date',
@@ -146,10 +136,9 @@ def return_xlsx(request, columns, collections):
     return response
 
 
-def return_csv(request, columns, collections):
+def return_csv(columns, collections):
     if type(collections) is not list:
-        context = {"exception": "Invalid argument received."}
-        return render(request, "error.html", context, status=500)
+        return HttpResponse("Invalid argument received.", status=500)
 
     response = HttpResponse(content_type="text/csv")
 
@@ -160,8 +149,9 @@ def return_csv(request, columns, collections):
 
     for collection in collections:
         if type(collection) is not Collection:
-            context = {"exception": "Received list contains invalid collection."}
-            return render(request, "error.html", context, status=500)
+            return HttpResponse(
+                "Received list contains invalid collection.", status=500
+            )
 
         records = Record.objects.filter(collection=collection).values_list(
             # 'collection__garden__name',
