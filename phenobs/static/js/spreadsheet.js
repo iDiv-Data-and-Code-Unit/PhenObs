@@ -53,8 +53,9 @@ function formatCollection(id) {
     let collection = {
         "id": parseInt(id),
         "date": $("#date-" + id).val(),
-        "garden": $("#garden-" + id).attr("name"),
-        "records": []
+        "garden": parseInt($("#garden-" + id).attr("name")),
+        "records": {},
+        "creator": $("#collection-creator-" + id).text()
     };
 
     const records = $("#collection-" + id + ' tr[id*="record-"]');
@@ -72,13 +73,15 @@ function formatCollection(id) {
         for (let j = 0; j < inputs.length; j++) {
             if (inputs[j].type === "checkbox")
                 record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = inputs[j].checked;
+            else if (inputs[j].type === "hidden")
+                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = parseInt(inputs[j].value);
             else
                 record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = inputs[j].value;
         }
         for (let j = 0; j < selects.length; j++)
             record[selects[j].id.substr(selects[j].id.match("-").index + 1)] = selects[j].value;
 
-        collection["records"].push(record);
+        collection["records"][record["order"]] = record;
     }
 
     return collection;
@@ -192,11 +195,15 @@ async function uploadSelected(collection=null) {
         collections.push(formatCollection(selected[i]));
 
 
+    console.log(collections)
+
     for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
 
-        for (let j = 0; j < collection["records"].length; j++) {
-            const record = collection["records"][j];
+        console.log(collection)
+
+        for (let key in collection["records"]) {
+            const record = collection["records"][key];
 
             const fields = $("[id*=" + record["id"] + "-]");
             for (let k = 0; k < fields.length; k++) {
@@ -210,7 +217,7 @@ async function uploadSelected(collection=null) {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["senescence-intensity"] > 0 && record["senescence"] !== "y") {
+            } else if (record["senescence-intensity"].length > 0 && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence').addClass("invalidField");
                 invalid = true;
@@ -222,7 +229,7 @@ async function uploadSelected(collection=null) {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowering-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["flowering-intensity"] > 0 && record["flowers-opening"] !== "y") {
+            } else if (record["flowering-intensity"].length > 0 && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowers-opening').addClass("invalidField");
                 invalid = true;

@@ -29,9 +29,9 @@
                    aria-controls="collection-{{ collection.id }}">
                 <div class="row">
                   <span class="col-11 d-flex">
-                    <span class="col">{{ collection.date_full }}</span>
-                    <span class="col text-center"><strong id="garden-{{ collection.id }}" name="{{ subgarden.id }}">{{ garden.name }}</strong>: {{ subgarden.name }}</span>
-                    <span class="col text-center">{{ collection.creator }}</span>
+                    <span class="col" id="collection-date-{{ collection.id }}">{{ collection.date_full }}</span>
+                    <span class="col text-center" id="collection-garden-{{ collection.id }}"><strong id="garden-{{ collection.id }}" name="{{ subgarden.id }}">{{ garden.name }}</strong>: {{ subgarden.name }}</span>
+                    <span class="col text-center" id="collection-creator-{{ collection.id }}">{{ collection.creator }}</span>
                   </span>
                   {% if collection.finished == False %}
                     <i class="bi bi-exclamation-circle-fill col-1 text-right"></i>
