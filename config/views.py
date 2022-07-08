@@ -18,7 +18,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
     """
     try:
-        garden = Garden.objects.filter(auth_users=request.user).get()
+        garden = Garden.objects.get(auth_users=request.user)
         date = datetime.now().date()
 
         context = {"garden": garden, "date": date}
@@ -40,7 +40,7 @@ def home(request: HttpRequest) -> HttpResponse:
                 "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
             )
         }
-        return render(request, "error.html", context, status=500)
+        return render(request, "error.html", context, status=409)
 
     except Exception as e:
         context = {"exception": e}

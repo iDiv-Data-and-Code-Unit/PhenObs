@@ -3,16 +3,11 @@ import csv
 import factory
 import pytest
 from django.contrib.admin.sites import AdminSite
-from django.test import Client, RequestFactory
+from django.test import Client
 
 from phenobs.gardens.models import Garden
 from phenobs.plants.admin import PlantAdmin
 from phenobs.plants.models import Plant
-
-
-@pytest.fixture
-def request_factory():
-    return RequestFactory()
 
 
 @pytest.fixture
