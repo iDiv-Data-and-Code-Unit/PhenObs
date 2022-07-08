@@ -216,6 +216,7 @@ def normalize_record(record):
 
 
 def update_collection(data, username):
+    print(data)
     validate(instance=data, schema=collection_schema)
 
     collection_date = datetime.strptime(data["date"], "%Y-%m-%d")

@@ -77,7 +77,7 @@ def test_upload_with_post(post_request_upload_valid_json):
     )
 
     assert isinstance(response, JsonResponse)
-    assert json.loads(response.content) == "OK"
+    assert response.content == b'"OK"'
 
 
 @pytest.mark.django_db
@@ -85,6 +85,7 @@ def test_upload_with_get(get_request_upload_valid_json):
     response = upload(get_request_upload_valid_json)
 
     assert response.status_code == 405
+    assert response.content == b'"Method not allowed."'
 
 
 @pytest.mark.django_db
@@ -92,7 +93,7 @@ def test_upload_invalid_json(post_request_upload_invalid_json):
     response = upload(post_request_upload_invalid_json)
 
     assert isinstance(response, JsonResponse)
-    assert json.loads(response.content) == "Upload failed. JSON decoding error."
+    assert response.content == b'"Upload failed. JSON decoding error."'
 
 
 @pytest.mark.django_db
@@ -108,7 +109,7 @@ def test_upload_selected_with_post(post_request_upload_selected_valid_json):
 
     assert update_collection_mock.call_count == 2
     assert isinstance(response, JsonResponse)
-    assert json.loads(response.content) == "OK"
+    assert response.content == b'"OK"'
 
 
 @pytest.mark.django_db
@@ -116,7 +117,7 @@ def test_upload_selected_invalid_json(post_request_upload_selected_invalid_json)
     response = upload(post_request_upload_selected_invalid_json)
 
     assert isinstance(response, JsonResponse)
-    assert json.loads(response.content) == "Upload failed. JSON decoding error."
+    assert response.content == b'"Upload failed. JSON decoding error."'
 
 
 @pytest.mark.django_db
@@ -124,6 +125,7 @@ def test_upload_selected_with_get(get_request_upload_selected_valid_json):
     response = upload(get_request_upload_selected_valid_json)
 
     assert response.status_code == 405
+    assert response.content == b'"Method not allowed."'
 
 
 @pytest.fixture
@@ -226,7 +228,7 @@ def test_update_collection_valid_json(collection_valid_json, user):
 
 
 @pytest.mark.django_db
-def test_normalize_record_valid_json_no_observation(
+def test_normalize_record_valid_json_no_observation_true(
     collection_valid_json_no_observation,
 ):
     for key in collection_valid_json_no_observation["records"]:
@@ -242,6 +244,23 @@ def test_normalize_record_valid_json_no_observation(
         assert record["senescence"] is None
         assert record["senescence-intensity"] is None
         assert record["peak-flowering-estimation"] is None
+
+
+@pytest.mark.django_db
+def test_normalize_record_valid_json_no_observation_false(
+    collection_valid_json,
+):
+    for key in collection_valid_json["records"]:
+        record = normalize_record(collection_valid_json["records"][key])
+
+        assert record["no-observation"] is False
+        assert record["initial-vegetative-growth"] is not None
+        assert record["young-leaves-unfolding"] is not None
+        assert record["flowers-opening"] is not None
+        assert record["peak-flowering"] is not None
+        assert record["ripe-fruits"] is not None
+        assert record["senescence"] is not None
+        assert record["peak-flowering-estimation"] is not None
 
 
 @pytest.mark.django_db

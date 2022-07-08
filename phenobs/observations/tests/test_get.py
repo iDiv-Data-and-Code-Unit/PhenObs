@@ -20,6 +20,8 @@ from phenobs.observations.get import (
 )
 from phenobs.observations.models import Collection, Record
 
+# from phenobs.observations.tests.test_upload import collection_valid_json
+
 
 @pytest.fixture
 def collection_valid_json(collection, record_factory, plant_factory):
