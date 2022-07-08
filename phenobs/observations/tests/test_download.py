@@ -2,7 +2,7 @@ import random
 from unittest.mock import patch
 
 import pytest
-from django.http import HttpResponse
+from django.http import StreamingHttpResponse
 
 from phenobs.observations.download import download, return_csv, return_xlsx
 
@@ -144,7 +144,7 @@ def test_return_csv_valid_collections(collection, columns):
 
     response = return_csv(columns, collections)
 
-    assert type(response) == HttpResponse
+    assert type(response) == StreamingHttpResponse
     assert response.status_code == 200
     assert response["content-type"] == "text/csv"
     assert response["Content-Disposition"] == 'attachment; filename="collections.csv"'
@@ -176,7 +176,7 @@ def test_return_xlsx_valid_collections(collection, columns):
 
     response = return_xlsx(columns, collections)
 
-    assert type(response) == HttpResponse
+    assert type(response) == StreamingHttpResponse
     assert response.status_code == 200
     assert (
         response["content-type"]

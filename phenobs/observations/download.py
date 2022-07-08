@@ -4,7 +4,7 @@ import json
 
 import xlsxwriter
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -70,6 +70,11 @@ def download(request, filetype):
         return HttpResponse("Method not allowed.", status=405)
 
 
+class Echo(object):
+    def write(self, value):
+        return value
+
+
 def return_xlsx(columns, collections):
     if type(collections) is not list:
         return HttpResponse("Invalid argument received.", status=500)
@@ -127,7 +132,7 @@ def return_xlsx(columns, collections):
     workbook.close()
     output.seek(0)
 
-    response = HttpResponse(
+    response = StreamingHttpResponse(
         output,
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
@@ -140,12 +145,10 @@ def return_csv(columns, collections):
     if type(collections) is not list:
         return HttpResponse("Invalid argument received.", status=500)
 
-    response = HttpResponse(content_type="text/csv")
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer, delimiter=";")
 
-    writer = csv.writer(response, delimiter=";")
-    writer.writerow(columns)
-
-    rows = []
+    rows = [columns]
 
     for collection in collections:
         if type(collection) is not Collection:
@@ -192,8 +195,9 @@ def return_csv(columns, collections):
                 ]
             )
 
-    writer.writerows(sorted(rows, key=lambda row: row[2]))
-
+    response = StreamingHttpResponse(
+        (writer.writerow(row) for row in rows), content_type="text/csv"
+    )
     response["Content-Disposition"] = 'attachment; filename="collections.csv"'
 
     return response
