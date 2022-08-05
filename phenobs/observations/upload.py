@@ -35,58 +35,7 @@ def upload(request: HttpRequest) -> JsonResponse:
 
         print(request.body)
 
-        try:
-            update_collection(data, request.user.username)
-        except ValidationError:
-            response = JsonResponse(
-                "Upload failed. Received JSON could not be validated.", safe=False
-            )
-            response.status_code = 500
-            return response
-        except ValueError as e:
-            response = JsonResponse(
-                "Upload failed. Received the following error:\n%s" % e
-            )
-            response.status_code = 500
-            return response
-        except Collection.DoesNotExist:
-            response = JsonResponse(
-                "Upload failed. Collection could not be retrieved from database.",
-                safe=False,
-            )
-            response.status_code = 404
-            return response
-        except Garden.DoesNotExist:
-            response = JsonResponse(
-                "Upload failed. Garden could not be retrieved from database.",
-                safe=False,
-            )
-            response.status_code = 404
-            return response
-        except Record.DoesNotExist as e:
-            response = JsonResponse(
-                "Upload failed. Error occurred while retrieving a record:\n%s" % e,
-                safe=False,
-            )
-            response.status_code = 404
-            return response
-        except Plant.DoesNotExist as e:
-            response = JsonResponse(
-                "Upload failed. Error occurred while retrieving the plant for a record:\n%s"
-                % e,
-                safe=False,
-            )
-            response.status_code = 404
-            return response
-        except Exception as e:
-            response = JsonResponse(
-                "Upload failed. Following error message was received:\n%s" % e,
-                safe=False,
-            )
-            response.status_code = 500
-            return response
-
-        return JsonResponse("OK", safe=False)
+        return update_collection(data, request.user.username)
     else:
         response = JsonResponse("Method not allowed.", safe=False)
         response.status_code = 405
@@ -100,71 +49,12 @@ def upload_selected(request):
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse(
-                "Upload failed. JSON decoding error was raised.", safe=False
+                "Upload failed. JSON decoding error was raised.", status=500, safe=False
             )
 
         for collection in data:
-            try:
-                update_collection(collection, request.user.username)
-            except ValidationError:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Received JSON could not be validated." % collection["id"],
-                    safe=False,
-                )
-                response.status_code = 500
-                return response
-            except ValueError as e:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Received the following error:\n%s" % (collection["id"], e),
-                    safe=False,
-                )
-                response.status_code = 500
-                return response
-            except Collection.DoesNotExist:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Collection could not be retrieved from database."
-                    % collection["id"],
-                    safe=False,
-                )
-                response.status_code = 404
-                return response
-            except Garden.DoesNotExist:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Garden with the ID=%s could not be retrieved from database."
-                    % (collection["id"], collection["garden"]),
-                    safe=False,
-                )
-                response.status_code = 404
-                return response
-            except Record.DoesNotExist as e:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Error occurred while retrieving a record:\n%s"
-                    % (collection["id"], e),
-                    safe=False,
-                )
-                response.status_code = 404
-                return response
-            except Plant.DoesNotExist as e:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Error occurred while retrieving the plant for a record:\n%s"
-                    % (collection["id"], e),
-                    safe=False,
-                )
-                response.status_code = 404
-                return response
-            except Exception as e:
-                response = JsonResponse(
-                    "Upload failed for collection with ID: %s. "
-                    "Following error message was received:\n%s" % (collection["id"], e),
-                    safe=False,
-                )
-                response.status_code = 500
+            response = update_collection(collection, request.user.username)
+            if response.status_code != 200:
                 return response
         return JsonResponse("OK", safe=False)
     else:
@@ -217,46 +107,110 @@ def normalize_record(record):
 
 def update_collection(data, username):
     print(data)
-    validate(instance=data, schema=collection_schema)
+    try:
+        try:
+            validate(instance=data, schema=collection_schema)
+        except ValidationError as e:
+            response = JsonResponse(
+                "Upload failed for collection. "
+                "Received JSON could not be validated. Following message was received: %s"
+                % e,
+                safe=False,
+            )
+            response.status_code = 500
+            return response
 
-    collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
-    doy = collection_date.date() - date(collection_date.year, 1, 1) + timedelta(1)
+        collection_date = datetime.strptime(data["date"], "%Y-%m-%d")
+        doy = collection_date.date() - date(collection_date.year, 1, 1) + timedelta(1)
 
-    collection = Collection.objects.get(id=data["id"])
-    collection.garden = Garden.objects.filter(id=data["garden"]).get()
-    collection.date = collection_date.date()
-    collection.doy = doy.days
-    collection.finished = True
-    collection.creator = Collection.objects.filter(id=data["id"]).get().creator
-    collection.save()
+        collection = Collection.objects.get(id=data["id"])
+        collection.garden = Garden.objects.filter(id=data["garden"]).get()
+        collection.date = collection_date.date()
+        collection.doy = doy.days
+        collection.finished = True
+        collection.creator = Collection.objects.filter(id=data["id"]).get().creator
+        collection.save()
 
-    for record in data["records"]:
-        current_record = normalize_record(
-            data["records"][record] if type(record) == str else record
+        for record in data["records"]:
+            current_record = normalize_record(
+                data["records"][record] if type(record) == str else record
+            )
+            timestamp = timezone.now()
+            new_record = Record(
+                collection=collection,
+                id=int(current_record["id"]),
+                plant=Plant.objects.filter(
+                    order=int(current_record["order"]),
+                    garden_id=int(data["garden"]),
+                ).get(),
+                timestamp_entry=timestamp,
+                timestamp_edit=timestamp,
+                editor=User.objects.filter(username=username).get(),
+                initial_vegetative_growth=current_record["initial-vegetative-growth"],
+                young_leaves_unfolding=current_record["young-leaves-unfolding"],
+                flowers_open=current_record["flowers-opening"],
+                peak_flowering=current_record["peak-flowering"],
+                flowering_intensity=current_record["flowering-intensity"],
+                ripe_fruits=current_record["ripe-fruits"],
+                senescence=current_record["senescence"],
+                senescence_intensity=current_record["senescence-intensity"],
+                maintenance=current_record["maintenance"],
+                remarks=current_record["remarks"],
+                peak_flowering_estimation=current_record["peak-flowering-estimation"],
+                done=current_record["done"],
+            )
+
+            new_record.save()
+
+    except ValueError as e:
+        response = JsonResponse(
+            "Upload failed for collection with ID: %s. "
+            "Received the following error:\n%s" % (data["id"], e),
+            safe=False,
         )
-        timestamp = timezone.now()
-        new_record = Record(
-            collection=collection,
-            id=int(current_record["id"]),
-            plant=Plant.objects.filter(
-                order=int(current_record["order"]),
-                garden_id=int(data["garden"]),
-            ).get(),
-            timestamp_entry=timestamp,
-            timestamp_edit=timestamp,
-            editor=User.objects.filter(username=username).get(),
-            initial_vegetative_growth=current_record["initial-vegetative-growth"],
-            young_leaves_unfolding=current_record["young-leaves-unfolding"],
-            flowers_open=current_record["flowers-opening"],
-            peak_flowering=current_record["peak-flowering"],
-            flowering_intensity=current_record["flowering-intensity"],
-            ripe_fruits=current_record["ripe-fruits"],
-            senescence=current_record["senescence"],
-            senescence_intensity=current_record["senescence-intensity"],
-            maintenance=current_record["maintenance"],
-            remarks=current_record["remarks"],
-            peak_flowering_estimation=current_record["peak-flowering-estimation"],
-            done=current_record["done"],
+        response.status_code = 500
+        return response
+    except Collection.DoesNotExist:
+        response = JsonResponse(
+            "Upload failed for collection with ID: %s. "
+            "Collection could not be retrieved from database." % data["id"],
+            safe=False,
         )
+        response.status_code = 404
+        return response
+    except Garden.DoesNotExist:
+        response = JsonResponse(
+            "Upload failed for collection with ID: %s. "
+            "Garden with the ID=%s could not be retrieved from database."
+            % (data["id"], data["garden"]),
+            safe=False,
+        )
+        response.status_code = 404
+        return response
+    except Record.DoesNotExist as e:
+        response = JsonResponse(
+            "Upload failed for collection with ID: %s. "
+            "Error occurred while retrieving a record:\n%s" % (data["id"], e),
+            safe=False,
+        )
+        response.status_code = 404
+        return response
+    except Plant.DoesNotExist as e:
+        response = JsonResponse(
+            "Upload failed for collection with ID: %s. "
+            "Error occurred while retrieving the plant for a record:\n%s"
+            % (data["id"], e),
+            safe=False,
+        )
+        response.status_code = 404
+        return response
+    except Exception as e:
+        response = JsonResponse(
+            "Upload failed for the collection."
+            "Following error message was received:\n%s" % e,
+            safe=False,
+        )
+        response.status_code = 500
+        return response
 
-        new_record.save()
+    return JsonResponse("OK", safe=False)

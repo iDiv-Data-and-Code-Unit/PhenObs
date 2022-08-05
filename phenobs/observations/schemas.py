@@ -66,4 +66,13 @@ collection_schema = {
         "remaining": {"type": "array", "items": {"type": "integer"}},
         "uploaded": {"type": "boolean"},
     },
+    "required": [
+        "id",
+        "creator",
+        "garden",
+        "date",
+        "records",
+        "finished",
+        "garden-name",
+    ],
 }

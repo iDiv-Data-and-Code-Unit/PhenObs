@@ -1,6 +1,6 @@
 {% load static i18n %}
 
-<div class="mb-1">
+<div style="">
   <nav class="navbar navbar-expand-md navbar-light bg-light nav-shadow">
     <div class="container">
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -11,7 +11,7 @@
       <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a id="home" class="nav-link {{ home_active }}" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+            <a id="home" class="nav-link {{ home_active }}" href="{% url 'home' %}">Home</a>
           </li>
           <li class="nav-item d-xl-none">
             <a class="nav-link {{ observations_default_active }}" href="{% url 'observations:all' %}">Observations</a>
@@ -26,9 +26,9 @@
         </ul>
         <ul class="navbar-nav">
           {% if request.user.is_authenticated %}
-{#            <li class="nav-item">#}
-{#              <a class="nav-link {{ help_active }}" id="help" href="{% url 'help' %}">{% translate "Help" %}</a>#}
-{#            </li>#}
+            <li class="nav-item">
+              <a class="nav-link {{ help_active }}" id="help" href="{% url 'help' %}">{% translate "Help" %}</a>
+            </li>
             <li class="nav-item">
               {# URL provided by django-allauth/account/urls.py #}
               <a class="nav-link disabled" id="signout" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>

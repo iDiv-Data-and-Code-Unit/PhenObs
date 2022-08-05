@@ -43,8 +43,8 @@ class PlantAdmin(admin.ModelAdmin):
             try:
                 csv_file = request.FILES["csv_upload"]
 
-                # delimiter = 1 for semicolon
-                # delimiter = 2 for comma
+                # delimiter = '1' for semicolon
+                # delimiter = '2' for comma
                 try:
                     delimiter = request.POST["delimiter"]
 

@@ -31,6 +31,14 @@ def post_request_upload_invalid_json(post_request_upload_valid_json):
 
 
 @pytest.fixture
+def post_request_upload_invalid_json_schema(post_request_upload_valid_json):
+    request = post_request_upload_valid_json
+    request._body = "{}"
+
+    return request
+
+
+@pytest.fixture
 def get_request_upload_valid_json(request_factory, user):
     request = request_factory.get("/observations/upload/")
     request.user = user
@@ -68,7 +76,8 @@ def get_request_upload_selected_valid_json(request_factory, user):
 @pytest.mark.django_db
 def test_upload_with_post(post_request_upload_valid_json):
     with patch(
-        "phenobs.observations.upload.update_collection"
+        "phenobs.observations.upload.update_collection",
+        side_effect=lambda x, y: update_collection(x, y),
     ) as update_collection_mock:
         response = upload(post_request_upload_valid_json)
 
@@ -77,7 +86,8 @@ def test_upload_with_post(post_request_upload_valid_json):
     )
 
     assert isinstance(response, JsonResponse)
-    assert response.content == b'"OK"'
+    assert response.status_code == 500
+    assert "Received JSON could not be validated. " in json.loads(response.content)
 
 
 @pytest.mark.django_db
@@ -90,8 +100,13 @@ def test_upload_with_get(get_request_upload_valid_json):
 
 @pytest.mark.django_db
 def test_upload_invalid_json(post_request_upload_invalid_json):
-    response = upload(post_request_upload_invalid_json)
+    with patch(
+        "phenobs.observations.upload.update_collection",
+        side_effect=lambda x, y: update_collection(x, y),
+    ) as update_collection_mock:
+        response = upload(post_request_upload_invalid_json)
 
+    update_collection_mock.assert_called()
     assert isinstance(response, JsonResponse)
     assert response.content == b'"Upload failed. JSON decoding error."'
 
@@ -99,7 +114,8 @@ def test_upload_invalid_json(post_request_upload_invalid_json):
 @pytest.mark.django_db
 def test_upload_selected_with_post(post_request_upload_selected_valid_json):
     with patch(
-        "phenobs.observations.upload.update_collection"
+        "phenobs.observations.upload.update_collection",
+        side_effect=lambda x, y: update_collection(x, y),
     ) as update_collection_mock:
         response = upload_selected(post_request_upload_selected_valid_json)
 
@@ -107,9 +123,9 @@ def test_upload_selected_with_post(post_request_upload_selected_valid_json):
         {}, post_request_upload_selected_valid_json.user.username
     )
 
-    assert update_collection_mock.call_count == 2
     assert isinstance(response, JsonResponse)
-    assert response.content == b'"OK"'
+    assert response.status_code == 500
+    assert "Received JSON could not be validated. " in json.loads(response.content)
 
 
 @pytest.mark.django_db
@@ -126,11 +142,6 @@ def test_upload_selected_with_get(get_request_upload_selected_valid_json):
 
     assert response.status_code == 405
     assert response.content == b'"Method not allowed."'
-
-
-@pytest.fixture
-def collection_invalid_key_json():
-    return "{}"
 
 
 @pytest.fixture
@@ -271,7 +282,11 @@ def test_update_collection_valid_json_no_observation(
         with patch(
             "phenobs.observations.upload.normalize_record", side_effect=normalize_record
         ) as normalize_record_mock:
-            update_collection(collection_valid_json_no_observation, user.username)
+            response = update_collection(
+                collection_valid_json_no_observation, user.username
+            )
+
+        assert response.status_code == 200
 
         normalize_record_mock.assert_called()
         assert normalize_record_mock.call_count == 2
@@ -281,18 +296,8 @@ def test_update_collection_valid_json_no_observation(
 
 
 @pytest.mark.django_db
-def test_update_collection_invalid_key_json(collection_invalid_key_json, user):
-    try:
-        update_collection(json.loads(collection_invalid_key_json), user.username)
-        assert False
-    except KeyError:
-        assert True
-
-
-@pytest.mark.django_db
 def test_update_collection_invalid_json(collection_invalid_json, user):
-    try:
-        update_collection(json.loads(collection_invalid_json), user.username)
-        assert False
-    except ValidationError:
-        assert True
+    response = update_collection(json.loads(collection_invalid_json), user.username)
+
+    assert response.status_code == 500
+    assert "Received JSON could not be validated. " in json.loads(response.content)

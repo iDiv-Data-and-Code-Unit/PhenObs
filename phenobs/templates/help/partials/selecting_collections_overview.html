@@ -1,0 +1,22 @@
+{% extends "help/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/selecting_collections_overview.png" %}{% endblock %}
+
+{% block title %}Selecting collections on Overview view{% endblock %}
+
+{% block content %}
+  <p>To select a single or multiple collections, notice the checkboxes
+    placed in the right end of each collection row. </p>
+  <p>If you wish to select all the listed collections at once, you may
+    click on the “Select all” <i class="bi bi-check-square-fill text-primary"></i>
+    button located in the right end of the
+    navigation bar. Similarly, you may click on the “Select none”
+    <i class="bi bi-dash-square-fill text-primary"></i> to
+    select none of the listed collections.</p>
+{% endblock %}
+
+
+selecting_collections_overview

@@ -1,0 +1,16 @@
+{% extends "help/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/check_date.png" %}{% endblock %}
+
+{% block title %}Selecting the collection date{% endblock %}
+
+{% block content %}
+Collections upon creation are set the current date. If you would like to change the set date, please follow the steps below:
+<ol>
+  <li>Click on calendar icon.</li>
+  <li>Select the collection date date.</li>
+</ol>
+{% endblock %}
