@@ -20,7 +20,6 @@ function handleConnection() {
                 $('#myprofile').removeClass('disabled');
                 $('#online').removeClass('d-none');
                 $('#offline').addClass('d-none');
-                console.log('online');
 
                 return true;
             } else {
@@ -30,7 +29,6 @@ function handleConnection() {
                 $('#myprofile').addClass('disabled');
                 $('#offline').removeClass('d-none');
                 $('#online').addClass('d-none');
-                console.log('no connectivity');
 
                 return false;
             }
@@ -40,10 +38,8 @@ function handleConnection() {
         $('#brand').removeAttr("href");
         $('#home').addClass('disabled');
         $('#myprofile').addClass('disabled');
-        $('#help').addClass('disabled');
         $('#offline').removeClass('d-none');
         $('#online').addClass('d-none');
-        console.log('offline');
 
         return false;
     }
