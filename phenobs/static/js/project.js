@@ -17,7 +17,6 @@ function handleConnection() {
                 $('#signout').removeClass('disabled');
                 $('#brand').attr("href", "/");
                 $('#home').removeClass('disabled');
-                $('#help').removeClass('disabled');
                 $('#myprofile').removeClass('disabled');
                 $('#online').removeClass('d-none');
                 $('#offline').addClass('d-none');
@@ -28,7 +27,6 @@ function handleConnection() {
                 $('#signout').addClass('disabled');
                 $('#brand').removeAttr("href");
                 $('#home').addClass('disabled');
-                $('#help').addClass('disabled');
                 $('#myprofile').addClass('disabled');
                 $('#offline').removeClass('d-none');
                 $('#online').addClass('d-none');

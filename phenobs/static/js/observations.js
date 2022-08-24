@@ -184,7 +184,10 @@ async function getAllCollections() {
         data: JSON.stringify(ids),
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
-            alertModal(jqXHR.responseJSON);
+            if (!navigator.onLine)
+                alertModal("'Get collections' functionality is not available offline.");
+            else
+                alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
