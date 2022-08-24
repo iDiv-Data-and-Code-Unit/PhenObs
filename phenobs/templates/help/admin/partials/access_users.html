@@ -1,0 +1,12 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/subgarden_permissions.png" %}{% endblock %}
+
+{% block title %}Adding/Removing access users for a subgarden {% endblock %}
+
+{% block content %}
+  <p>In the “Access users” section select and deselect the user by holding “CTRL” key and clicking on it.</p>
+{% endblock %}

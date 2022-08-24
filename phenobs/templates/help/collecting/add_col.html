@@ -1,0 +1,33 @@
+<h1 class="mt-4" id="add_col">Adding a collection</h1>
+<p>To add a new collection, please follow these steps: </p>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="check_connection" text="Check connectivity status and verify 'Online' state." %}
+    {% include "help/collecting/partials/check_connection.html" with id="check_connection"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="add_collection_page" text="Proceed to 'Add collection' page." %}
+    {% include "help/collecting/partials/add_collection_page.html" with id="add_collection_page"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="collection_date" text="Check the collection date." %}
+    {% include "help/collecting/partials/collection_date.html" with id="collection_date"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="subgarden_selection" text="Select the subgarden(s) you would like to enter data for." %}
+    {% include "help/collecting/partials/subgarden_selection.html" with id="subgarden_selection"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="plant_selection" text="Select the plant." %}
+    {% include "help/collecting/partials/plant_selection.html" with id="plant_selection"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="filling_values" text="Fill in values for the chosen plant." %}
+    {% include "help/collecting/partials/filling_values.html" with id="filling_values"%}
+  </li>
+  <li>Select next plant and repeat step 6 for <strong>every</strong> plant.</li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="saving_local_obs" text="Save the collection to the database." %}
+    {% include "help/collecting/partials/saving_local.html" with id="saving_local_obs"%}
+  </li>
+</ol>

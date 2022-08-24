@@ -1,0 +1,20 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/user_details.png" %}{% endblock %}
+
+{% block title %}Entering personal user details{% endblock %}
+
+{% block content %}
+  In the “Personal Info” section, you may enter personal details of the user.
+  <ol>
+    <li>Select the “Status of Member” from the dropdown list (student or staff).</li>
+    <li>Select the “Organization” [OPTIONAL].</li>
+    <li>
+      Most of the fields are optional, however, it is recommended at least you enter the full name of the user,
+      so, it is easier to distinguish the users.
+    </li>
+  </ol>
+{% endblock %}

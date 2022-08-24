@@ -1,0 +1,20 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/upload_csv.png" %}{% endblock %}
+
+{% block title %}Filling in the "Import from CSV" form{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Choose the main garden from the “Garden” list.</li>
+    <li>Choose your CSV file by clicking on the “Choose file” button.</li>
+    <li>Choose the delimiter used in the document.</li>
+    <li>
+      Click on “Upload” button to upload the file and
+      create all the plants. This process may take a while if the list has too many rows.
+    </li>
+  </ol>
+{% endblock %}

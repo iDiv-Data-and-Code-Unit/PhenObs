@@ -1,0 +1,15 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/delete_collections.png" %}{% endblock %}
+
+{% block title %}Deleting multiple collections{% endblock %}
+
+{% block content %}
+  <p>
+    After choosing the collections to be deleted by checking the preceding checkboxes and select
+    Delete selected collections” from the actions menu and click on “Go”.
+  </p>
+{% endblock %}

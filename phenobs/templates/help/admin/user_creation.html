@@ -1,0 +1,49 @@
+<h1 class="mt-4" id="user_creation"><strong>User creation</strong></h1>
+<h2 id="create_user">Creating a user</h2>
+<p>To create a new user, please follow below steps:</p>
+<ol class="" style="font-size: 14pt">
+  <li>Proceed to <strong>Admin Panel</strong>.</li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_module_add" text="Locate the 'USERS' module and click on the 'Add' located on the right end of the 'Users' row." %}
+    {% include "help/admin/partials/users_module_add.html" with id="users_module_add"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_required_details" text="Enter required user details." %}
+    {% include "help/admin/partials/users_required_details.html" with id="users_required_details"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_optional_details" text="Enter personal user details." %}
+    {% include "help/admin/partials/users_optional_details.html" with id="users_optional_details"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_user_permissions" text="Add user permissions." %}
+    {% include "help/admin/partials/users_user_permissions.html" with id="users_user_permissions"%}
+  </li>
+  <li>
+    Save.
+  </li>
+</ol>
+
+<br />
+
+<h2 id="admin_permissions">Granting admin permissions to a user</h2>
+<p>Admin users may delete collections, add users, main gardens, subgardens, plants etc. on PhenObs Application
+  Administration panel. To grant a user administrative privileges, please follow the below steps:</p>
+<ol class="" style="font-size: 14pt">
+  <li>Proceed to <strong>Admin Panel</strong>.</li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="grant_admin_perms" text="Locate the 'USERS' module and click on the 'Users' row." %}
+    {% include "help/admin/partials/users_module_add.html" with id="grant_admin_perms"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_table" text="Locate the specific user from users table and edit user details." %}
+    {% include "help/admin/partials/users_table.html" with id="users_table"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="users_admin_perms" text="Add admin permissions." %}
+    {% include "help/admin/partials/users_admin_perms.html" with id="users_admin_perms"%}
+  </li>
+  <li>
+    Save.
+  </li>
+</ol>

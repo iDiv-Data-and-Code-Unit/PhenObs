@@ -1,0 +1,14 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/users_table.png" %}{% endblock %}
+
+{% block title %}Locating a user in Users page{% endblock %}
+
+{% block content %}
+  <p>Once you click on the Users row in USERS module on Admin Panel, you will be directed
+    to the Users page and table of users. On this page you may edit a user's details by
+    clicking on their usernames.</p>
+{% endblock %}

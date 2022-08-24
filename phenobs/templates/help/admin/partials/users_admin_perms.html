@@ -1,0 +1,16 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/user_details_admin.png" %}{% endblock %}
+
+{% block title %}Adding Admin permissions{% endblock %}
+
+{% block content %}
+  <p>Navigate down to “Permissions” section.</p>
+  <ol>
+    <li>Check “Staff status” box.</li>
+    <li>Choose “Admins” permission group from the available groups.</li>
+  </ol>
+{% endblock %}

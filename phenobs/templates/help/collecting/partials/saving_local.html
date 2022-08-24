@@ -1,0 +1,26 @@
+{% extends "help/collecting/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/unfinished_finished.png" %}{% endblock %}
+
+{% block title %}Saving collection{% endblock %}
+
+{% block content %}
+  <p>After you have finished recording data for your collection,
+    you need to save it to the database. On the “Add collection”
+    and “Edit collection” pages, you can save the collection to
+    the database by clicking on the “Done” button at the bottom
+    right corner of the form. The button will turn blue and can
+    be clicked after you have recorded data for every plant in the
+    collection. Clicking on the button, you will save the collection
+    to the database and you will see a window appearing to confirm your
+    collection was successfully saved.</p>
+  <p>
+    You can also save the collections in the Local Observations view
+    by clicking on the Save button
+    <img class="bi" src="/static/images/save_db_primary.png"  width="21">
+    for the given collection.
+  </p>
+{% endblock %}

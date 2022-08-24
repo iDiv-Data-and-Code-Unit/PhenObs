@@ -1,4 +1,5 @@
 {% load static i18n %}
+{% load auth_extras %}
 
 <div style="">
   <nav class="navbar navbar-expand-md navbar-light bg-light nav-shadow">
@@ -23,6 +24,11 @@
               <a class="dropdown-item {{ observations_overview_active }} text-primary" href="{% url 'observations:overview' %}">Overview</a>
             </div>
           </li>
+          {% if request.user.is_authenticated and request.user|is_admin %}
+            <li class="nav-item">
+              <a id="admin_panel" class="nav-link" href="/admin">Administration</a>
+            </li>
+          {% endif %}
         </ul>
         <ul class="navbar-nav">
           {% if request.user.is_authenticated %}

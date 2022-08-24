@@ -1,0 +1,41 @@
+<h1 class="mt-4" id="garden_creation"><strong>Garden creation</strong></h1>
+<h2 id="create_main_garden">Creating a main garden</h2>
+<p>
+  Every garden structure is combined of a main garden instance and its
+  subgardens. To create a main garden, please follow the below steps:
+</p>
+<ol class="" style="font-size: 14pt">
+  <li>Proceed to <strong>Admin Panel</strong>.</li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="gardens_module" text="Locate the 'GARDENS' module and click on 'Add' located on the right end of the 'Gardens' row." %}
+    {% include "help/admin/partials/gardens_module.html" with id="gardens_module"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="garden_details" text="Enter garden details." %}
+    {% include "help/admin/partials/garden_details.html" with id="garden_details"%}
+  </li>
+  <li>
+    Leave the "Permissions" section empty and Save.
+  </li>
+</ol>
+
+<br />
+
+<h2 id="create_subgarden">Creating a subgarden</h2>
+<p>To create a subgarden for your main garden, please follow the below steps:</p>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="gardens_module2" text="Locate the 'GARDENS' module and click on 'Add' located on the right end of the 'Gardens' row." %}
+    {% include "help/admin/partials/gardens_module.html" with id="gardens_module2"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="subgarden_details" text="Enter subgarden details." %}
+    {% include "help/admin/partials/subgarden_details.html" with id="subgarden_details"%}
+  </li>
+  <li>
+    <a href="#user_assignment">Assign the users to their respective subgardens.</a>
+  </li>
+  <li>
+    Save.
+  </li>
+</ol>

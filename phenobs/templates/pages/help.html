@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load auth_extras %}
 
 {% block css %}
   <link href="{% static 'css/help.css' %}" rel="stylesheet">
@@ -27,15 +28,18 @@
               <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#download_col">Downloading</a>
               <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#delete_col">Deleting</a>
           </div>
-{#          <div class="sidebar-heading border-bottom bg-light"><strong>Administration</strong></div>#}
-{#          <div class="list-group list-group-flush">#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#add_garden">Adding garden</a>#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#user_create">User creation</a>#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#admin_create">Admin creation</a>#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#delete_col_admin">Deleting collections</a>#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#deactivate">Deactivating plants</a>#}
-{#              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#assigning_user">Assigning user to subgarden</a>#}
-{#          </div>#}
+        {% if request.user|is_admin %}
+          <div class="sidebar-heading border-bottom bg-light"><strong>Administration</strong></div>
+          <div class="list-group list-group-flush">
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#add_garden">Adding garden</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#user_creation">User creation</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#garden_creation">Garden creation</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#user_assignment">Assigning user to subgarden</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#plant_creation">Plant creation</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#plant_deactivate">Plant deactivation</a>
+              <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#collection_deletion">Collection deletion</a>
+          </div>
+        {% endif %}
       </div>
       <!-- Page content wrapper-->
       <div class="container" id="page-content-wrapper" style="z-index: 1; position: relative">
@@ -46,17 +50,37 @@
             </button>
           </div>
           <div class="container-fluid">
-            {% include 'help/icons.html' %}
+            {% include 'help/collecting/icons.html' %}
             <br />
-            {% include 'help/add_col.html' %}
+            {% include 'help/collecting/add_col.html' %}
             <br />
-            {% include 'help/edit_col.html' %}
+            {% include 'help/collecting/edit_col.html' %}
             <br />
-            {% include 'help/all_cols.html' %}
+            {% include 'help/collecting/all_cols.html' %}
             <br />
-            {% include 'help/download_col.html' %}
+            {% include 'help/collecting/download_col.html' %}
             <br />
-            {% include 'help/delete_col.html' %}
+            {% include 'help/collecting/delete_col.html' %}
+            <br />
+            {% if request.user|is_admin %}
+              <br />
+              <h1 class="text-primary display-4"><i class="bi bi-tools"></i> Administration manuals</h1>
+              <hr />
+              {% include 'help/admin/add_garden.html' %}
+              <br />
+              {% include 'help/admin/user_creation.html' %}
+              <br />
+              {% include 'help/admin/garden_creation.html' %}
+              <br />
+              {% include 'help/admin/assign_user.html' %}
+              <br />
+              {% include 'help/admin/plant_creation.html' %}
+              <br />
+              {% include 'help/admin/deactivating_plant.html' %}
+              <br />
+              {% include 'help/admin/collection_deletion.html' %}
+              <br />
+            {% endif %}
           </div>
       </div>
   </div>

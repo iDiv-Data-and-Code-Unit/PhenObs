@@ -1,0 +1,57 @@
+{% load static %}
+
+<h1 class="mt-4" id="plant_creation"><strong>Plant creation</strong></h1>
+<h2 id="create_plants_csv">Creating plants via CSV file</h2>
+<p>
+  A garden may have tens or hundreds of plants in it. Creating each and every plant by hand one
+  by one can be an exhausting process. So, there is the option to create multiple plants at a
+  time with the help of a CSV file that fits the below template:
+</p>
+<ol class="" style="font-size: 14pt">
+  <li>First column named “Order” indicating the plant’s order in the garden.</li>
+  <li>Second column named “Name” indicating plant’s name used in the garden.</li>
+  <li>Third column named “Subgarden” indicating which subgarden the plant belongs to.</li>
+</ol>
+<p><a href="{% static "CSV_template.csv" %}" download>You may download the template by clicking on this link.</a></p>
+<p>
+  Be aware, each subgarden needs to be created prior to uploading the CSV file.
+  If the mentioned subgardens are not found in the system, you will get an error.
+</p>
+<p>After you have the full list of plants fitting the above template, please follow the below steps:</p>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="plants_module" text="Please locate the 'PLANTS' module and click on 'Plants'." %}
+    {% include "help/admin/partials/plants_module.html" with id="plants_module"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="import_from_csv" text="Click on 'Import from CSV' located on top of the search bar." %}
+    {% include "help/admin/partials/import_from_csv.html" with id="import_from_csv"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="import_from_csv_details" text="Fill in CSV details." %}
+    {% include "help/admin/partials/import_from_csv_details.html" with id="import_from_csv_details"%}
+  </li>
+</ol>
+
+<h2 id="create_plants_manual">Creating plants manually</h2>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="species_module" text="Please locate the 'SPECIES' module and click on 'Add' located on the right end of the 'Species' row." %}
+    {% include "help/admin/partials/species_module.html" with id="species_module"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="species_add" text="Add the species." %}
+    {% include "help/admin/partials/species_add.html" with id="species_add"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="plants_module2" text="Please locate the 'PLANTS' module and click on 'Add' located on the right end of the 'Plants' row." %}
+    {% include "help/admin/partials/plants_module.html" with id="plants_module2"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="plants_add" text="Add a plant." %}
+    {% include "help/admin/partials/plants_add.html" with id="plants_add"%}
+  </li>
+  <li>
+    Save.
+  </li>
+</ol>

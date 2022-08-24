@@ -1,0 +1,20 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/subgarden_add.png" %}{% endblock %}
+
+{% block title %}Adding details for a subgarden{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Choose your main garden from the “Main garden” dropdown menu.</li>
+    <li>Enter the name of the subgarden in the “Name” text field.</li>
+    <li>
+      Enter the latitude and longitude values in the “Coordinates” section
+      into the respective fields. You may use the same coordinates used for
+      the main garden.
+    </li>
+  </ol>
+{% endblock %}

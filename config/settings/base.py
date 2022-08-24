@@ -190,6 +190,9 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "phenobs.utils.context_processors.settings_context",
             ],
+            "libraries": {
+                "auth_extras": "phenobs.templatetags.auth_extras",
+            },
         },
     }
 ]

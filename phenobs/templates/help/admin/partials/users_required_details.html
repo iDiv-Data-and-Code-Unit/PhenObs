@@ -1,0 +1,23 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/add_user.png" %}{% endblock %}
+
+{% block title %}Entering required user details{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Enter a unique username for the user. It will be used for signing into the system.</li>
+    <li>Enter a password for the user. Please follow the password requirements listed below the field.</li>
+    <li>Enter the password once more in the confirmation field.</li>
+    <li>
+      Click on “SAVE” button located on the right end of bottom row.
+      <ol>
+        <li>You may click on “Save and add another” if you wish to create multiple users at once.</li>
+        <li>You may click on “Save and continue editing” to proceed to “Editing user” page. </li>
+      </ol>
+    </li>
+  </ol>
+{% endblock %}

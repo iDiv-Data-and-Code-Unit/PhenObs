@@ -1,0 +1,16 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/collection_table.png" %}{% endblock %}
+
+{% block title %}Selecting a collection{% endblock %}
+
+{% block content %}
+  <p>
+    On the Collections page, you will find the Collections table where the collections are displayed. To edit
+    a collection you click on its ID or date. You may check if a collection is finished or not by checking the
+    "FINISHED" column in the table.
+  </p>
+{% endblock %}

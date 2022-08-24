@@ -1,0 +1,17 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/users.png" %}{% endblock %}
+
+{% block title %}Locating USERS module{% endblock %}
+
+{% block content %}
+  <p>
+    <strong>USERS</strong> module is located near the bottom of the Admin Panel page. You will find the
+    <em>Organizations</em> and <em>Users</em> row in the module. You may click on either one of the rows
+    to be taken to the respective page. You may click on <em>Add</em> or <em>Change</em>
+    in either one of them to be taken to the respective page.
+  </p>
+{% endblock %}

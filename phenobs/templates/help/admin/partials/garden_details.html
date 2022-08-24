@@ -1,0 +1,19 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/main_garden_add.png" %}{% endblock %}
+
+{% block title %}Adding details for a main garden{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Choose none (“---------”) from the “Main garden” dropdown menu.</li>
+    <li>Enter the name of the garden in the “Name” text field.</li>
+    <li>
+      Enter the latitude and longitude values in the “Coordinates” section
+      into the respective fields. Coordinates system is WGS84.
+    </li>
+  </ol>
+{% endblock %}

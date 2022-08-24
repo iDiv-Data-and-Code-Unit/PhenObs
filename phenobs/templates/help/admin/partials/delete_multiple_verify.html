@@ -1,0 +1,16 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/delete_verify.png" %}{% endblock %}
+
+{% block title %}Verifying records and collections to be deleted{% endblock %}
+
+{% block content %}
+  <p>
+    Before the chosen collections are permanently deleted from the system, you will be shown the list of records
+    belonging to selected collections, which will also be deleted. To verify deletion, click on the red button on the left
+    in the bottom section with the text "Yes, I'm sure".
+  </p>
+{% endblock %}

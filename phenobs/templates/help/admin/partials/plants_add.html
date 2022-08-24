@@ -1,0 +1,17 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/plants_add.png" %}{% endblock %}
+
+{% block title %}Creating a plant manually{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Select the garden the plant belongs to.</li>
+    <li>Select species plant belongs to.</li>
+    <li>Enter the name of the plant in the given garden.</li>
+    <li>If the plant is actively monitored, check “Active” box.</li>
+  </ol>
+{% endblock %}

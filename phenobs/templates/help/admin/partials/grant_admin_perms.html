@@ -1,0 +1,17 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/user_details_admin.png" %}{% endblock %}
+
+{% block title %}Adding user permissions{% endblock %}
+
+{% block content %}
+  To set necessary permissions, please follow the below steps:
+  <ol>
+    <li>In the “Permissions” section, check “Active”.</li>
+    <li>In the “Groups” permissions list, select “User” to apply the necessary permissions for a user.</li>
+    <li>Click on “SAVE”.</li>
+  </ol>
+{% endblock %}

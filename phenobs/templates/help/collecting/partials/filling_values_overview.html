@@ -1,0 +1,23 @@
+{% extends "help/collecting/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/filling_values_overview.png" %}{% endblock %}
+
+{% block title %}Filling in values in Overview view{% endblock %}
+
+{% block content %}
+  <p>Users may enter the values by selecting their responses
+    from the dropdown menus with the help of a mouse. However,
+    for a faster data entering process you may also try keyboard
+    shortcuts. With the help of <code>Tab</code> key you may easily select the
+    next field and with the <code>Tab</code> + <code>CTRL</code> key combination you may select
+    the previous field.
+  </p>
+  <p>By entering the first letter of the response you can also easily
+    choose the value from a dropdown list. For the flowering intensity
+    and senescence intensity values you only need to type in the first
+    digit or the whole number.
+  </p>
+{% endblock %}

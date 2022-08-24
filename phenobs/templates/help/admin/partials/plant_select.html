@@ -1,0 +1,16 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/plant_select.png" %}{% endblock %}
+
+{% block title %}Editing a plant{% endblock %}
+
+{% block content %}
+  <p>
+    In the Plants page, you will find the plants table.
+    You may click on the ID, garden name or species name of
+    the plant to edit the its details.
+  </p>
+{% endblock %}

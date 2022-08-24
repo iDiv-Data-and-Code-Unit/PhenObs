@@ -1,0 +1,15 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/screenshots/species_add.png" %}{% endblock %}
+
+{% block title %}Creating new species{% endblock %}
+
+{% block content %}
+  <p>
+    In the "Add species" page, enter reference name, e.g the species name used in the database.
+    Optionally, you may add reference ID, if available.
+  </p>
+{% endblock %}
