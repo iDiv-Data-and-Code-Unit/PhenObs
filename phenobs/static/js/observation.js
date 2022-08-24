@@ -323,7 +323,7 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
             "flowering-intensity",
             "senescence-intensity",
             "remarks",
-            "peak-flowering-estimation"
+            // "peak-flowering-estimation"
         ], "checked": [
             "cut-partly",
             "cut-total",
@@ -427,6 +427,7 @@ export function requireIntensities() {
     let senescenceIntensity = $('#senescence-intensity');
     let flowersOpening = $('#flowers-opening');
     let floweringIntensity = $('#flowering-intensity');
+    let peakFlowering = $('#peak-flowering');
 
     if (senescence.val() === 'y' && !senescence.prop('disabled')) {
         senescenceIntensity.prop('disabled', false);
@@ -441,9 +442,17 @@ export function requireIntensities() {
         floweringIntensity.prop('disabled', false);
         floweringIntensity.prop('required', true);
         floweringIntensity.removeClass('disabled-btn');
+
+        peakFlowering.prop('disabled', false);
+        peakFlowering.prop('required', true);
+        peakFlowering.removeClass('disabled-btn');
     } else {
         floweringIntensity.addClass('disabled-btn');
         floweringIntensity.prop('disabled', true);
         floweringIntensity.prop('required', false);
+
+        peakFlowering.addClass('disabled-btn');
+        peakFlowering.prop('disabled', true);
+        peakFlowering.prop('required', false);
     }
 }

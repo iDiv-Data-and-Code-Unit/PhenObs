@@ -146,10 +146,10 @@ def add(request: HttpRequest) -> HttpResponse:
                 {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
                 {"id": "flowers-opening", "label": "Flowers opening"},
                 {"id": "peak-flowering", "label": "Peak flowering"},
-                {
-                    "id": "peak-flowering-estimation",
-                    "label": "Peak flowering estimation",
-                },
+                # {
+                #     "id": "peak-flowering-estimation",
+                #     "label": "Peak flowering estimation",
+                # },
                 {"id": "flowering-intensity", "label": "Flowering intensity"},
                 {"id": "ripe-fruits", "label": "Ripe fruits"},
                 {"id": "senescence", "label": "Senescence"},
@@ -307,10 +307,10 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
                 {"id": "young-leaves-unfolding", "label": "Young leaves unfolding"},
                 {"id": "flowers-opening", "label": "Flowers opening"},
                 {"id": "peak-flowering", "label": "Peak flowering"},
-                {
-                    "id": "peak-flowering-estimation",
-                    "label": "Peak flowering estimation",
-                },
+                # {
+                #     "id": "peak-flowering-estimation",
+                #     "label": "Peak flowering estimation",
+                # },
                 {"id": "flowering-intensity", "label": "Flowering intensity"},
                 {"id": "ripe-fruits", "label": "Ripe fruits"},
                 {"id": "senescence", "label": "Senescence"},

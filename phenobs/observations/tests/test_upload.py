@@ -106,7 +106,7 @@ def test_upload_invalid_json(post_request_upload_invalid_json):
     ) as update_collection_mock:
         response = upload(post_request_upload_invalid_json)
 
-    update_collection_mock.assert_called()
+    update_collection_mock.assert_not_called()
     assert isinstance(response, JsonResponse)
     assert response.content == b'"Upload failed. JSON decoding error."'
 

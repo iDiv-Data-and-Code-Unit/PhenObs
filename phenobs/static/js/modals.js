@@ -54,6 +54,7 @@ export function fillInOldData(lastCollection, plant) {
     // Disabling/Enabling intensities if the respective fields are not set "yes"
     const senescenceIntensityBtn = $("#senescence-intensity-button");
     const floweringIntensityBtn = $("#flowering-intensity-button");
+    const peakFloweringBtn = $("#peak-flowering-button");
 
     if (old_record["senescence"] !== "y") {
         senescenceIntensityBtn.prop("disabled", true);
@@ -76,15 +77,23 @@ export function fillInOldData(lastCollection, plant) {
         $("#flowering-intensity-old").prop("required", false);
         floweringIntensityBtn.addClass("disabled-old");
         floweringIntensityBtn.removeClass("required-field");
-    } else {
-        if (old_record["flowering-intensity"] == null || old_record["flowering-intensity"].length === 0)
-            floweringIntensityBtn.addClass("required-field");
-        else
-            floweringIntensityBtn.removeClass("required-field");
 
+        peakFloweringBtn.prop("disabled", true);
+        $("#peak-flowering-old").prop("required", false);
+        peakFloweringBtn.addClass("disabled-old");
+        peakFloweringBtn.removeClass("required-field");
+    } else {
+        if (old_record["flowering-intensity"] == null || old_record["flowering-intensity"].length === 0) {
+            floweringIntensityBtn.addClass("required-field");
+        } else {
+            floweringIntensityBtn.removeClass("required-field");
+        }
         floweringIntensityBtn.prop("disabled", false);
         $("#flowering-intensity-old").prop("required", true);
         floweringIntensityBtn.removeClass("disabled-old");
+
+        peakFloweringBtn.prop("disabled", false);
+        peakFloweringBtn.removeClass("disabled-old");
     }
 
     // Checkboxes
@@ -160,13 +169,14 @@ export function fillInButtons(lastCollection, plant) {
         if (lastCollection["records"][plant]["no-observation"]) {
             buttons[i].disabled = true;
             $("#copy-older").prop("disabled", true);
-        } else if (!buttons[i].id.includes("intensity")) {
+        } else if (!buttons[i].id.includes("intensity") && !buttons[i].id.includes("peak")) {
             buttons[i].disabled = false;
             $("#copy-older").prop("disabled", false);
         }
         // Checking for intensity values and disabling them no matter no-observation value
         else if ((buttons[i].id.includes("senescence-intensity") && old_record["senescence"] !== "y") ||
-            (buttons[i].id.includes("flowering-intensity") && old_record["flowers-opening"] !== "y")) {
+            (buttons[i].id.includes("flowering-intensity") && old_record["flowers-opening"] !== "y") ||
+            (buttons[i].id.includes("peak") && old_record["flowers-opening"] !== "y")) {
             buttons[i].disabled = true;
         }
     }

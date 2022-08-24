@@ -10,7 +10,7 @@
       {% endfor %}
       </select>
     {% else %}
-      <select name="{{ id.id }}" id="{{ id.id }}" class="custom-dropdown no-margin-left col mr-3 new-value-btn">
+      <select name="{{ id.id }}" {% if 'peak' in id.id %} disabled {% endif %} id="{{ id.id }}" class="custom-dropdown no-margin-left col mr-3 new-value-btn">
         <option value="y">yes</option>
         <option value="u">unsure</option>
         <option value="m">missed</option>
