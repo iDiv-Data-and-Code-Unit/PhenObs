@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.contrib.auth.decorators import login_required
@@ -101,14 +102,46 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         return response
 
 
+@csrf_exempt
 def get_collections(request, id):
     try:
-        context = {"gardens": [], "range": range(5, 105, 5)}
+        data = json.loads(request.body)
+
+        start_date_json = data["start_date"]
+        end_date_json = data["end_date"]
+        start_date = None
+        end_date = None
+        start_date_string = ""
+        end_date_string = ""
+
+        if start_date_json is not None:
+            start_date, start_date_string = json_date_formatter(start_date_json)
+
+        if start_date_json is not None:
+            end_date, end_date_string = json_date_formatter(end_date_json)
+
+        context = {
+            "start_date": start_date_string,
+            "end_date": end_date_string,
+            "gardens": [],
+            "range": range(5, 105, 5),
+        }
 
         is_admin = False
+        context["subgarden_options"] = []
 
         if request.user.groups.filter(name="Admins").exists():
             is_admin = True
+
+        auth_garden = Garden.objects.get(auth_users=request.user)
+        for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
+            context["subgarden_options"].append(
+                {
+                    "main_garden": subgarden.main_garden.name,
+                    "name": subgarden.name,
+                    "id": subgarden.id,
+                }
+            )
 
         if id == "all":
             if is_admin:
@@ -172,6 +205,10 @@ def get_collections(request, id):
                 collections = Collection.objects.filter(
                     garden_id=subgarden["id"]
                 ).order_by("date")
+                if start_date is not None and end_date is not None:
+                    collections = collections.filter(
+                        date__gte=start_date, date__lte=end_date
+                    )
                 for collection in collections:
                     collection_dict = {
                         "id": collection.id,
@@ -189,6 +226,10 @@ def get_collections(request, id):
                     subgarden["collections"].append(collection_dict)
 
         return render(request, "observations/views_content.html", context)
+
+    except json.JSONDecodeError:
+        context = {"exception": Exception("JSON decoding error was raised.")}
+        return render(request, "error.html", context, status=400)
 
     except Garden.DoesNotExist:
         context = {
@@ -210,6 +251,24 @@ def get_collections(request, id):
     except Exception as e:
         context = {"exception": e}
         return render(request, "error.html", context, status=500)
+
+
+def json_date_formatter(json_date):
+    date_string = ""
+    date_object = None
+
+    if (
+        json_date["year"] is not None
+        and json_date["month"] is not None
+        and json_date["day"] is not None
+        and json_date["string"] is not None
+    ):
+        date_object = datetime.date(
+            year=json_date["year"], month=json_date["month"], day=json_date["day"]
+        )
+        date_string = json_date["string"]
+
+    return date_object, date_string
 
 
 @login_required

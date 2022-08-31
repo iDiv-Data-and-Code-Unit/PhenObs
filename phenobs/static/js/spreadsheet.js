@@ -1,8 +1,49 @@
 import { alertModal } from "./modals.js";
 
-async function fillCollections(id, edit=null) {
+async function fillCollections(id, edit=false, reset=false) {
+    const prefix = (edit) ? "#edit" : "#view";
+
+    const start_date_e = $(prefix + "-start-date");
+    const end_date_e = $(prefix + "-end-date");
+    let start_date = null;
+    let end_date = null;
+
+    console.log(start_date_e.val())
+    console.log(end_date_e.val())
+
+    if (!reset) {
+        if (start_date_e) {
+            const start_date_object = new Date(start_date_e.val());
+            start_date = {
+                year: start_date_object.getFullYear(),
+                month: start_date_object.getMonth() + 1,
+                day: start_date_object.getDate(),
+                string: start_date_e.val()
+            }
+        }
+
+        if (end_date_e) {
+            const end_date_object = new Date(end_date_e.val());
+            end_date = {
+                year: end_date_object.getFullYear(),
+                month: end_date_object.getMonth() + 1,
+                day: end_date_object.getDate(),
+                string: end_date_e.val()
+            }
+        }
+    }
+
+    const date_range = {
+        start_date: start_date,
+        end_date: end_date
+    }
+
+    console.log(date_range)
+
     await $.ajax({
-        url: "/observations/collections/" + id,
+        url: `/observations/collections/${id}/`,
+        method: "POST",
+        data: JSON.stringify(date_range),
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
             alertModal(jqXHR.responseJSON);
@@ -18,7 +59,7 @@ async function fillCollections(id, edit=null) {
             initNav();
             $("#uploadSelected").unbind().click(uploadSelected);
 
-            if (edit != null) {
+            if (edit) {
                 $("#edit-tab").addClass("active");
                 $("#view-tab").removeClass("active");
                 $("#edit").addClass("active");
@@ -36,16 +77,74 @@ async function fillCollections(id, edit=null) {
 
             const collectionCardsEdit = $('[id^="collection-"]');
             const collectionCardsView = $('[id^="view-collection-"]');
-
             assignListeners(collectionCardsEdit, true);
             assignListeners(collectionCardsView, false);
+
+            const start_date_edit = $("#edit-start-date");
+            const end_date_edit = $("#edit-end-date");
+            const start_date_view = $("#view-start-date");
+            const end_date_view = $("#view-end-date");
+            start_date_edit.change(() => lowerLimitDate(true));
+            end_date_edit.change(() => upperLimitDate(true));
+            start_date_view.change(() => lowerLimitDate());
+            end_date_view.change(() => upperLimitDate());
+
+            document.getElementById("edit-in-range").addEventListener(
+                "click",
+                async () => await checkDateRange(true)
+            );
+            document.getElementById("view-in-range").addEventListener(
+                "click",
+                async () => await checkDateRange()
+            );
+            document.getElementById("create-new").addEventListener(
+                "click",
+                async() => await createNewCollection()
+            );
         }
     });
 }
 
+async function checkDateRange(edit=false) {
+    const prefix = (edit) ? "#edit" : "#view";
+
+    const start_date_val = $(prefix + "-start-date").val();
+    const end_date_val = $(prefix + "-end-date").val();
+
+    if (start_date_val.length && end_date_val.length) {
+        if (start_date_val <= end_date_val) {
+            const gardenId = $("#gardens")[0].selectedOptions[0].id;
+
+            await fillCollections(gardenId, edit);
+        } else {
+            alertModal("The end date should be later than the start date.")
+        }
+    } else {
+        alertModal("Please select start and end dates.")
+    }
+}
+
+function lowerLimitDate(edit=false) {
+    const prefix = (edit) ? "edit" : "view";
+
+    const start_date_val = document.getElementById(prefix + "-start-date").value;
+    const end_date = document.getElementById(prefix + "-end-date");
+
+    end_date.min = start_date_val;
+}
+
+function upperLimitDate(edit=false) {
+    const prefix = (edit) ? "edit" : "view";
+
+    const end_date_val = document.getElementById(prefix + "-end-date").value;
+    const start_date = document.getElementById(prefix + "-start-date");
+
+    start_date.max = end_date_val;
+}
+
 $("#gardens").change(async (e) => {
     if (e.target.selectedOptions[0].id.length)
-        await fillCollections(e.target.selectedOptions[0].id);
+        await fillCollections(e.target.selectedOptions[0].id, false, true);
 });
 
 function formatCollection(id) {
@@ -55,7 +154,8 @@ function formatCollection(id) {
         "date": $("#date-" + id).val(),
         "garden": parseInt($("#garden-" + id).attr("name")),
         "records": {},
-        "creator": $("#collection-creator-" + id).text()
+        "creator": $("#collection-creator-" + id).text(),
+        "finished": true
     };
 
     const records = $("#collection-" + id + ' tr[id*="record-"]');
@@ -184,6 +284,7 @@ function initNav() {
     $("#viewDeselectAll").unbind().click((e) => {e.preventDefault(); checkAll(false, true)});
 
     document.getElementById("uploadSelected").addEventListener("click", async () => await uploadSelected());
+
 }
 
 async function uploadSelected(collection=null) {
@@ -253,6 +354,7 @@ async function uploadSelected(collection=null) {
         return;
 
     if (collections.length) {
+        console.log(collections)
         await $.ajax({
             url: "/observations/save/",
             type: "POST",
@@ -288,6 +390,9 @@ function assignListeners(cards, edit=false) {
         const idSplit = cards[i].id.split('-');
         const collectionId = idSplit[idSplit.length - 1];
 
+        if (collectionId === "new")
+            continue;
+
         $(cards[i]).on("show.bs.collapse",
             async () => {
                 if ($(`#${(edit) ? "edit" : "view"}-records-${collectionId}`).html().length === 0) {
@@ -303,6 +408,64 @@ function assignListeners(cards, edit=false) {
                 }
             }
         )
+    }
+}
+
+async function createNewCollection() {
+    const createBtn = document.getElementById("create-new");
+    const garden = document.getElementById("new-subgarden");
+    const gardenSelected = garden.selectedOptions[0].id;
+
+    if (garden.length) {
+        await $.ajax({
+            url: `/observations/new/${gardenSelected}`,
+            method: "POST",
+            error: function (jqXHR) {
+                // alert(jqXHR.responseText);
+                alertModal(jqXHR.responseJSON);
+            },
+            beforeSend: function(){
+                $("body").addClass("loading");
+            },
+            complete: function(data){
+                // console.log(data["id"]);
+                $("body").removeClass("loading");
+            },
+            success: async function (data) {
+                const collectionDiv = document.getElementById("collection-new");
+                const collectionGarden = document.getElementById("garden-new");
+                const collectionCreator = document.getElementById("collection-creator-new");
+                const collectionToggle = document.getElementById("collapse-toggle-new");
+
+                const collectionId = data["id"];
+                const collectionDate = document.getElementById("new-date");
+                const collectionDateLabel = document.getElementById("new-date-label");
+                const collectionContent = document.getElementById("edit-records-new");
+
+                collectionDate.id = `date-${collectionId}`;
+                collectionContent.id = `edit-records-${collectionId}`;
+                collectionDiv.id = `collection-${collectionId}`;
+                $(collectionGarden).prop("name", gardenSelected);
+                collectionGarden.id = `garden-${collectionId}`;
+                collectionCreator.id = `collection-creator-${collectionId}`;
+
+                $(collectionDateLabel).prop("for", collectionDate.id);
+                $(garden).prop("disabled", true);
+
+                createBtn.remove();
+                collectionDate.classList.remove("d-none");
+                collectionDate.value = data["date"];
+                collectionContent.classList.remove("d-none");
+                collectionDateLabel.classList.remove("d-none");
+
+                collectionToggle.dataset["target"] = `#collection-${collectionId}`;
+
+                await fillInContent(parseInt(collectionId), true);
+                cancelAndSaveButtons(collectionId);
+            }
+        });
+    } else {
+        alertModal("Please choose a date and a subgarden.")
     }
 }
 

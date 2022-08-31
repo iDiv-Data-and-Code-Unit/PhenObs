@@ -73,6 +73,5 @@ collection_schema = {
         "date",
         "records",
         "finished",
-        "garden-name",
     ],
 }

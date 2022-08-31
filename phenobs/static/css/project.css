@@ -477,3 +477,18 @@ body.loading .overlay {
 .help-nav-link {
   background: yellow;
 }
+
+
+
+.overview-date-range {
+  border-radius: .25rem;
+  border: 1px solid black;
+  height: 30px;
+  background: transparent;
+  filter: invert(1);
+}
+
+.overview-date-range-label {
+  color: rgba(255, 255, 255,.5);
+  font-size: 1rem;
+}
