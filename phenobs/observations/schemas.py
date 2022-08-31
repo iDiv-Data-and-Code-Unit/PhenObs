@@ -80,7 +80,7 @@ date_range_schema = {
     "type": "object",
     "properties": {
         "start_date": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
                 "year": {"type": ["integer", "null"]},
                 "month": {"type": ["integer", "null"]},
@@ -89,7 +89,7 @@ date_range_schema = {
             },
         },
         "end_date": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
                 "year": {"type": ["integer", "null"]},
                 "month": {"type": ["integer", "null"]},
