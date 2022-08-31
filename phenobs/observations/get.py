@@ -11,7 +11,7 @@ from jsonschema.exceptions import ValidationError
 
 from ..gardens.models import Garden
 from .models import Collection, Record
-from .schemas import collection_schema, collections_schema
+from .schemas import collection_schema, collections_schema, date_range_schema
 
 
 @csrf_exempt
@@ -105,10 +105,18 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 @csrf_exempt
 def get_collections(request, id):
     try:
-        data = json.loads(request.body)
+        start_date_json = None
+        end_date_json = None
 
-        start_date_json = data["start_date"]
-        end_date_json = data["end_date"]
+        if len(request.body) > 0:
+            data = json.loads(request.body)
+            validate(instance=data, schema=date_range_schema)
+
+            if "start_date" in data:
+                start_date_json = data["start_date"]
+            if "end_date" in data:
+                end_date_json = data["end_date"]
+
         start_date = None
         end_date = None
         start_date_string = ""
@@ -119,6 +127,15 @@ def get_collections(request, id):
 
         if start_date_json is not None:
             end_date, end_date_string = json_date_formatter(end_date_json)
+
+        if start_date is not None and end_date is not None:
+            if end_date < start_date:
+                context = {
+                    "exception": Exception(
+                        "Filtering date range is invalid. End date cannot be earlier than start date."
+                    )
+                }
+                return render(request, "error.html", context, status=400)
 
         context = {
             "start_date": start_date_string,
@@ -230,6 +247,10 @@ def get_collections(request, id):
     except json.JSONDecodeError:
         context = {"exception": Exception("JSON decoding error was raised.")}
         return render(request, "error.html", context, status=400)
+
+    except ValidationError:
+        context = {"exception": Exception("Received JSON could not be validated.")}
+        return render(request, "error.html", context, status=500)
 
     except Garden.DoesNotExist:
         context = {

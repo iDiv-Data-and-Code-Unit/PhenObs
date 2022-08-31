@@ -75,3 +75,28 @@ collection_schema = {
         "finished",
     ],
 }
+
+date_range_schema = {
+    "type": "object",
+    "properties": {
+        "start_date": {
+            "type": "object",
+            "properties": {
+                "year": {"type": ["integer", "null"]},
+                "month": {"type": ["integer", "null"]},
+                "day": {"type": ["integer", "null"]},
+                "string": {"type": ["string", "null"], "format": "date"},
+            },
+        },
+        "end_date": {
+            "type": "object",
+            "properties": {
+                "year": {"type": ["integer", "null"]},
+                "month": {"type": ["integer", "null"]},
+                "day": {"type": ["integer", "null"]},
+                "string": {"type": ["string", "null"], "format": "date"},
+            },
+        },
+    },
+    "required": ["start_date", "end_date"],
+}
