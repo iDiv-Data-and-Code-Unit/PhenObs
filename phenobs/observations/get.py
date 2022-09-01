@@ -146,19 +146,27 @@ def get_collections(request, id):
 
         is_admin = False
         context["subgarden_options"] = []
+        auth_garden = Garden.objects.get(auth_users=request.user)
 
         if request.user.groups.filter(name="Admins").exists():
             is_admin = True
-
-        auth_garden = Garden.objects.get(auth_users=request.user)
-        for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
-            context["subgarden_options"].append(
-                {
-                    "main_garden": subgarden.main_garden.name,
-                    "name": subgarden.name,
-                    "id": subgarden.id,
-                }
-            )
+            for subgarden in Garden.objects.all().exclude(main_garden=None):
+                context["subgarden_options"].append(
+                    {
+                        "main_garden": subgarden.main_garden.name,
+                        "name": subgarden.name,
+                        "id": subgarden.id,
+                    }
+                )
+        else:
+            for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
+                context["subgarden_options"].append(
+                    {
+                        "main_garden": subgarden.main_garden.name,
+                        "name": subgarden.name,
+                        "id": subgarden.id,
+                    }
+                )
 
         if id == "all":
             if is_admin:
@@ -279,10 +287,10 @@ def json_date_formatter(json_date):
     date_object = None
 
     if (
-        json_date["year"] is not None
-        and json_date["month"] is not None
-        and json_date["day"] is not None
-        and json_date["string"] is not None
+        (json_date["year"] is not None or len(json_date["year"]) > 0)
+        and (json_date["month"] is not None or len(json_date["month"]) > 0)
+        and (json_date["day"] is not None or len(json_date["day"]) > 0)
+        and (json_date["string"] is not None or len(json_date["string"]) > 0)
     ):
         date_object = datetime.date(
             year=json_date["year"], month=json_date["month"], day=json_date["day"]

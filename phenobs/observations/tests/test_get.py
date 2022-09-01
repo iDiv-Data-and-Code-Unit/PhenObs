@@ -20,8 +20,6 @@ from phenobs.observations.get import (
 )
 from phenobs.observations.models import Collection, Record
 
-# from phenobs.observations.tests.test_upload import collection_valid_json
-
 
 @pytest.mark.django_db
 def test_get_all_collections_valid_garden_valid_json_valid_schema(
@@ -128,13 +126,13 @@ def test_get_collections_all_valid_json_data(request_factory, valid_garden_user)
                 "year": start_date.year,
                 "month": start_date.month,
                 "day": start_date.day,
-                "string": start_date.isoformat(),
+                "string": start_date.date().isoformat(),
             },
             "end_date": {
                 "year": end_date.year,
                 "month": end_date.month,
                 "day": end_date.day,
-                "string": end_date.isoformat(),
+                "string": end_date.date().isoformat(),
             },
         }
     )
@@ -167,13 +165,13 @@ def test_get_collections_all_valid_json_data_invalid_date_range(
                 "year": start_date.year,
                 "month": start_date.month,
                 "day": start_date.day,
-                "string": start_date.isoformat(),
+                "string": start_date.date().isoformat(),
             },
             "end_date": {
                 "year": end_date.year,
                 "month": end_date.month,
                 "day": end_date.day,
-                "string": end_date.isoformat(),
+                "string": end_date.date().isoformat(),
             },
         }
     )
@@ -181,6 +179,45 @@ def test_get_collections_all_valid_json_data_invalid_date_range(
     response = get_collections(request, "all")
 
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_get_collections_all_valid_json_data_invalid_date_string(
+    request_factory, valid_garden_user
+):
+    start_date = datetime(
+        year=random.randint(1980, 2022),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+    end_date = datetime(
+        year=random.randint(start_date.year + 1, 2023),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+
+    request = request_factory.get("collections/all/")
+    request.user = valid_garden_user
+    request._body = json.dumps(
+        {
+            "start_date": {
+                "year": start_date.year,
+                "month": start_date.month,
+                "day": start_date.day,
+                "string": "2022-22-22",
+            },
+            "end_date": {
+                "year": end_date.year,
+                "month": end_date.month,
+                "day": end_date.day,
+                "string": "2022-22-22",
+            },
+        }
+    )
+
+    response = get_collections(request, "all")
+
+    assert response.status_code == 500
 
 
 @pytest.mark.django_db

@@ -8,9 +8,6 @@ async function fillCollections(id, edit=false, reset=false) {
     let start_date = null;
     let end_date = null;
 
-    console.log(start_date_e.val())
-    console.log(end_date_e.val())
-
     if (!reset) {
         if (start_date_e) {
             const start_date_object = new Date(start_date_e.val());
@@ -37,8 +34,6 @@ async function fillCollections(id, edit=false, reset=false) {
         start_date: start_date,
         end_date: end_date
     }
-
-    console.log(date_range)
 
     await $.ajax({
         url: `/observations/collections/${id}/`,
@@ -202,8 +197,6 @@ function checkAll(checked=true, view=false) {
     const ids = "selected" + ((view) ? "view-" : "-");
     const checkboxes = $('input[id*="' + ids + '"]');
 
-    console.log(checkboxes)
-
     for (let i = 0; i < checkboxes.length; i++) {
         if (!(checkboxes[i].classList.contains("d-none")))
             checkboxes[i].checked = checked;
@@ -219,7 +212,7 @@ async function downloadFile(filetype){
         request.onreadystatechange = function() {
             if(request.readyState === 4) {
                 if (request.status === 200) {
-                    console.log(typeof request.response); // should be a blob
+                    // console.log(typeof request.response); // should be a blob
                     let filename = "";
                     let disposition = request.getResponseHeader('Content-Disposition');
                     if (disposition && disposition.indexOf('attachment') !== -1) {
@@ -295,13 +288,8 @@ async function uploadSelected(collection=null) {
     for (let i = 0; i < selected.length; i++)
         collections.push(formatCollection(selected[i]));
 
-
-    console.log(collections)
-
     for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
-
-        console.log(collection)
 
         for (let key in collection["records"]) {
             const record = collection["records"][key];
@@ -354,7 +342,6 @@ async function uploadSelected(collection=null) {
         return;
 
     if (collections.length) {
-        console.log(collections)
         await $.ajax({
             url: "/observations/save/",
             type: "POST",
@@ -428,7 +415,6 @@ async function createNewCollection() {
                 $("body").addClass("loading");
             },
             complete: function(data){
-                // console.log(data["id"]);
                 $("body").removeClass("loading");
             },
             success: async function (data) {
@@ -484,15 +470,14 @@ function cancelAndSaveButtons(collectionId) {
 
             document.getElementById("date-" + id).value = oldValues["date"];
 
-            for (let j = 0; j < oldValues["records"].length; j++) {
-                const recordId = oldValues["records"][j]["id"];
-                for (let key in oldValues["records"][j]) {
+            for (let index in oldValues["records"]) {
+                let recordId = oldValues["records"][index]["id"];
+                for (let key in oldValues["records"][index]) {
                     if (!(key === "id" || key === "no-observation" || key === "done")) {
-                        if (oldValues["records"][j][key] === true || oldValues["records"][j][key] === false) {
-                            document.getElementById(recordId + "-" + key).checked = oldValues["records"][j][key];
-                        }
-                        else {
-                            document.getElementById(recordId + "-" + key).value = oldValues["records"][j][key];
+                        if (oldValues["records"][index][key] === true || oldValues["records"][index][key] === false) {
+                            document.getElementById(recordId + "-" + key).checked = oldValues["records"][index][key];
+                        } else {
+                            document.getElementById(recordId + "-" + key).value = oldValues["records"][index][key];
                         }
                     }
                 }
