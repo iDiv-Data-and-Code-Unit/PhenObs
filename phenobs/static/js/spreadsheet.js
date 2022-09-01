@@ -72,8 +72,8 @@ async function fillCollections(id, edit=false, reset=false) {
 
             const collectionCardsEdit = $('[id^="collection-"]');
             const collectionCardsView = $('[id^="view-collection-"]');
-            assignListeners(collectionCardsEdit, true);
-            assignListeners(collectionCardsView, false);
+            await assignListeners(collectionCardsEdit, true);
+            await assignListeners(collectionCardsView, false);
 
             const start_date_edit = $("#edit-start-date");
             const end_date_edit = $("#edit-end-date");
@@ -142,18 +142,18 @@ $("#gardens").change(async (e) => {
         await fillCollections(e.target.selectedOptions[0].id, false, true);
 });
 
-function formatCollection(id) {
-
+function formatCollection(collectionId) {
+    console.log(collectionId)
     let collection = {
-        "id": parseInt(id),
-        "date": $("#date-" + id).val(),
-        "garden": parseInt($("#garden-" + id).attr("name")),
+        "id": parseInt(collectionId),
+        "date": $("#date-" + collectionId).val(),
+        "garden": parseInt($("#garden-" + collectionId).attr("name")),
         "records": {},
-        "creator": $("#collection-creator-" + id).text(),
+        "creator": $("#collection-creator-" + collectionId).text(),
         "finished": true
     };
 
-    const records = $("#collection-" + id + ' tr[id*="record-"]');
+    const records = $("#collection-" + collectionId + ' tr[id*="record-"]');
 
     for (let i = 0; i < records.length; i++) {
         let record = {
@@ -166,15 +166,19 @@ function formatCollection(id) {
         let selects = $('#record-' + record["id"] + ' select');
 
         for (let j = 0; j < inputs.length; j++) {
-            if (inputs[j].type === "checkbox")
-                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = inputs[j].checked;
-            else if (inputs[j].type === "hidden")
-                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = parseInt(inputs[j].value);
+            if ($(inputs[j]).prop("type") === "checkbox")
+                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = $(inputs[j]).prop("checked");
+            else if ($(inputs[j]).prop("type") === "hidden")
+                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = parseInt($(inputs[j]).val());
             else
-                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = inputs[j].value;
+                record[inputs[j].id.substr(inputs[j].id.match("-").index + 1)] = $(inputs[j]).val();
         }
         for (let j = 0; j < selects.length; j++)
-            record[selects[j].id.substr(selects[j].id.match("-").index + 1)] = selects[j].value;
+            if (selects[j].id.includes("intensity")) {
+                record[selects[j].id.substr(selects[j].id.match("-").index + 1)] = parseInt(selects[j].value);
+            }
+            else
+                record[selects[j].id.substr(selects[j].id.match("-").index + 1)] = selects[j].value;
 
         collection["records"][record["order"]] = record;
     }
@@ -189,7 +193,7 @@ function selectAll(view=false) {
     for (let i = 0; i < checkboxes.length; i++)
         if (checkboxes[i].checked)
             collections.push(parseInt(checkboxes[i].id.substr((view) ? 13 : 9)))
-
+    console.log(collections)
     return collections;
 }
 
@@ -277,16 +281,26 @@ function initNav() {
     $("#viewDeselectAll").unbind().click((e) => {e.preventDefault(); checkAll(false, true)});
 
     document.getElementById("uploadSelected").addEventListener("click", async () => await uploadSelected());
-
 }
 
 async function uploadSelected(collection=null) {
-    let selected = (collection == null) ? selectAll() : [collection];
+    let selected = (
+        collection == null ||
+        (
+            typeof collection !== "number" &&
+            typeof collection !== "string"
+        )
+    ) ? selectAll() : [collection];
+
     let collections = [];
     let invalid = false;
 
-    for (let i = 0; i < selected.length; i++)
-        collections.push(formatCollection(selected[i]));
+    console.log(selected, selected.length)
+
+    for (let i = 0; i < selected.length; i++) {
+        const collection = formatCollection(selected[i])
+        collections.push(collection);
+    }
 
     for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
@@ -306,7 +320,7 @@ async function uploadSelected(collection=null) {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["senescence-intensity"].length > 0 && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
+            } else if (record["senescence-intensity"] != null && record["senescence-intensity"].length > 0 && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence').addClass("invalidField");
                 invalid = true;
@@ -318,7 +332,7 @@ async function uploadSelected(collection=null) {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowering-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["flowering-intensity"].length > 0 && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
+            } else if (record["flowering-intensity"] != null && record["flowering-intensity"].length > 0 && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowers-opening').addClass("invalidField");
                 invalid = true;
@@ -341,7 +355,7 @@ async function uploadSelected(collection=null) {
     if (invalid)
         return;
 
-    if (collections.length) {
+    if (collections.length > 0) {
         await $.ajax({
             url: "/observations/save/",
             type: "POST",
@@ -362,7 +376,7 @@ async function uploadSelected(collection=null) {
                 // const response = data.split("<nav");
                 // initNav();
                 // $("#uploadSelected").unbind().click(uploadSelected);
-               await fillCollections(document.getElementById("gardens").selectedOptions[0].id,true)
+               await fillCollections(document.getElementById("gardens").selectedOptions[0].id,true, true)
             }
         });
     } else {
@@ -372,7 +386,7 @@ async function uploadSelected(collection=null) {
     return collections;
 }
 
-function assignListeners(cards, edit=false) {
+async function assignListeners(cards, edit=false) {
     for (let i = 0; i < cards.length; i++) {
         const idSplit = cards[i].id.split('-');
         const collectionId = idSplit[idSplit.length - 1];
@@ -390,7 +404,7 @@ function assignListeners(cards, edit=false) {
 
                     if (edit) {
                         $(`#selected-${collectionId}`).removeClass("d-none");
-                        cancelAndSaveButtons(collectionId);
+                        await cancelAndSaveButtons(collectionId);
                     }
                 }
             }
@@ -447,7 +461,7 @@ async function createNewCollection() {
                 collectionToggle.dataset["target"] = `#collection-${collectionId}`;
 
                 await fillInContent(parseInt(collectionId), true);
-                cancelAndSaveButtons(collectionId);
+                await cancelAndSaveButtons(parseInt(collectionId));
             }
         });
     } else {
@@ -455,10 +469,10 @@ async function createNewCollection() {
     }
 }
 
-function cancelAndSaveButtons(collectionId) {
+async function cancelAndSaveButtons(collectionId) {
     document.getElementById(`${collectionId}-save`).addEventListener(
         'click',
-        () => uploadSelected(parseInt(collectionId))
+        async () => await uploadSelected(collectionId)
     );
 
     const oldValues = formatCollection(collectionId);
