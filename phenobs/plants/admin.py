@@ -98,8 +98,9 @@ class PlantAdmin(admin.ModelAdmin):
                 )
                 status = 500
         else:
-            messages.error(request, "Method not allowed.")
-            status = 405
+            if "csv_upload" in request.FILES:
+                messages.error(request, "Method not allowed.")
+                status = 405
 
         form = CsvImportForm()
         context = {"form": form}
