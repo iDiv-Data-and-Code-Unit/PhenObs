@@ -75,7 +75,7 @@ class RecordAdmin(admin.ModelAdmin):
 
                     if delimiter == "2":
                         try:
-                            file_data = read_csv(csv_file, sep=",")
+                            file_data = read_csv(csv_file, sep=",", encoding="utf8")
                             print("IMPORT DATA FROM CSV: COMMA SEPARATED")
                             print(file_data)
                             format_data_status, formatted, total, data = format_data(
@@ -92,13 +92,20 @@ class RecordAdmin(admin.ModelAdmin):
                                 )
                                 status = 500
 
+                        except UnicodeDecodeError:
+                            messages.error(
+                                request,
+                                "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
+                            )
+                            status = 500
+
                         except Exception as e:
                             messages.error(request, e)
                             status = 500
 
                     elif delimiter == "1":
                         try:
-                            file_data = read_csv(csv_file, sep=";")
+                            file_data = read_csv(csv_file, sep=";", encoding="utf8")
                             print("IMPORT DATA FROM CSV: SEMICOLON SEPARATED")
                             print(file_data)
                             format_data_status, formatted, total, data = format_data(
@@ -113,6 +120,13 @@ class RecordAdmin(admin.ModelAdmin):
                                     "Please fix the typos and errors and try again",
                                 )
                                 status = 500
+
+                        except UnicodeDecodeError:
+                            messages.error(
+                                request,
+                                "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
+                            )
+                            status = 500
 
                         except Exception as e:
                             messages.error(request, e)
