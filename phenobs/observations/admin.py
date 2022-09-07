@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 
 from django import forms
 from django.contrib import admin, messages
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
@@ -162,6 +162,9 @@ class RecordAdmin(admin.ModelAdmin):
                 "%d out of %d listed plants were successfully added." % (added, total),
             )
 
+        if status == 200 and request.method == "POST":
+            return redirect("/admin/observations/record/")
+
         return render(request, "admin/import_from_csv.html", context, status=status)
 
 
@@ -179,7 +182,9 @@ def format_data(request, file_data):
         required_columns = [
             "garden",
             "subgarden",
-            "date",
+            "day",
+            "month",
+            "year",
             "species",
             "initial vegetative growth",
             "young leaves unfolding",
@@ -231,8 +236,8 @@ def format_data(request, file_data):
             total = len(records)
             print(total)
 
-            try:
-                for record in records:
+            for record in records:
+                try:
                     garden = Garden.objects.get(name=record["garden"])
                     print(garden)
                     try:
@@ -247,17 +252,21 @@ def format_data(request, file_data):
                                 "collections": {},
                             }
 
-                        print(subgardens)
-                        if (
-                            record["date"]
-                            not in subgardens["%s: %s" % (garden.name, subgarden.name)][
-                                "collections"
-                            ]
-                        ):
-                            try:
-                                collection_date = datetime.strptime(
-                                    record["date"], "%d.%m.%Y"
-                                )
+                        try:
+                            day = int(record["day"])
+                            month = int(record["month"])
+                            year = int(record["year"])
+
+                            collection_date = datetime(day=day, month=month, year=year)
+
+                            print(subgardens)
+                            if (
+                                collection_date.strftime("%d.%m.%Y")
+                                not in subgardens[
+                                    "%s: %s" % (garden.name, subgarden.name)
+                                ]["collections"]
+                            ):
+
                                 doy = (
                                     collection_date.date()
                                     - date(collection_date.year, 1, 1)
@@ -266,35 +275,39 @@ def format_data(request, file_data):
 
                                 subgardens["%s: %s" % (garden.name, subgarden.name)][
                                     "collections"
-                                ][record["date"]] = {
+                                ][collection_date.strftime("%d.%m.%Y")] = {
                                     "date": collection_date.date(),
                                     "creator": request.user,
                                     "doy": doy,
                                     "finished": True,
                                     "records": [],
                                 }
-                            except ValueError:
-                                messages.error(
-                                    request,
-                                    "Upload failed. Date value '%s' raised a ValueError. "
-                                    "Please make sure date values follow 'DD.MM.YYYY' format"
-                                    % record["date"],
-                                )
-                                status = 404
-                                break
+                        except ValueError:
+                            messages.error(
+                                request,
+                                "Upload failed. Please make sure the entered values form a valid date. "
+                                "Entered values were Day: '%s' Month: '%s' Year '%s'. "
+                                "Please check the columns 'Day', 'Month' and 'Year'."
+                                % (record["day"], record["month"], record["year"]),
+                            )
+                            status = 400
+                            break
 
-                            except KeyError:
-                                messages.error(
-                                    request,
-                                    "Upload failed. KeyError was raised. "
-                                    "Please make sure the column names are correct. Check 'Date' column",
-                                )
-                                status = 400
-                                break
+                        except KeyError:
+                            messages.error(
+                                request,
+                                "Upload failed. KeyError was raised. "
+                                "Please make sure the column names are correct. "
+                                "Please check the columns 'Day', 'Month' and 'Year'.",
+                            )
+                            status = 400
+                            break
 
                         subgardens["%s: %s" % (garden.name, subgarden.name)][
                             "collections"
-                        ][record["date"]]["records"].append(record)
+                        ][collection_date.strftime("%d.%m.%Y")]["records"].append(
+                            record
+                        )
 
                         formatted = formatted + 1
                     except Garden.DoesNotExist:
@@ -313,25 +326,26 @@ def format_data(request, file_data):
                             % e,
                         )
                         status = 400
-            except Garden.DoesNotExist:
-                messages.error(
-                    request,
-                    "Upload failed. Garden '%s' does not exist. Please check for typos."
-                    % record["garden"],
-                )
-                status = 404
-            except KeyError:
-                messages.error(
-                    request,
-                    "Upload failed. KeyError was raised. "
-                    "Please make sure the column names are correct. Check 'Garden' column",
-                )
-                status = 400
+                except Garden.DoesNotExist:
+                    messages.error(
+                        request,
+                        "Upload failed. Garden '%s' does not exist. Please check for typos."
+                        % record["garden"],
+                    )
+                    status = 404
+                except KeyError:
+                    messages.error(
+                        request,
+                        "Upload failed. KeyError was raised. "
+                        "Please make sure the column names are correct. Check 'Garden' column",
+                    )
+                    status = 400
     except Exception as e:
         messages.error(
             request, "Upload failed. Following error message was received: %s" % e
         )
         status = 500
+
     return status, formatted, total, subgardens
 
 
@@ -599,12 +613,14 @@ def map_record_values(request, record):
             messages.error(
                 request,
                 "Upload failed. Unrecognized value '%s' in the field '%s'. Please check for typos."
-                "Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                 % (
                     record[key],
                     key.replace("_", " "),
                     "%s: %s" % (record["garden"], record["subgarden"]),
-                    record["date"],
+                    record["day"],
+                    record["month"],
+                    record["year"],
                     record["species"],
                 ),
             )
@@ -622,10 +638,13 @@ def map_record_values(request, record):
             messages.error(
                 request,
                 "Upload failed. 'Flowering intensity' field should be left empty "
-                "if the 'flowers opening' field is not set 'yes'. Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                "if the 'flowers opening' field is not set 'yes'. "
+                "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                 % (
                     "%s: %s" % (record["garden"], record["subgarden"]),
-                    record["date"],
+                    record["day"],
+                    record["month"],
+                    record["year"],
                     record["species"],
                 ),
             )
@@ -639,10 +658,13 @@ def map_record_values(request, record):
             messages.error(
                 request,
                 "Upload failed. 'Senescence intensity' field should be left empty "
-                "if the 'senescence' field is not set 'yes'. Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                "if the 'senescence' field is not set 'yes'. "
+                "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                 % (
                     "%s: %s" % (record["garden"], record["subgarden"]),
-                    record["date"],
+                    record["day"],
+                    record["month"],
+                    record["year"],
                     record["species"],
                 ),
             )
@@ -652,10 +674,13 @@ def map_record_values(request, record):
             messages.error(
                 request,
                 "Upload failed. 'Flowering intensity' field should not be left empty "
-                "if the 'flowers opening' field is set 'yes'. Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                "if the 'flowers opening' field is set 'yes'. "
+                "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                 % (
                     "%s: %s" % (record["garden"], record["subgarden"]),
-                    record["date"],
+                    record["day"],
+                    record["month"],
+                    record["year"],
                     record["species"],
                 ),
             )
@@ -665,10 +690,13 @@ def map_record_values(request, record):
             messages.error(
                 request,
                 "Upload failed. 'Senescence intensity' field should not be left empty "
-                "if the 'senescence' field is set 'yes'. Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                "if the 'senescence' field is set 'yes'. "
+                "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                 % (
                     "%s: %s" % (record["garden"], record["subgarden"]),
-                    record["date"],
+                    record["day"],
+                    record["month"],
+                    record["year"],
                     record["species"],
                 ),
             )
@@ -681,11 +709,14 @@ def map_record_values(request, record):
                 else:
                     messages.error(
                         request,
-                        "Upload failed. '%s' field should not be left empty. Subgarden: '%s'\nDate: '%s'\nSpecies: '%s'"
+                        "Upload failed. '%s' field should not be left empty. "
+                        "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                         % (
                             value,
                             "%s: %s" % (record["garden"], record["subgarden"]),
-                            record["date"],
+                            record["day"],
+                            record["month"],
+                            record["year"],
                             record["species"],
                         ),
                     )
