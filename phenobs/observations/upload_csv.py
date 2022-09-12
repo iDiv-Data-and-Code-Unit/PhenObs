@@ -59,7 +59,7 @@ def import_from_csv(request):
                                 request,
                                 "Please fix the typos and errors and try again",
                             )
-                            status = 500
+                            status = format_data_status
 
                     except UnicodeDecodeError:
                         messages.error(
@@ -88,7 +88,7 @@ def import_from_csv(request):
                                 request,
                                 "Please fix the typos and errors and try again",
                             )
-                            status = 500
+                            status = format_data_status
 
                     except UnicodeDecodeError:
                         messages.error(
@@ -309,6 +309,7 @@ def format_data(request, file_data):
                             % e,
                         )
                         status = 400
+                        break
                 except Garden.DoesNotExist:
                     messages.error(
                         request,
@@ -316,6 +317,7 @@ def format_data(request, file_data):
                         % record["garden"],
                     )
                     status = 404
+                    break
                 except KeyError:
                     messages.error(
                         request,
@@ -323,6 +325,7 @@ def format_data(request, file_data):
                         "Please make sure the column names are correct. Check 'Garden' column",
                     )
                     status = 400
+                    break
     except Exception as e:
         messages.error(
             request, "Upload failed. Following error message was received: %s" % e
@@ -515,6 +518,7 @@ def add_data(request, data):
                                     ),
                                 )
                                 status = 404
+                                break
             except Exception as e:
                 messages.error(
                     request, "Upload failed. Following message was received: '%s'" % e

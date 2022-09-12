@@ -170,7 +170,48 @@ def csv_data_generator(
     return records
 
 
-def csv_file(tmp_path, csv_data, delimiter):
+def to_rows(csv_data):
+    rows = []
+
+    for collection in csv_data:
+        subgarden = collection["subgarden"]
+        main_garden = collection["main_garden"]
+
+        day = random.randint(1, 28)
+        month = random.randint(1, 12)
+        year = random.randint(1980, 2022)
+
+        for record_obj in collection["records"]:
+            record = record_obj["record"]
+            plant = record_obj["plant"]
+
+            rows.append(
+                [
+                    main_garden.name,
+                    subgarden.name,
+                    day,
+                    month,
+                    year,
+                    plant.garden_name,
+                    reverse_map_values(record.initial_vegetative_growth),
+                    reverse_map_values(record.young_leaves_unfolding),
+                    reverse_map_values(record.flowers_open),
+                    reverse_map_values(record.peak_flowering),
+                    reverse_map_values(str(record.flowering_intensity)),
+                    reverse_map_values(record.ripe_fruits),
+                    reverse_map_values(record.senescence),
+                    reverse_map_values(str(record.senescence_intensity)),
+                    str([x for x in record.maintenance if x != "None"])[1:-1].replace(
+                        "'", ""
+                    ),
+                    record.remarks,
+                ]
+            )
+
+    return rows
+
+
+def csv_file(tmp_path, rows, delimiter):
     d = tmp_path / "sub"
     d.mkdir()
 
@@ -198,40 +239,8 @@ def csv_file(tmp_path, csv_data, delimiter):
         ]
     )
 
-    for collection in csv_data:
-        subgarden = collection["subgarden"]
-        main_garden = collection["main_garden"]
-
-        day = random.randint(1, 28)
-        month = random.randint(1, 12)
-        year = random.randint(1980, 2022)
-
-        for record_obj in collection["records"]:
-            record = record_obj["record"]
-            plant = record_obj["plant"]
-
-            writer.writerow(
-                [
-                    main_garden.name,
-                    subgarden.name,
-                    day,
-                    month,
-                    year,
-                    plant.garden_name,
-                    reverse_map_values(record.initial_vegetative_growth),
-                    reverse_map_values(record.young_leaves_unfolding),
-                    reverse_map_values(record.flowers_open),
-                    reverse_map_values(record.peak_flowering),
-                    reverse_map_values(str(record.flowering_intensity)),
-                    reverse_map_values(record.ripe_fruits),
-                    reverse_map_values(record.senescence),
-                    reverse_map_values(str(record.senescence_intensity)),
-                    str([x for x in record.maintenance if x != "None"])[1:-1].replace(
-                        "'", ""
-                    ),
-                    record.remarks,
-                ]
-            )
+    for row in rows:
+        writer.writerow(row)
 
     file.close()
     file = open(d / "test.csv", "r")
