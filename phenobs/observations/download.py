@@ -72,7 +72,7 @@ def download(request, filetype):
 
 class Echo(object):
     def write(self, value):
-        return value
+        return value.encode("utf-8")
 
 
 def return_xlsx(columns, collections):
@@ -146,7 +146,7 @@ def return_csv(columns, collections):
         return HttpResponse("Invalid argument received.", status=500)
 
     pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer, delimiter=";")
+    writer = csv.writer(pseudo_buffer, delimiter=",")
 
     rows = [columns]
 

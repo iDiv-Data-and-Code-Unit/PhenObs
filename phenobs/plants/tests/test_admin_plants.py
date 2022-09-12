@@ -105,10 +105,7 @@ def test_upload_csv_comma_success(csv_plants_comma):
         {"csv_upload": file, "delimiter": "2", "garden": main_garden_id},
     )
 
-    messages = list(response.context["messages"])
-
-    assert response.status_code == 200
-    assert str(messages[0]) == "6 out of 6 listed plants were successfully added."
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db
@@ -122,10 +119,7 @@ def test_upload_csv_semicolon_success(csv_plants_semicolon):
         {"csv_upload": file, "delimiter": "1", "garden": main_garden_id},
     )
 
-    messages = list(response.context["messages"])
-
-    assert response.status_code == 200
-    assert str(messages[0]) == "6 out of 6 listed plants were successfully added."
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db
@@ -148,12 +142,14 @@ def test_upload_csv_comma_no_file(csv_plants_comma):
 
 
 @pytest.mark.django_db
-def test_upload_csv_method_not_allowed():
+def test_upload_csv_method_not_allowed(csv_plants_comma):
     c = Client()
+
+    file, main_garden_id = csv_plants_comma
 
     response = c.get(
         "/admin/plants/plant/upload-csv/",
-        {"csv_upload": "", "delimiter": "2", "garden": factory.Faker("pyint")},
+        {"csv_upload": file, "delimiter": "2", "garden": main_garden_id},
     )
 
     messages = list(response.context["messages"])
