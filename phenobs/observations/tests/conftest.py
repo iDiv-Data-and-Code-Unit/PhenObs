@@ -6,8 +6,6 @@ from django.contrib.auth.models import Group
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 
-# from .factories import *
-
 
 @pytest.fixture
 def admin_group():
@@ -211,6 +209,27 @@ def to_rows(csv_data):
     return rows
 
 
+def top_column_names():
+    return [
+        "Garden",
+        "Subgarden",
+        "Day",
+        "Month",
+        "Year",
+        "Species",
+        "Initial vegetative growth",
+        "Young leaves unfolding",
+        "Flowers opening",
+        "Peak flowering",
+        "Flowering intensity",
+        "Ripe fruits",
+        "Senescence",
+        "Senescence intensity",
+        "Maintenance",
+        "Remarks",
+    ]
+
+
 def csv_file(tmp_path, rows, delimiter):
     d = tmp_path / "sub"
     d.mkdir()
@@ -218,26 +237,7 @@ def csv_file(tmp_path, rows, delimiter):
     file = open(d / "test.csv", "w")
 
     writer = csv.writer(file, delimiter=delimiter)
-    writer.writerow(
-        [
-            "Garden",
-            "Subgarden",
-            "Day",
-            "Month",
-            "Year",
-            "Species",
-            "Initial vegetative growth",
-            "Young leaves unfolding",
-            "Flowers opening",
-            "Peak flowering",
-            "Flowering intensity",
-            "Ripe fruits",
-            "Senescence",
-            "Senescence intensity",
-            "Maintenance",
-            "Remarks",
-        ]
-    )
+    writer.writerow(top_column_names())
 
     for row in rows:
         writer.writerow(row)
@@ -248,12 +248,96 @@ def csv_file(tmp_path, rows, delimiter):
     return file
 
 
-def upload_csv_request(request_factory, file, admin_user, delimiter):
+def csv_file_redundant_columns(tmp_path, rows, delimiter):
+    d = tmp_path / "sub"
+    d.mkdir()
+
+    file = open(d / "test.csv", "w")
+
+    writer = csv.writer(file, delimiter=delimiter)
+
+    top_columns = top_column_names()
+    top_columns.append("Redundant")
+
+    writer.writerow(top_columns)
+
+    for row in rows:
+        writer.writerow(row)
+
+    file.close()
+    file = open(d / "test.csv", "r")
+
+    return file
+
+
+def csv_file_missing_columns(tmp_path, rows, delimiter):
+    d = tmp_path / "sub"
+    d.mkdir()
+
+    file = open(d / "test.csv", "w")
+
+    writer = csv.writer(file, delimiter=delimiter)
+
+    top_columns = top_column_names()
+    top_columns.remove("Remarks")
+
+    writer.writerow(top_columns)
+
+    for row in rows:
+        writer.writerow(row)
+
+    file.close()
+    file = open(d / "test.csv", "r")
+
+    return file
+
+
+def csv_file_wrong_column_names(tmp_path, rows, delimiter):
+    d = tmp_path / "sub"
+    d.mkdir()
+
+    file = open(d / "test.csv", "w")
+
+    writer = csv.writer(file, delimiter=delimiter)
+    top_columns = top_column_names()
+    top_columns[0] = "Test"
+
+    writer.writerow(top_columns)
+
+    for row in rows:
+        writer.writerow(row)
+
+    file.close()
+    file = open(d / "test.csv", "r")
+
+    return file
+
+
+def upload_csv_request(request_factory, admin_user, delimiter, file=None):
     request = request_factory.post(
         "/admin/observations/record/upload-csv/", data={"delimiter": delimiter}
     )
     request.user = admin_user
-    request.FILES["csv_upload"] = file
+
+    if file:
+        request.FILES["csv_upload"] = file
+
+    middleware = SessionMiddleware()
+    middleware.process_request(request)
+    request.session.save()
+
+    messages = FallbackStorage(request)
+    setattr(request, "_messages", messages)
+
+    return request
+
+
+def upload_csv_request_no_delimiter(request_factory, admin_user, file=None):
+    request = request_factory.post("/admin/observations/record/upload-csv/")
+    request.user = admin_user
+
+    if file:
+        request.FILES["csv_upload"] = file
 
     middleware = SessionMiddleware()
     middleware.process_request(request)

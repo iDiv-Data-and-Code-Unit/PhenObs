@@ -25,108 +25,132 @@ def import_from_csv(request):
     added = 0
     total = 0
     status = 200
+    done = 0
 
     if request.method == "POST":
-        try:
-            csv_file = request.FILES["csv_upload"]
-
-            # delimiter = '1' for semicolon
-            # delimiter = '2' for comma
+        while done != 1:
             try:
-                delimiter = request.POST["delimiter"]
+                csv_file = request.FILES["csv_upload"]
 
-                if not csv_file.name.endswith(".csv"):
+                if not hasattr(csv_file, "name"):
                     messages.error(
                         request,
-                        "The wrong file type was uploaded. Please upload a CSV file.",
+                        "The uploaded file could not be read. Please make sure to upload a valid file.",
                     )
                     status = 406
+                    break
 
-                if delimiter == "2":
-                    try:
-                        file_data = read_csv(csv_file, sep=",", encoding="utf8")
-                        print("IMPORT DATA FROM CSV: COMMA SEPARATED")
-                        print(file_data)
-                        format_data_status, formatted, total, data = format_data(
-                            request, file_data
-                        )
-                        print(format_data_status, formatted, total)
+                # delimiter = '1' for semicolon
+                # delimiter = '2' for comma
+                try:
+                    delimiter = request.POST["delimiter"]
 
-                        if format_data_status == 200 and formatted == total:
-                            add_data_status, added = add_data(request, data)
-                        else:
-                            messages.error(
-                                request,
-                                "Please fix the typos and errors and try again",
-                            )
-                            status = format_data_status
-
-                    except UnicodeDecodeError:
+                    if not csv_file.name.endswith(".csv"):
                         messages.error(
                             request,
-                            "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
+                            "The wrong file type was uploaded. Please upload a CSV file.",
                         )
-                        status = 500
+                        status = 406
+                        break
 
-                    except Exception as e:
-                        messages.error(request, e)
-                        status = 500
+                    if delimiter == "2":
+                        try:
+                            file_data = read_csv(csv_file, sep=",", encoding="utf8")
+                            print("IMPORT DATA FROM CSV: COMMA SEPARATED")
+                            print(file_data)
+                            format_data_status, formatted, total, data = format_data(
+                                request, file_data
+                            )
+                            print(format_data_status, formatted, total)
 
-                elif delimiter == "1":
-                    try:
-                        file_data = read_csv(csv_file, sep=";", encoding="utf8")
-                        print("IMPORT DATA FROM CSV: SEMICOLON SEPARATED")
-                        print(file_data)
-                        format_data_status, formatted, total, data = format_data(
-                            request, file_data
-                        )
-                        print(format_data_status, formatted, total)
-                        if format_data_status == 200 and formatted == total:
-                            add_data_status, added = add_data(request, data)
-                        else:
+                            if format_data_status == 200 and formatted == total:
+                                add_data_status, added = add_data(request, data)
+                                done = 1
+                            else:
+                                messages.error(
+                                    request,
+                                    "Please fix the typos and errors and try again",
+                                )
+                                status = format_data_status
+                                break
+
+                        except UnicodeDecodeError:
                             messages.error(
                                 request,
-                                "Please fix the typos and errors and try again",
+                                "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
                             )
-                            status = format_data_status
+                            status = 500
+                            break
 
-                    except UnicodeDecodeError:
+                        except Exception as e:
+                            messages.error(request, e)
+                            status = 500
+                            break
+
+                    elif delimiter == "1":
+                        try:
+                            file_data = read_csv(csv_file, sep=";", encoding="utf8")
+                            print("IMPORT DATA FROM CSV: SEMICOLON SEPARATED")
+                            print(file_data)
+                            format_data_status, formatted, total, data = format_data(
+                                request, file_data
+                            )
+                            print(format_data_status, formatted, total)
+                            if format_data_status == 200 and formatted == total:
+                                add_data_status, added = add_data(request, data)
+                                done = 1
+                            else:
+                                messages.error(
+                                    request,
+                                    "Please fix the typos and errors and try again",
+                                )
+                                status = format_data_status
+                                break
+
+                        except UnicodeDecodeError:
+                            messages.error(
+                                request,
+                                "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
+                            )
+                            status = 500
+                            break
+
+                        except Exception as e:
+                            messages.error(request, e)
+                            status = 500
+                            break
+
+                    else:
                         messages.error(
                             request,
-                            "Upload failed. Please make sure the CSV file is UTF-8 encoded.",
+                            "Upload failed. Please select a delimiter from the available choices.",
                         )
-                        status = 500
+                        status = 400
+                        break
 
-                    except Exception as e:
-                        messages.error(request, e)
-                        status = 500
-
-                else:
+                except KeyError:
                     messages.error(
                         request,
-                        "Upload failed. Please select a delimiter from the available choices.",
+                        "Upload failed. No delimiter was chosen. Please choose a delimiter before submitting.",
                     )
                     status = 400
+                    break
 
-            except KeyError:
+            except MultiValueDictKeyError:
                 messages.error(
                     request,
-                    "Upload failed. No delimiter was chosen. Please choose a delimiter before submitting.",
+                    "Upload failed. No CSV file was found in the previous request.",
                 )
                 status = 400
+                break
 
-        except MultiValueDictKeyError:
-            messages.error(
-                request,
-                "Upload failed. No CSV file was found in the previous request.",
-            )
-            status = 400
-        except Exception as e:
-            messages.error(
-                request,
-                "Upload failed. Following error message was received: %s" % e,
-            )
-            status = 500
+            except Exception as e:
+                messages.error(
+                    request,
+                    "Upload failed. Following error message was received: %s" % e,
+                )
+                status = 500
+                break
 
     else:
         if "csv_upload" in request.FILES:
@@ -452,9 +476,9 @@ def add_data(request, data):
                                         mapped_record,
                                     ) = map_record_values(request, record)
                                     if status == 200:
-                                        if (
-                                            no_observation is True
-                                            and len(mapped_record["remarks"]) == 0
+                                        if no_observation is True and (
+                                            len(str(mapped_record["remarks"])) == 0
+                                            or str(mapped_record["remarks"]) == "nan"
                                         ):
                                             messages.error(
                                                 request,
@@ -699,7 +723,7 @@ def map_record_values(request, record):
                         "Upload failed. '%s' field should not be left empty. "
                         "Subgarden: '%s'\nDay: '%s'\nMonth: '%s'\nYear: '%s'\nSpecies: '%s'"
                         % (
-                            value,
+                            value.replace("_", " "),
                             "%s: %s" % (record["garden"], record["subgarden"]),
                             record["day"],
                             record["month"],
