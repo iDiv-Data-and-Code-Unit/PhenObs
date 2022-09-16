@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.contrib.auth.decorators import login_required
@@ -10,7 +11,7 @@ from jsonschema.exceptions import ValidationError
 
 from ..gardens.models import Garden
 from .models import Collection, Record
-from .schemas import collection_schema, collections_schema
+from .schemas import collection_schema, collections_schema, date_range_schema
 
 
 @csrf_exempt
@@ -101,14 +102,71 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         return response
 
 
+@csrf_exempt
 def get_collections(request, id):
     try:
-        context = {"gardens": [], "range": range(5, 105, 5)}
+        start_date_json = None
+        end_date_json = None
+
+        if len(request.body) > 0:
+            data = json.loads(request.body)
+            validate(instance=data, schema=date_range_schema)
+
+            if "start_date" in data:
+                start_date_json = data["start_date"]
+            if "end_date" in data:
+                end_date_json = data["end_date"]
+
+        start_date = None
+        end_date = None
+        start_date_string = ""
+        end_date_string = ""
+
+        if start_date_json is not None:
+            start_date, start_date_string = json_date_formatter(start_date_json)
+
+        if start_date_json is not None:
+            end_date, end_date_string = json_date_formatter(end_date_json)
+
+        if start_date is not None and end_date is not None:
+            if end_date < start_date:
+                context = {
+                    "exception": Exception(
+                        "Filtering date range is invalid. End date cannot be earlier than start date."
+                    )
+                }
+                return render(request, "error.html", context, status=400)
+
+        context = {
+            "start_date": start_date_string,
+            "end_date": end_date_string,
+            "gardens": [],
+            "range": range(5, 105, 5),
+        }
 
         is_admin = False
+        context["subgarden_options"] = []
+        auth_garden = Garden.objects.get(auth_users=request.user)
 
         if request.user.groups.filter(name="Admins").exists():
             is_admin = True
+            for subgarden in Garden.objects.all().exclude(main_garden=None):
+                context["subgarden_options"].append(
+                    {
+                        "main_garden": subgarden.main_garden.name,
+                        "name": subgarden.name,
+                        "id": subgarden.id,
+                    }
+                )
+        else:
+            for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
+                context["subgarden_options"].append(
+                    {
+                        "main_garden": subgarden.main_garden.name,
+                        "name": subgarden.name,
+                        "id": subgarden.id,
+                    }
+                )
 
         if id == "all":
             if is_admin:
@@ -172,6 +230,10 @@ def get_collections(request, id):
                 collections = Collection.objects.filter(
                     garden_id=subgarden["id"]
                 ).order_by("date")
+                if start_date is not None and end_date is not None:
+                    collections = collections.filter(
+                        date__gte=start_date, date__lte=end_date
+                    )
                 for collection in collections:
                     collection_dict = {
                         "id": collection.id,
@@ -189,6 +251,14 @@ def get_collections(request, id):
                     subgarden["collections"].append(collection_dict)
 
         return render(request, "observations/views_content.html", context)
+
+    except json.JSONDecodeError:
+        context = {"exception": Exception("JSON decoding error was raised.")}
+        return render(request, "error.html", context, status=400)
+
+    except ValidationError:
+        context = {"exception": Exception("Received JSON could not be validated.")}
+        return render(request, "error.html", context, status=500)
 
     except Garden.DoesNotExist:
         context = {
@@ -210,6 +280,24 @@ def get_collections(request, id):
     except Exception as e:
         context = {"exception": e}
         return render(request, "error.html", context, status=500)
+
+
+def json_date_formatter(json_date):
+    date_string = ""
+    date_object = None
+
+    if (
+        (json_date["year"] is not None or len(json_date["year"]) > 0)
+        and (json_date["month"] is not None or len(json_date["month"]) > 0)
+        and (json_date["day"] is not None or len(json_date["day"]) > 0)
+        and (json_date["string"] is not None or len(json_date["string"]) > 0)
+    ):
+        date_object = datetime.date(
+            year=json_date["year"], month=json_date["month"], day=json_date["day"]
+        )
+        date_string = json_date["string"]
+
+    return date_object, date_string
 
 
 @login_required

@@ -1,0 +1,27 @@
+{
+  "name": "phenobs",
+  "version": "1.0.0",
+  "description": "PhenObs =======",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zxyctn/PhenObs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zxyctn/PhenObs/issues"
+  },
+  "homepage": "https://github.com/zxyctn/PhenObs#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.25.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.2"
+  }
+}

@@ -198,11 +198,16 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
         today = timezone.now()
         doy = today.date() - date(today.date().year, 1, 1) + timedelta(days=1)
 
+        is_admin = False
+
+        if request.user.groups.filter(name="Admins").exists():
+            is_admin = True
+
         try:
             garden = Garden.objects.filter(id=garden_id).get()
             creator = User.objects.filter(id=request.user.id).get()
 
-            if not check_garden_auth_user(creator, garden):
+            if not is_admin and not check_garden_auth_user(creator, garden):
                 response = JsonResponse(
                     "You do not have permission to create collections for this garden.",
                     safe=False,

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin, messages
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.datastructures import MultiValueDictKeyError
 from pandas import read_csv
@@ -98,14 +98,18 @@ class PlantAdmin(admin.ModelAdmin):
                 )
                 status = 500
         else:
-            messages.error(request, "Method not allowed.")
-            status = 405
+            if "delimiter" in request.GET:
+                messages.error(request, "Method not allowed.")
+                status = 405
 
         form = CsvImportForm()
         context = {"form": form}
 
         if add_plants_status != 200 and status == 200:
             status = add_plants_status
+
+        if status == 200 and request.method == "POST":
+            return redirect("/admin/plants/plant/", context)
 
         return render(request, "admin/csv_upload.html", context, status=status)
 

@@ -20,77 +20,6 @@ from phenobs.observations.get import (
 )
 from phenobs.observations.models import Collection, Record
 
-# from phenobs.observations.tests.test_upload import collection_valid_json
-
-
-@pytest.fixture
-def collection_valid_json(collection, record_factory, plant_factory):
-    plant_1 = plant_factory.create(garden=collection.garden)
-    plant_2 = plant_factory.create(garden=collection.garden)
-    record_1 = record_factory.create(collection=collection, plant=plant_1)
-    record_2 = record_factory.create(collection=collection, plant=plant_2)
-
-    assert plant_1 != plant_2
-    assert record_1 != record_2
-
-    return {
-        "id": collection.id,
-        "date": str(collection.date),
-        "creator": collection.creator.username,
-        "finished": collection.finished,
-        "records": {
-            str(plant_1.order): {
-                "id": record_1.id,
-                "order": int(plant_1.order),
-                "done": record_1.done,
-                "name": record_1.plant.garden_name,
-                "initial-vegetative-growth": record_1.initial_vegetative_growth,
-                "young-leaves-unfolding": record_1.young_leaves_unfolding,
-                "flowers-opening": record_1.flowers_open,
-                "peak-flowering": record_1.peak_flowering,
-                "flowering-intensity": record_1.flowering_intensity,
-                "ripe-fruits": record_1.ripe_fruits,
-                "senescence": record_1.senescence,
-                "senescence-intensity": record_1.senescence_intensity,
-                "covered-artificial": "covered_artificial" in record_1.maintenance,
-                "covered-natural": "covered_natural" in record_1.maintenance,
-                "cut-partly": "cut_partly" in record_1.maintenance,
-                "cut-total": "cut_total" in record_1.maintenance,
-                "transplanted": "transplanted" in record_1.maintenance,
-                "removed": "removed" in record_1.maintenance,
-                "remarks": record_1.remarks,
-                "peak-flowering-estimation": record_1.peak_flowering_estimation,
-                "no-observation": False,
-            },
-            str(plant_2.order): {
-                "id": record_2.id,
-                "order": int(plant_2.order),
-                "done": record_2.done,
-                "name": record_2.plant.garden_name,
-                "initial-vegetative-growth": record_2.initial_vegetative_growth,
-                "young-leaves-unfolding": record_2.young_leaves_unfolding,
-                "flowers-opening": record_2.flowers_open,
-                "peak-flowering": record_2.peak_flowering,
-                "flowering-intensity": record_2.flowering_intensity,
-                "ripe-fruits": record_2.ripe_fruits,
-                "senescence": record_2.senescence,
-                "senescence-intensity": record_2.senescence_intensity,
-                "covered-artificial": "covered_artificial" in record_2.maintenance,
-                "covered-natural": "covered_natural" in record_2.maintenance,
-                "cut-partly": "cut_partly" in record_2.maintenance,
-                "cut-total": "cut_total" in record_2.maintenance,
-                "transplanted": "transplanted" in record_2.maintenance,
-                "removed": "removed" in record_2.maintenance,
-                "remarks": record_2.remarks,
-                "peak-flowering-estimation": record_2.peak_flowering_estimation,
-                "no-observation": False,
-            },
-        },
-        "garden": collection.garden_id,
-        "garden-name": collection.garden.name,
-        "last-collection-id": None,
-    }
-
 
 @pytest.mark.django_db
 def test_get_all_collections_valid_garden_valid_json_valid_schema(
@@ -166,7 +95,135 @@ def test_get_all_collections_valid_garden_valid_json_invalid_schema(
 
 
 @pytest.mark.django_db
-def test_get_collections_admin_user_all(request_factory, admin_user):
+def test_get_collections_all_invalid_json_data(request_factory, valid_garden_user):
+    request = request_factory.get("collections/all/")
+    request.user = valid_garden_user
+    request._body = json.dumps({})
+
+    response = get_collections(request, "all")
+
+    assert response.status_code == 500
+
+
+@pytest.mark.django_db
+def test_get_collections_all_valid_json_data(request_factory, valid_garden_user):
+    start_date = datetime(
+        year=random.randint(1980, 2022),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+    end_date = datetime(
+        year=random.randint(start_date.year + 1, 2023),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+
+    request = request_factory.get("collections/all/")
+    request.user = valid_garden_user
+    request._body = json.dumps(
+        {
+            "start_date": {
+                "year": start_date.year,
+                "month": start_date.month,
+                "day": start_date.day,
+                "string": start_date.date().isoformat(),
+            },
+            "end_date": {
+                "year": end_date.year,
+                "month": end_date.month,
+                "day": end_date.day,
+                "string": end_date.date().isoformat(),
+            },
+        }
+    )
+
+    response = get_collections(request, "all")
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_get_collections_all_valid_json_data_invalid_date_range(
+    request_factory, valid_garden_user
+):
+    start_date = datetime(
+        year=random.randint(1981, 2022),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+    end_date = datetime(
+        year=random.randint(1980, start_date.year - 1),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+
+    request = request_factory.get("collections/all/")
+    request.user = valid_garden_user
+    request._body = json.dumps(
+        {
+            "start_date": {
+                "year": start_date.year,
+                "month": start_date.month,
+                "day": start_date.day,
+                "string": start_date.date().isoformat(),
+            },
+            "end_date": {
+                "year": end_date.year,
+                "month": end_date.month,
+                "day": end_date.day,
+                "string": end_date.date().isoformat(),
+            },
+        }
+    )
+
+    response = get_collections(request, "all")
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_get_collections_all_valid_json_data_invalid_date_string(
+    request_factory, valid_garden_user
+):
+    start_date = datetime(
+        year=random.randint(1980, 2022),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+    end_date = datetime(
+        year=random.randint(start_date.year + 1, 2023),
+        month=random.randint(1, 12),
+        day=random.randint(1, 28),
+    )
+
+    request = request_factory.get("collections/all/")
+    request.user = valid_garden_user
+    request._body = json.dumps(
+        {
+            "start_date": {
+                "year": start_date.year,
+                "month": start_date.month,
+                "day": start_date.day,
+                "string": "2022-22-22",
+            },
+            "end_date": {
+                "year": end_date.year,
+                "month": end_date.month,
+                "day": end_date.day,
+                "string": "2022-22-22",
+            },
+        }
+    )
+
+    response = get_collections(request, "all")
+
+    assert response.status_code == 500
+
+
+@pytest.mark.django_db
+def test_get_collections_admin_user_all(request_factory, admin_user, garden):
+    garden.auth_users.set([admin_user])
+
     request = request_factory.get("collections/all/")
     request.user = admin_user
 
@@ -192,10 +249,11 @@ def test_get_collections_admin_user_valid_subgarden(
 
 @pytest.mark.django_db
 def test_get_collections_admin_user_valid_main_garden(
-    request_factory, admin_user, main_garden_factory
+    request_factory, admin_user, main_garden_factory, subgarden_factory
 ):
     main_garden = main_garden_factory()
-    main_garden.auth_users.set([admin_user])
+    subgarden = subgarden_factory(main_garden=main_garden)
+    subgarden.auth_users.set([admin_user])
 
     request = request_factory.get("collections/%d/" % main_garden.id)
     request.user = admin_user

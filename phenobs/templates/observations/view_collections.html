@@ -20,6 +20,18 @@
               </a>
             </li>
           </ul>
+          <ul class="navbar-nav d-flex justify-content-around">
+            <li class="navbar-item d-flex align-items-center">
+              <input type="date" value="{{ start_date }}" id="view-start-date" class="overview-date-range">
+            </li>
+            <li class="navbar-item d-flex align-items-center text-white">
+              <label for="edit-end-date" class="mb-0 mx-2 overview-date-range-label"> - </label>
+              <input type="date" class="overview-date-range" id="view-end-date" value="{{ end_date }}">
+            </li>
+            <li class="navbar-item d-flex align-items-center">
+              <button class="btn btn-outline-light ml-2 d-flex align-items-center" style="height: 30px" id="view-in-range">Load</button>
+            </li>
+          </ul>
           <ul class="navbar-nav">
             <li class="nav-item">
               <a class="nav-link" id="viewDeselectAll"><i class="bi bi-dash-square-fill"></i></a>

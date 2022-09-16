@@ -32,6 +32,12 @@ class Garden(models.Model):
         "self", on_delete=models.DO_NOTHING, blank=True, null=True
     )
 
+    class Meta:
+        unique_together = (
+            "name",
+            "main_garden",
+        )
+
     def __str__(self) -> str:
         """Returns name of the garden."""
         if self.main_garden is not None:
