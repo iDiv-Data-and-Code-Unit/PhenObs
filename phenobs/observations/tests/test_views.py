@@ -65,12 +65,15 @@ def test_add_multiple_gardens(request_factory, multiple_gardens_user):
 
 @pytest.mark.django_db
 def test_edit_valid_garden_valid_collection(
-    request_factory, valid_garden_user, collection_factory
+    request_factory, user, collection_factory, subgarden_factory
 ):
-    collection = collection_factory(creator=valid_garden_user)
+    subgarden = subgarden_factory()
+    subgarden.auth_users.set([user])
+
+    collection = collection_factory(creator=user, garden=subgarden)
 
     request = request_factory.get("/observations/edit/%d/" % collection.id)
-    request.user = valid_garden_user
+    request.user = user
 
     response = edit(request, collection.id)
 
@@ -148,9 +151,11 @@ def test_new_invalid_garden(request_factory, user, subgarden_factory):
 
 
 @pytest.mark.django_db
-def test_overview_admin_user(request_factory, admin_user):
+def test_overview_admin_user(request_factory, subgarden_user, admin_group):
+    subgarden_user.groups.set([admin_group])
+
     request = request_factory.get("/observations/overview/")
-    request.user = admin_user
+    request.user = subgarden_user
 
     response = overview(request)
 

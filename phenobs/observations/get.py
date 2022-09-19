@@ -79,8 +79,11 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         return response
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         response = JsonResponse(
-            "Multiple subgardens are assigned to the user. Please assign only one subgarden per user.",
+            "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+            "Assigned gardens are: %s" % str([garden.name for garden in gardens])[1:-1],
             safe=False,
         )
         response.status_code = 409
@@ -269,9 +272,13 @@ def get_collections(request, id):
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
 

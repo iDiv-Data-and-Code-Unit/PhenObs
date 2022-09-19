@@ -27,7 +27,19 @@ def all(request: HttpRequest) -> HttpResponse:
 
     try:
         garden = Garden.objects.filter(auth_users=request.user).get()
-        context = {"garden": garden}
+        if garden.is_subgarden():
+            context = {"garden": garden}
+        else:
+            context = {
+                "exception": Exception(
+                    "User has been assigned to a main garden.\n"
+                    "Please get unassigned from the garden '%s' and "
+                    "get assigned to a subgarden." % garden.name
+                )
+            }
+
+            return render(request, "error.html", context, status=400)
+
         return render(request, "observations/observations.html", context)
 
     except Garden.DoesNotExist:
@@ -40,9 +52,13 @@ def all(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
 
@@ -74,9 +90,35 @@ def overview(request: HttpRequest) -> HttpResponse:
 
         if is_admin:
             gardens = Garden.objects.filter(main_garden=None).all()
+            # Check if the next line raises any error
+            Garden.objects.get(auth_users=request.user)
         else:
-            subgarden = Garden.objects.filter(auth_users=request.user).get()
-            gardens = [subgarden.main_garden]
+            try:
+                subgarden = Garden.objects.get(auth_users=request.user)
+                if subgarden.is_subgarden():
+                    gardens = [subgarden.main_garden]
+                else:
+                    context = {
+                        "exception": Exception(
+                            "User has been assigned to a main garden.\n"
+                            "Please get unassigned from the garden '%s' and "
+                            "get assigned to a subgarden." % subgarden.name
+                        )
+                    }
+
+                    return render(request, "error.html", context, status=400)
+            except Garden.MultipleObjectsReturned:
+                gardens = Garden.objects.filter(auth_users=request.user)
+
+                context = {
+                    "exception": Exception(
+                        "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                        "Assigned gardens are: %s"
+                        % str([garden.name for garden in gardens])[1:-1]
+                    )
+                }
+
+                return render(request, "error.html", context, status=409)
 
         for garden in gardens:
             garden_dict = {"name": garden.name, "id": garden.id, "subgardens": []}
@@ -99,9 +141,13 @@ def overview(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
 
@@ -127,10 +173,18 @@ def add(request: HttpRequest) -> HttpResponse:
     try:
         garden = Garden.objects.filter(auth_users=request.user).get()
 
-        if garden.main_garden is not None:
+        if garden.is_subgarden():
             subgardens = Garden.objects.filter(main_garden=garden.main_garden).all()
         else:
-            subgardens = [garden]
+            context = {
+                "exception": Exception(
+                    "User has been assigned to a main garden.\n"
+                    "Please get unassigned from the garden '%s' and "
+                    "get assigned to a subgarden." % garden.name
+                )
+            }
+
+            return render(request, "error.html", context, status=400)
 
         context = {
             "garden": garden,
@@ -168,9 +222,13 @@ def add(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
 
@@ -206,6 +264,16 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
         try:
             garden = Garden.objects.filter(id=garden_id).get()
             creator = User.objects.filter(id=request.user.id).get()
+
+            if garden.is_subgarden() is False:
+                response = JsonResponse(
+                    "You have been assigned to a main garden, instead of a subgarden. "
+                    "Please, get unassigned from the garden '%s' and get assigned to a "
+                    "subgarden." % garden.name,
+                    safe=False,
+                )
+                response.status_code = 400
+                return response
 
             if not is_admin and not check_garden_auth_user(creator, garden):
                 response = JsonResponse(
@@ -249,8 +317,12 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
             return response
 
         except Garden.MultipleObjectsReturned:
+            gardens = Garden.objects.filter(auth_users=request.user)
+
             response = JsonResponse(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user.",
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1],
                 safe=False,
             )
             response.status_code = 409
@@ -290,7 +362,14 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         garden = Garden.objects.filter(auth_users=request.user).get()
 
         try:
-            Collection.objects.filter(id=id).get()
+            collection = Collection.objects.get(id=id)
+            if collection.garden.main_garden != garden.main_garden:
+                context = {
+                    "exception": Exception(
+                        "You don't have access to edit this collection. "
+                    )
+                }
+                return render(request, "error.html", context, status=404)
         except Collection.DoesNotExist:
             context = {
                 "exception": Exception(
@@ -334,9 +413,13 @@ def edit(request: HttpRequest, id: int) -> HttpResponse:
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
 
