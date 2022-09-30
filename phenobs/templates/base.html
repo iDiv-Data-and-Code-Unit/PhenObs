@@ -42,7 +42,7 @@
 
       <!-- Your stuff: Third-party javascript libraries go here -->
       {% if user.is_authenticated %}
-        <script defer type="text/javascript">
+        <script type="text/javascript">
           sessionStorage.setItem("loggedIn", "{{user.username}}");
           sessionStorage.setItem("subgardenId", "{{garden.id}}");
           sessionStorage.setItem("mainGardenName", "{{garden.main_garden}}");
