@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { multiple_gardens } = require('./login/userEnvironments.js');
-const login = require('./login/login.js');
+const { no_subgarden } = require('../helpers/login/userEnvironments.js');
+const login = require('../helpers/login/login.js');
 
 test.describe('Home page', () => {
     let page = null;
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
-        await login(page, multiple_gardens);
+        await login(page, no_subgarden);
     });
 
     test('Navbar | Brand', async () => {
@@ -48,7 +48,7 @@ test.describe('Home page', () => {
     test('Home | Jumbotron details', async () => {
         // Expect to get an error about no subgarden assignment
         await expect(page.locator('div.jumbotron-fluid.custom-jumbotron h1')).toHaveText('Error');
-        await expect(page.locator('div.jumbotron-fluid.custom-jumbotron p')).toHaveText(`Multiple gardens are assigned to the user. Please assign only one subgarden per user. Assigned gardens are: 'Subgarden 1', 'Subgarden 2'`);
+        await expect(page.locator('div.jumbotron-fluid.custom-jumbotron p')).toHaveText('No subgarden has been assigned to the user. Please assign user to a subgarden.');
     });
 
     test("Imprint", async () => {

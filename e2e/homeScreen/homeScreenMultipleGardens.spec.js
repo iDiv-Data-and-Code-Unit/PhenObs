@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { user } = require('./login/userEnvironments.js');
-const login = require('./login/login.js');
+const { multiple_gardens } = require('../helpers/login/userEnvironments.js');
+const login = require('../helpers/login/login.js');
 
 test.describe('Home page', () => {
     let page = null;
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
-        await login(page, user);
+        await login(page, multiple_gardens);
     });
 
     test('Navbar | Brand', async () => {
@@ -40,34 +40,15 @@ test.describe('Home page', () => {
             expect(observationLinks.nth(i).textContent()).toHaveText(observationLinkTexts[i]);
     });
 
-    test('Home | Active', async () => {
-        // Expect to have active class in class list
-        await expect(page.locator('#home')).toHaveClass('nav-link active');
-    });
-
-    test("Home | Buttons", async () => {
-        // Expect to have Local observations button displayed
-        await expect(page.locator('.wide-button.offline-feature')).toHaveText('Local observations');
-        // Expect to have Add collection button displayed
-        await expect(page.locator('.wide-button.online-feature')).toHaveText('Add collection');
+    test('Home | Error', async () => {
+        // Expect to have 'Error' in title
+        await expect(page).toHaveTitle('Error');
     });
 
     test('Home | Jumbotron details', async () => {
-        // Expect to have Halle garden name displayed
-        await expect(page.locator('div h1.display-3 strong')).toHaveText((`${user.main_garden_name}: ${user.subgarden_name}`));
-
-        // Today's date string
-        const todayString = new Date().toLocaleString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-
-        // Expect date string to be equal to today's date string
-        await expect(page.locator('#home-date')).toHaveText(todayString);
-
-        // Expect having login name to be displayed in the corner
-        await expect(page.locator('div h1.display-4.text-right strong')).toHaveText(user.username);
+        // Expect to get an error about no subgarden assignment
+        await expect(page.locator('div.jumbotron-fluid.custom-jumbotron h1')).toHaveText('Error');
+        await expect(page.locator('div.jumbotron-fluid.custom-jumbotron p')).toHaveText(`Multiple gardens are assigned to the user. Please assign only one subgarden per user. Assigned gardens are: 'Subgarden 1', 'Subgarden 2'`);
     });
 
     test("Imprint", async () => {

@@ -172,6 +172,9 @@ function addRemoveLink(collections=null) {
 }
 
 async function getAllCollections() {
+    if (!navigator.onLine)
+        alertModal("Get collections functionality is not available offline.");
+
     const collections = await getCollections();
     let ids = [];
     for (let collection in collections) {
@@ -184,10 +187,7 @@ async function getAllCollections() {
         data: JSON.stringify(ids),
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
-            if (!navigator.onLine)
-                alertModal("'Get collections' functionality is not available offline.");
-            else
-                alertModal(jqXHR.responseJSON);
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");

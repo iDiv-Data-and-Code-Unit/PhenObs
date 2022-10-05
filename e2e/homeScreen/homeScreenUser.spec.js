@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { main_garden } = require('./login/userEnvironments.js');
-const login = require('./login/login.js');
+const { user } = require('../helpers/login/userEnvironments.js');
+const login = require('../helpers/login/login.js');
 
 test.describe('Home page', () => {
     let page = null;
 
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
-        await login(page, main_garden);
+        await login(page, user);
     });
 
     test('Navbar | Brand', async () => {
@@ -54,7 +54,7 @@ test.describe('Home page', () => {
 
     test('Home | Jumbotron details', async () => {
         // Expect to have Halle garden name displayed
-        await expect(page.locator('div h1.display-3 strong')).toHaveText((`${main_garden.subgarden_name}`));
+        await expect(page.locator('div h1.display-3 strong')).toHaveText((`${user.main_garden_name}: ${user.subgarden_name}`));
 
         // Today's date string
         const todayString = new Date().toLocaleString('en-US', {
@@ -67,7 +67,7 @@ test.describe('Home page', () => {
         await expect(page.locator('#home-date')).toHaveText(todayString);
 
         // Expect having login name to be displayed in the corner
-        await expect(page.locator('div h1.display-4.text-right strong')).toHaveText(main_garden.username);
+        await expect(page.locator('div h1.display-4.text-right strong')).toHaveText(user.username);
     });
 
     test("Imprint", async () => {

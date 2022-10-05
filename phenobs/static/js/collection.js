@@ -181,6 +181,10 @@ export async function deleteCollection(id) {
 }
 // Upload a collection
 export async function uploadCollection(id) {
+    if (!navigator.onLine) {
+        alertModal("Saving is not available in offline mode");
+        return;
+    }
     const collection = await getCollection(id);
     await $.ajax({
         url: "/observations/upload/",
@@ -203,7 +207,7 @@ export async function uploadCollection(id) {
             await setCollection(collection);
             // alert("Collection successfully uploaded!");
             console.log(data);
-            alertModal("Collection successfully uploaded!");
+            alertModal("Collection successfully saved to database!");
         }
     });
 }
@@ -225,7 +229,7 @@ export async function uploadSelectedCollections(collections) {
         },
         success: async function (data) {
             // alert("Collection successfully uploaded!");
-            alertModal("Collections successfully saved");
+            alertModal("Collections successfully saved to database!");
         }
     });
 }

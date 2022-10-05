@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
-const { user } = require('./login/userEnvironments.js');
-const login = require('./login/login.js');
+const { user } = require('../helpers/login/userEnvironments.js');
+const login = require('../helpers/login/login.js');
 
 test.describe('Home page', () => {
     let page = null;
