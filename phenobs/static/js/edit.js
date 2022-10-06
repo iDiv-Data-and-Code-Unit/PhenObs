@@ -61,7 +61,7 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
 
-    if (collection["last-collection-id"] == null) {
+    if (collection["last-collection-id"] == null && !orderedListCall) {
         await getLast(parseInt(collection["id"]));
         collection = await getCollection(id);
     }
