@@ -22,6 +22,11 @@ test.describe('Local observations', () => {
         await page.goto(process.env.E2E_INDEX + 'observations/');
     });
 
+    // test.beforeEach(async ({ page }) => {
+    //     await login(page, admin);
+    //     await page.goto(process.env.E2E_INDEX + 'observations/');
+    // });
+
     test('Jumbotron details', async () => {
         // Expect to have main garden name displayed in the header of the jumbotron
         await expect(page.locator('.jumbotron-fluid.custom-jumbotron .row h1')).toHaveText(`${admin.main_garden_name} collections`);
@@ -302,7 +307,7 @@ test.describe('Local observations', () => {
         // Try saving a colleciton while offline
         await page.locator('a:has(img[id="3-upload"])').click();
         await expect(alert).toBeVisible();
-        await expect(alert.locator('div.modal-body p[id="alert-body"]')).toHaveText("Save functionality is not available in offline mode");
+        await expect(alert.locator('div.modal-body p[id="alert-body"]')).toHaveText("Saving is not available in offline mode");
         await page.locator('button[id="alert-okay"]').click();
         await expect(alert).not.toBeVisible();
 

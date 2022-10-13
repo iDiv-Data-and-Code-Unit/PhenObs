@@ -41,5 +41,12 @@ module.exports = {
         subgarden_name: process.env.E2E_ADD_ADMIN_SUBGARDEN_NAME,
         main_garden_id: process.env.E2E_ADD_ADMIN_MAIN_GARDEN_ID,
         subgarden_id: process.env.E2E_ADD_ADMIN_SUBGARDEN_ID,
+    }, add_user: {
+        username: process.env.E2E_ADD_USER_USERNAME,
+        password: process.env.E2E_ADD_USER_PASSWORD,
+        main_garden_name: process.env.E2E_ADD_USER_MAIN_GARDEN_NAME,
+        subgarden_name: process.env.E2E_ADD_USER_SUBGARDEN_NAME,
+        main_garden_id: process.env.E2E_ADD_USER_MAIN_GARDEN_ID,
+        subgarden_id: process.env.E2E_ADD_USER_SUBGARDEN_ID,
     },
 }

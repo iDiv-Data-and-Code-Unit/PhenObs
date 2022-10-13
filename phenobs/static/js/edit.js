@@ -23,7 +23,8 @@ import {
     fillInOldData,
     confirmModal,
     alertModal,
-    formatDate
+    formatDate,
+    toggleButtons
 } from "./modals.js";
 
 if (location.href.indexOf('edit') !== -1 && location.href.indexOf('not found') === -1) {
@@ -40,7 +41,7 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
 
     let collection = await getCollection(id);
 
-    if (isOnline && (collection === undefined || collection == null || !("last-collection-id" in collection))) {
+    if (isOnline && (collection === undefined || collection == null)) {
         await fetchCollection(id, isOnline);
         collection = await getCollection(id);
         if (!"no-observation" in collection)
@@ -60,11 +61,6 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
     // await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
-
-    if (collection["last-collection-id"] == null && !orderedListCall) {
-        await getLast(parseInt(collection["id"]));
-        collection = await getCollection(id);
-    }
 
     if (collection["last-collection-id"] != null) {
         await oldClickListeners(parseInt(collection["last-collection-id"]));
@@ -139,16 +135,24 @@ async function getLast(id) {
             $("body").removeClass("loading");
         },
         success: async function (lastCollection) {
-            collection['last-collection-id'] = lastCollection["id"]
-            await insertCollection(lastCollection, true)
-            await setCollection(collection);
-            await fillInFields(
-                id,
-                document.getElementById("plant").selectedOptions[0].id,
-                collection["last-collection-id"]
-            );
-            let lastCollectionDate = document.getElementById('last-obs-date');
-            lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+            if (lastCollection) {
+                collection['last-collection-id'] = lastCollection["id"]
+                await insertCollection(lastCollection, true)
+                await setCollection(collection);
+                const order = parseInt(document.getElementById('plant').selectedOptions[0].id);
+                if (order) {
+                    fillInOldData(lastCollection, order);
+                    fillInModalDates(lastCollection);
+                    fillInButtons(lastCollection, order);
+                }
+                await oldClickListeners(parseInt(collection["last-collection-id"]));
+                let lastCollectionDate = document.getElementById('last-obs-date');
+                lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+            } else {
+                collection['last-collection-id'] = null;
+                await setCollection(collection);
+                toggleButtons(true);
+            }
         }
     });
 }
@@ -160,6 +164,9 @@ export function cachingListeners(id) {
         if (e.target.value.length > 0) {
             await updateCollection(id);
             await getLast(id);
+            if (collection["last-collection-id"] != null) {
+                await oldClickListeners(parseInt(collection["last-collection-id"]));
+            }
         } else {
             alertModal("Please choose a valid date");
         }
