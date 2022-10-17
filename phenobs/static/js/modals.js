@@ -134,6 +134,19 @@ export function fillInButtons(lastCollection, plant) {
     }
 
     for (let i = 0; i < buttons.length; i++) {
+        $(buttons[i]).unbind().click(function() {
+            const elementId = buttons[i].id.slice(0, buttons[i].id.length - 7);
+            if (elementId.includes("remarks")) {
+                $(`#remarks-old`).val(old_record["remarks"]);
+            } else if (elementId === "maintenance") {
+                for (let j = 0; j < old_checkboxes.length; j++) {
+                    const checkboxId = old_checkboxes[j].id.slice(0, old_checkboxes[j].id.length - 4);
+                    document.getElementById(old_checkboxes[j].id).checked = old_record[checkboxId];
+                }
+            } else {
+                document.getElementById(elementId + '-old').value = old_record[elementId];
+            }
+        });
         // Remarks button on small screens
         if (buttons[i].id.includes("small")) {
             buttons[i].innerHTML = old_record["remarks"];

@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { add_user } = require('../helpers/login/userEnvironments.js');
 const login = require('../helpers/login/login.js');
 
-test.describe('Add collection', () => {
+test.describe('Edit collection', () => {
     let created = [];
 
     test.beforeEach(async ({ page }) => {
@@ -12,19 +12,20 @@ test.describe('Add collection', () => {
 
     test.afterAll(async ({ page }) => {
         // Delete all the created collections
-        for (const collectionID of created) {
-            const response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+        for (let collectionID of created) {
+            let response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
             // await page.waitForTimeout(500);
-            const text = await response.json();
+            let text = await response.json();
             await expect(text).toStrictEqual("OK");
         }
         // Reset the created array
         created = [];
         // Reset the local storage for the window
         await page.evaluate(() => window.localStorage.setItem("collections", "{}"));
+        await page.close();
     });
 
-    test('Create 2 collections', async ({ page, isMobile }) => {
+    test('Editing current and previous collections', async ({ page, isMobile }) => {
         // Go to add a new collection page
         await page.locator('#add-collection').click();
 
@@ -36,7 +37,7 @@ test.describe('Add collection', () => {
         await page.locator('#subgarden').evaluate(e => e.blur());
         await page.waitForTimeout(100);
         // Save the ID for the new created collection
-        let collection1ID = await page.locator(`#subgarden option[value="AddSubgarden1"]`).getAttribute('id');
+        let collection1ID = null;
         while (collection1ID == null)
             collection1ID = await page.locator(`#subgarden option[value="AddSubgarden1"]`).getAttribute('id');
         created.push(collection1ID);
@@ -52,6 +53,12 @@ test.describe('Add collection', () => {
         await page.locator('#plant').click();
         await page.locator('#plant').selectOption('TestPlant9');
 
+        // Fill in remarks
+        await page.locator('#remarks').fill('Previous collection TestPlant9');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Set the values for the collection
         await page.locator('#initial-vegetative-growth').selectOption('y');
         await page.locator('#young-leaves-unfolding').selectOption('y');
@@ -63,16 +70,16 @@ test.describe('Add collection', () => {
         await page.locator('#covered-artificial').check();
         await page.locator('#transplanted').check();
 
-        // Fill in remarks
-        await page.locator('#remarks').fill('Previous collection TestPlant9');
-        await page.waitForTimeout(300);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(300);
-
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
         await page.locator('#plant').selectOption('TestPlant8');
+
+        // Fill in remarks
+        await page.locator('#remarks').fill('Previous collection TestPlant8');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
 
         // Set the values for the collection
         await page.locator('#ripe-fruits').selectOption('y');
@@ -83,12 +90,6 @@ test.describe('Add collection', () => {
         await page.locator('#cut-partly').check();
         await page.locator('#covered-natural').check();
         await page.locator('#removed').check();
-
-        // Fill in remarks
-        await page.locator('#remarks').fill('Previous collection TestPlant8');
-        await page.waitForTimeout(300);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(300);
 
         // Finish the collection
         await page.locator('#finish-btn').click();
@@ -129,6 +130,12 @@ test.describe('Add collection', () => {
         await page.locator('#plant').click();
         await page.locator('#plant').selectOption('TestPlant9');
 
+        // Fill in remarks
+        await page.locator('#remarks').fill('New collection TestPlant9');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Change values
         await page.locator('#initial-vegetative-growth-button').click();
         await page.locator('#initial-vegetative-growth-modal').waitFor();
@@ -160,16 +167,16 @@ test.describe('Add collection', () => {
         await page.locator('#remarks-save').click();
         await page.waitForTimeout(300);
 
-        // Fill in remarks
-        await page.locator('#remarks').fill('New collection TestPlant9');
-        await page.waitForTimeout(300);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(300);
-
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
         await page.locator('#plant').selectOption('TestPlant8');
+
+        // Fill in remarks
+        await page.locator('#remarks').fill('New collection TestPlant8');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
 
         // Change values
         await page.locator('#ripe-fruits-button').click();
@@ -200,12 +207,6 @@ test.describe('Add collection', () => {
         await page.locator('#remarks-old').fill('Edited TestPlant8');
         await page.waitForTimeout(300);
         await page.locator('#remarks-save').click();
-        await page.waitForTimeout(300);
-
-        // Fill in remarks
-        await page.locator('#remarks').fill('New collection TestPlant8');
-        await page.waitForTimeout(300);
-        await page.locator('#remarks').evaluate(e => e.blur());
         await page.waitForTimeout(300);
 
         // Finish the collection but don't save

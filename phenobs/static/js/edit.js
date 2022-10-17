@@ -164,6 +164,8 @@ export function cachingListeners(id) {
         if (e.target.value.length > 0) {
             await updateCollection(id);
             await getLast(id);
+            let collection = await getCollection(id);
+
             if (collection["last-collection-id"] != null) {
                 await oldClickListeners(parseInt(collection["last-collection-id"]));
             }

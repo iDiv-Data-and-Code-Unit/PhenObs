@@ -21,10 +21,10 @@ const config = {
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   // retries: process.env.CI ? 2 : 0,
-  retries: 0,
+  retries: 1,
   /* Opt out of parallel tests on CI. */
   // workers: process.env.CI ? 1 : undefined,
-  workers: 4,
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -45,13 +45,13 @@ const config = {
       use: {
         ...devices['Desktop Chrome'],
       },
-      timeout: 30 * 1000,
+      timeout: 40 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 30 * 1000,
+        timeout: 40 * 1000,
       },
     },
 
@@ -60,13 +60,13 @@ const config = {
       use: {
         ...devices['Desktop Firefox'],
       },
-      timeout: 30 * 1000,
+      timeout: 40 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 30 * 1000,
+        timeout: 40 * 1000,
       },
     },
 
@@ -75,13 +75,13 @@ const config = {
       use: {
         ...devices['Desktop Safari'],
       },
-      timeout: 100 * 1000,
+      timeout: 120 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 100 * 1000,
+        timeout: 120 * 1000,
       },
     },
 
@@ -91,13 +91,13 @@ const config = {
       use: {
         ...devices['Pixel 5'],
       },
-      timeout: 30 * 1000,
+      timeout: 40 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 30 * 1000,
+        timeout: 40 * 1000,
       },
     },
     {
@@ -105,13 +105,13 @@ const config = {
       use: {
         ...devices['iPhone 12'],
       },
-      timeout: 100 * 1000,
+      timeout: 120 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 100 * 1000,
+        timeout: 120 * 1000,
       },
     },
 
@@ -121,13 +121,13 @@ const config = {
       use: {
         channel: 'msedge',
       },
-      timeout: 30 * 1000,
+      timeout: 40 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 30 * 1000,
+        timeout: 40 * 1000,
       },
     },
     {
@@ -135,13 +135,13 @@ const config = {
       use: {
         channel: 'chrome',
       },
-      timeout: 30 * 1000,
+      timeout: 40 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 30 * 1000,
+        timeout: 40 * 1000,
       },
     },
   ],

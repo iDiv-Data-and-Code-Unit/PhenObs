@@ -16,7 +16,7 @@ test.describe('Add collection', () => {
         await page.locator('#subgarden').evaluate(e => e.blur());
         await page.waitForTimeout(100);
 
-        let collectionID = await page.locator(`#subgarden option[value="${option}"]`).getAttribute('id');
+        let collectionID = null;
         // await page.waitForTimeout(100);
         while (collectionID == null)
             collectionID = await page.locator(`#subgarden option[value="${option}"]`).getAttribute('id');
@@ -56,10 +56,12 @@ test.describe('Add collection', () => {
 
     test.afterEach(async ({ page }) => {
         // Delete all the created collections
-        for (const collectionID of created) {
-            const response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+        console.log(created);
+        for (let collectionID of created) {
+            console.log(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+            let response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
             // await page.waitForTimeout(500);
-            const text = await response.json();
+            let text = await response.json();
             await expect(text).toStrictEqual("OK");
         }
         // Reset the created array
@@ -400,9 +402,9 @@ test.describe('Add collection', () => {
 
         // Fill in remarks field
         await page.locator('#remarks').fill('Testing');
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
 
         // Check if all the fields are disabled
         await expect(page.locator('#initial-vegetative-growth')).toBeDisabled();
@@ -514,6 +516,12 @@ test.describe('Add collection', () => {
             await expect(buttons.nth(i)).toBeHidden();
         }
 
+        // Remarks
+        await page.locator('#remarks').fill('yes');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Select yes for all dropdowns
         await page.locator('#initial-vegetative-growth').selectOption('y');
         await page.locator('#young-leaves-unfolding').selectOption('y');
@@ -532,15 +540,16 @@ test.describe('Add collection', () => {
         await page.locator('#transplanted').check();
         await page.locator('#removed').check();
 
-        // Remarks
-        await page.locator('#remarks').fill('yes');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
-
         // Choose TestPlant11
         await page.locator('#plant').click();
+        await page.waitForTimeout(300);
         await page.locator('#plant').selectOption('TestPlant11');
+
+        // Remarks
+        await page.locator('#remarks').fill('missed');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
 
         // Select yes for all dropdowns
         await page.locator('#initial-vegetative-growth').selectOption('m');
@@ -554,15 +563,15 @@ test.describe('Add collection', () => {
         await page.locator('#covered-natural').check();
         await page.locator('#transplanted').check();
 
-        // Remarks
-        await page.locator('#remarks').fill('missed');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
-
         // Choose TestPlant11
         await page.locator('#plant').click();
+        await page.waitForTimeout(300);
         await page.locator('#plant').selectOption('TestPlant12');
+
+        await page.locator('#remarks').fill('unsure');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
 
         // Select yes for all dropdowns
         await page.locator('#initial-vegetative-growth').selectOption('u');
@@ -571,16 +580,11 @@ test.describe('Add collection', () => {
         await page.locator('#ripe-fruits').selectOption('u');
         await page.locator('#senescence').selectOption('u');
 
-        // Maintenance options defaults
+        // Maintenance options
         await page.locator('#cut-total').check();
         await page.locator('#covered-artificial').check();
         await page.locator('#removed').check();
 
-        // Remarks
-        await page.locator('#remarks').fill('unsure');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
         await page.locator('#finish-btn').click();
 
         // Save the collection
@@ -603,9 +607,9 @@ test.describe('Add collection', () => {
 
         // Remarks
         await page.locator('#remarks').fill('no');
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
 
         // Choose TestPlant8
         await page.locator('#plant').click();
@@ -618,9 +622,9 @@ test.describe('Add collection', () => {
 
         // Remarks
         await page.locator('#remarks').fill('no-observation');
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
 
         // Save the collection
         await page.locator('#finish-btn').click();
@@ -701,6 +705,12 @@ test.describe('Add collection', () => {
         // Verify the senescence intensity is not required
         await page.$eval("#senescence-intensity-button", el => !el.classList.contains("required-field"));
 
+        // Fill in remarks field
+        await page.locator('#remarks').fill('noo');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Change senescence value to yes
         await page.locator('#senescence-button').click();
         await page.locator('#senescence-modal').waitFor();
@@ -716,12 +726,6 @@ test.describe('Add collection', () => {
 
         // Verify the senescence intensity is required
         await page.$eval("#senescence-intensity-button", el => el.classList.contains("required-field"));
-
-        // Fill in remarks field
-        await page.locator('#remarks').fill('noo');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
 
         // Try to change to plant TestPlant8
         await page.locator('#plant').click();
@@ -748,6 +752,12 @@ test.describe('Add collection', () => {
         // Choose the second plant
         await page.locator('#plant').selectOption('TestPlant8');
 
+        // Fill in remarks
+        await page.locator('#remarks').fill('nooo');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Check if the all buttons are disabled
         // Verify copy-older button is disabled
         await expect(page.locator('#copy-older')).toBeDisabled();
@@ -766,12 +776,6 @@ test.describe('Add collection', () => {
         // Check remarks button text
         await expect(page.locator('#remarks-large-button')).toHaveText('no-observation');
         await expect(page.locator('#remarks-small-button')).toHaveText('no-observation');
-
-        // Fill in remarks
-        await page.locator('#remarks').fill('nooo');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
 
         // Finish
         await page.locator('#finish-btn').click();
@@ -847,6 +851,12 @@ test.describe('Add collection', () => {
         await expect(page.locator('#plant option[id="1"]')).toHaveText('✓ TestPlant10');
         await page.locator('#plant').selectOption('TestPlant12');
 
+        // Add a text into remarks field
+        await page.locator('#remarks').fill('test');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
+
         // Check all the values
         await expect(page.locator('#initial-vegetative-growth-button')).toHaveText('unsure');
         await expect(page.locator('#young-leaves-unfolding-button')).toHaveText('unsure');
@@ -856,17 +866,17 @@ test.describe('Add collection', () => {
         await expect(page.locator('#remarks-large-button')).toHaveText('unsure');
         await expect(page.locator('#remarks-small-button')).toHaveText('unsure');
 
-        // Add a text into remarks field
-        await page.locator('#remarks').fill('test');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
-
         // Change to the plant TestPlant12
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
         await expect(page.locator('#plant option[id="2"]')).toHaveText('✓ TestPlant12');
         await page.locator('#plant').selectOption('TestPlant11');
+
+        // Add a text into remarks field
+        await page.locator('#remarks').fill('test');
+        await page.waitForTimeout(300);
+        await page.locator('#remarks').evaluate(e => e.blur());
+        await page.waitForTimeout(300);
 
         // Check all the values
         await expect(page.locator('#initial-vegetative-growth-button')).toHaveText('missed');
@@ -886,12 +896,6 @@ test.describe('Add collection', () => {
 
          // Save the value
          await page.locator('#senescence-save').click();
-
-        // Add a text into remarks field
-        await page.locator('#remarks').fill('test');
-        await page.waitForTimeout(100);
-        await page.locator('#remarks').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
 
         // Finish the collection
         await page.locator('#finish-btn').click();
