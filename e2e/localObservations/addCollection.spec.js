@@ -55,16 +55,18 @@ test.describe('Add collection', () => {
     // });
 
     test.afterEach(async ({ page }) => {
+        // Delete all the created collections
         for (const collectionID of created) {
             const response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
             // await page.waitForTimeout(500);
             const text = await response.json();
             await expect(text).toStrictEqual("OK");
         }
-
+        // Reset the created array
         created = [];
+        // Reset the local storage for the window
         await page.evaluate(() => window.localStorage.setItem("collections", "{}"));
-    })
+    });
 
     test('Before choosing a subgarden', async ({ page }) => {
         // Verify URL
