@@ -11,7 +11,7 @@ const dateToString = (year, month, day) => {
     });
 };
 
-test.describe('Local observations', () => {
+test.describe.parallel('Local observations', () => {
     let page = null;
     let context = null;
 

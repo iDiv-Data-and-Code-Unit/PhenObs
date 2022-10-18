@@ -21,7 +21,7 @@ const config = {
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   // retries: process.env.CI ? 2 : 0,
-  retries: 1,
+  retries: 0,
   /* Opt out of parallel tests on CI. */
   // workers: process.env.CI ? 1 : undefined,
   workers: 1,
@@ -70,21 +70,6 @@ const config = {
       },
     },
 
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-      },
-      timeout: 120 * 1000,
-      expect: {
-        /**
-         * Maximum time expect() should wait for the condition to be met.
-         * For example in `await expect(locator).toHaveText();`
-         */
-        timeout: 120 * 1000,
-      },
-    },
-
     // /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
@@ -98,20 +83,6 @@ const config = {
          * For example in `await expect(locator).toHaveText();`
          */
         timeout: 40 * 1000,
-      },
-    },
-    {
-      name: 'Mobile Safari',
-      use: {
-        ...devices['iPhone 12'],
-      },
-      timeout: 120 * 1000,
-      expect: {
-        /**
-         * Maximum time expect() should wait for the condition to be met.
-         * For example in `await expect(locator).toHaveText();`
-         */
-        timeout: 120 * 1000,
       },
     },
 
@@ -142,6 +113,38 @@ const config = {
          * For example in `await expect(locator).toHaveText();`
          */
         timeout: 40 * 1000,
+      },
+    },
+
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+      },
+      retries: 1,
+      timeout: 60 * 1000,
+      expect: {
+        /**
+         * Maximum time expect() should wait for the condition to be met.
+         * For example in `await expect(locator).toHaveText();`
+         */
+        timeout: 60 * 1000,
+      },
+    },
+
+    {
+      name: 'Mobile Safari',
+      use: {
+        ...devices['iPhone 12'],
+      },
+      retries: 1,
+      timeout: 60 * 1000,
+      expect: {
+        /**
+         * Maximum time expect() should wait for the condition to be met.
+         * For example in `await expect(locator).toHaveText();`
+         */
+        timeout: 60 * 1000,
       },
     },
   ],

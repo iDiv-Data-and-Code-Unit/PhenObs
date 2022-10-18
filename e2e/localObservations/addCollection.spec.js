@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { add_user } = require('../helpers/login/userEnvironments.js');
 const login = require('../helpers/login/login.js');
 
-test.describe('Add collection', () => {
+test.describe.parallel('Add collection', () => {
     // let page = null;
     // let context = null;
     let created = [];

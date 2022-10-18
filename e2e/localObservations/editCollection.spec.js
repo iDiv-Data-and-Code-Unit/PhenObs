@@ -1,12 +1,14 @@
 const { test, expect } = require('@playwright/test');
-const { add_user } = require('../helpers/login/userEnvironments.js');
+const { edit_user } = require('../helpers/login/userEnvironments.js');
 const login = require('../helpers/login/login.js');
 
-test.describe('Edit collection', () => {
+test.describe.serial('Edit collection', () => {
     let created = [];
+    let collection1ID = null;
+    let collection2ID = null;
 
     test.beforeEach(async ({ page }) => {
-        await login(page, add_user);
+        await login(page, edit_user);
         await page.goto(process.env.E2E_INDEX + 'observations/');
     });
 
@@ -25,36 +27,34 @@ test.describe('Edit collection', () => {
         await page.close();
     });
 
-    test('Editing current and previous collections', async ({ page, isMobile }) => {
+    test('Creating previous collection', async ({ page, isMobile }) => {
         // Go to add a new collection page
         await page.locator('#add-collection').click();
 
-        // Choose AddSubgarden1 to create the new collection
+        // Choose EditSubgarden to create the new collection
         await page.locator('#subgarden').click();
         await page.waitForTimeout(100);
-        await page.locator('#subgarden').selectOption('AddSubgarden1');
+        await page.locator('#subgarden').selectOption('EditSubgarden');
         await page.waitForTimeout(100);
         await page.locator('#subgarden').evaluate(e => e.blur());
         await page.waitForTimeout(100);
         // Save the ID for the new created collection
-        let collection1ID = null;
+        collection1ID = null;
         while (collection1ID == null)
-            collection1ID = await page.locator(`#subgarden option[value="AddSubgarden1"]`).getAttribute('id');
+            collection1ID = await page.locator(`#subgarden option[value="EditSubgarden"]`).getAttribute('id');
         created.push(collection1ID);
 
         // Verify date
         const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
 
         await expect(page.locator('#collection-date')).toHaveValue(today.toLocaleDateString('en-CA'));
 
         // Select the first plant
         await page.locator('#plant').click();
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
 
         // Fill in remarks
-        await page.locator('#remarks').fill('Previous collection TestPlant9');
+        await page.locator('#remarks').fill('Previous collection TestPlant13');
         await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
         await page.waitForTimeout(300);
@@ -73,10 +73,10 @@ test.describe('Edit collection', () => {
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
 
         // Fill in remarks
-        await page.locator('#remarks').fill('Previous collection TestPlant8');
+        await page.locator('#remarks').fill('Previous collection TestPlant14');
         await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
         await page.waitForTimeout(300);
@@ -105,33 +105,39 @@ test.describe('Edit collection', () => {
 
         // Go back to local observations screen
         await page.goto(process.env.E2E_INDEX + 'observations/');
+    });
 
+    test('Creating current collection and editing previous', async ({ page, isMobile }) => {
         // Go to add a new collection page
         await page.locator('#add-collection').click();
 
         // Create a new collection for tomorrow
-        // Choose AddSubgarden1 to create the new collection
+        // Choose EditSubgarden to create the new collection
         await page.locator('#subgarden').click();
         await page.waitForTimeout(100);
-        await page.locator('#subgarden').selectOption('AddSubgarden1');
+        await page.locator('#subgarden').selectOption('EditSubgarden');
         await page.waitForTimeout(100);
         await page.locator('#subgarden').evaluate(e => e.blur());
         await page.waitForTimeout(100);
         // Save the ID for the new created collection
-        let collection2ID = await page.locator(`#subgarden option[value="AddSubgarden1"]`).getAttribute('id');
+        collection2ID = null
         while (collection2ID == null)
-            collection2ID = await page.locator(`#subgarden option[value="AddSubgarden1"]`).getAttribute('id');
+            collection2ID = await page.locator(`#subgarden option[value="EditSubgarden"]`).getAttribute('id');
         created.push(collection2ID);
         // Set the date
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
         await page.locator('#collection-date').fill(tomorrow.toLocaleDateString('en-CA'));
         await page.waitForTimeout(100);
         await page.locator('#collection-date').evaluate(e => e.blur());
         // Select the first plant
         await page.locator('#plant').click();
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
 
         // Fill in remarks
-        await page.locator('#remarks').fill('New collection TestPlant9');
+        await page.locator('#remarks').fill('New collection TestPlant13');
         await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
         await page.waitForTimeout(300);
@@ -162,7 +168,7 @@ test.describe('Edit collection', () => {
         await page.waitForTimeout(300);
         await page.locator('#remarks-modal').waitFor();
         await page.waitForTimeout(300);
-        await page.locator('#remarks-old').fill('Edited TestPlant9');
+        await page.locator('#remarks-old').fill('Edited TestPlant13');
         await page.waitForTimeout(300);
         await page.locator('#remarks-save').click();
         await page.waitForTimeout(300);
@@ -170,10 +176,10 @@ test.describe('Edit collection', () => {
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
 
         // Fill in remarks
-        await page.locator('#remarks').fill('New collection TestPlant8');
+        await page.locator('#remarks').fill('New collection TestPlant14');
         await page.waitForTimeout(300);
         await page.locator('#remarks').evaluate(e => e.blur());
         await page.waitForTimeout(300);
@@ -204,7 +210,7 @@ test.describe('Edit collection', () => {
         await page.waitForTimeout(300);
         await page.locator('#remarks-modal').waitFor();
         await page.waitForTimeout(300);
-        await page.locator('#remarks-old').fill('Edited TestPlant8');
+        await page.locator('#remarks-old').fill('Edited TestPlant14');
         await page.waitForTimeout(300);
         await page.locator('#remarks-save').click();
         await page.waitForTimeout(300);
@@ -218,11 +224,12 @@ test.describe('Edit collection', () => {
         await expect(page.locator(`img[id="${collection1ID}-upload"]`)).toBeDefined();
         await expect(page.locator(`img[id="${collection2ID}-upload"]`)).toBeDefined();
 
+        // Verify collections
         // Open the previous collection
         await page.locator(`td i[id="${collection1ID}-edit"]`).click();
         // Select the first plant
         await page.locator('#plant').click();
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
 
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('m');
         await expect(page.locator('#young-leaves-unfolding')).toHaveValue('u');
@@ -245,12 +252,12 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).not.toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant9');
+        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant13');
 
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
 
         // Check the values
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('y');
@@ -274,7 +281,7 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant8');
+        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant14');
 
         // Go back to Local Obs
         await page.goto(process.env.E2E_INDEX + 'observations/');
@@ -285,13 +292,13 @@ test.describe('Edit collection', () => {
         // Edit a value in the first plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
         await page.locator('#initial-vegetative-growth').selectOption('y');
 
         // Change the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
         await page.locator('#young-leaves-unfolding').selectOption('u');
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
@@ -331,7 +338,9 @@ test.describe('Edit collection', () => {
         // Verify no collections are saved on the device
         await expect(page.locator('#saved-collections-table tbody tr')).toHaveCount(0);
         await expect(page.locator('#notsaved-collections-table tbody tr')).toHaveCount(0);
+    });
 
+    test('Get saved collections and verify data', async ({ page }) => {
         // Get collections
         await page.locator('#get-collections').click();
         await expect(page.locator('#saved-collections-table tbody tr')).toHaveCount(2);
@@ -339,9 +348,10 @@ test.describe('Edit collection', () => {
 
         // Check the values for collection 1
         await page.locator(`td i[id="${collection2ID}-edit"]`).click();
+
         // Select the first plant
         await page.locator('#plant').click();
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
 
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('y');
         await expect(page.locator('#young-leaves-unfolding')).toHaveValue('no');
@@ -364,12 +374,12 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).not.toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('New collection TestPlant9');
+        await expect(page.locator('#remarks')).toHaveValue('New collection TestPlant13');
 
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
 
         // Check the values
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('no');
@@ -393,7 +403,7 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).not.toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('New collection TestPlant8');
+        await expect(page.locator('#remarks')).toHaveValue('New collection TestPlant14');
 
         // Go back to Local Obs
         await page.goto(process.env.E2E_INDEX + 'observations/');
@@ -402,7 +412,7 @@ test.describe('Edit collection', () => {
         await page.locator(`td i[id="${collection1ID}-edit"]`).click();
         // Select the first plant
         await page.locator('#plant').click();
-        await page.locator('#plant').selectOption('TestPlant9');
+        await page.locator('#plant').selectOption('TestPlant13');
 
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('m');
         await expect(page.locator('#young-leaves-unfolding')).toHaveValue('u');
@@ -425,12 +435,12 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).not.toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant9');
+        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant13');
 
         // Select the second plant
         await page.locator('#plant').click();
         await page.waitForTimeout(100);
-        await page.locator('#plant').selectOption('TestPlant8');
+        await page.locator('#plant').selectOption('TestPlant14');
 
         // Check the values
         await expect(page.locator('#initial-vegetative-growth')).toHaveValue('y');
@@ -454,6 +464,6 @@ test.describe('Edit collection', () => {
         await expect(page.locator('#removed')).toBeChecked();
 
         // Remarks
-        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant8');
+        await expect(page.locator('#remarks')).toHaveValue('Edited TestPlant14');
     });
 });
