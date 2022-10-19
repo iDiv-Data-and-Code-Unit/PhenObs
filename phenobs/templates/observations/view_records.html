@@ -4,7 +4,7 @@
       <th scope="col" class=" spreadsheet-col">Name</th>
       <th scope="col" class=" spreadsheet-col">Initial vegetative growth</th>
       <th scope="col" class=" spreadsheet-col">Young leaves unfolding</th>
-      <th scope="col" class=" spreadsheet-col">Flower opening</th>
+      <th scope="col" class=" spreadsheet-col">Flowers opening</th>
       <th scope="col" class=" spreadsheet-col">Peak flowering</th>
       <th scope="col" class=" spreadsheet-col">Peak flowering estimation</th>
       <th scope="col" class=" spreadsheet-col">Flowering intensity</th>
@@ -29,7 +29,7 @@
     {% for record in records %}
         <tr id="view-record-{{ record.id }}">
         {% for entry in record.values %}
-          {% if entry.value != True and entry.value != False %}
+          {% if entry.value != True and entry.value != False and entry.id != "order"  %}
             <td class="">
               <p style="font-size: 12px;" class="m-0">
                 {% if entry.value == "u" %}
@@ -42,7 +42,7 @@
                   yes
                 {% elif "intensity" in entry.id and entry.value != None%}
                   {{ entry.value }}%
-                {% elif entry.value != None and entry.id != "order" %}
+                {% elif entry.value != None %}
                   {{ entry.value }}
                 {% endif %}
               </p>
