@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "csv": "^6.2.1",
-    "dotenv": "^16.0.2"
+    "dotenv": "^16.0.2",
+    "node-xlsx": "^0.21.0"
   }
 }

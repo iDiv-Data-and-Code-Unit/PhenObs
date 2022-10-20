@@ -313,26 +313,28 @@ async function uploadSelected(collection=null) {
                 fields[k].classList.remove("invalidField");
             }
 
-            if ((record["senescence-intensity"] === 0 ||
-                    record["senescence-intensity"] == null ||
-                    record["senescence-intensity"].length === 0) &&
+            if ((isNaN(record["senescence-intensity"]) ||
+                record["senescence-intensity"] == null ||
+                record["senescence-intensity"] === 0 ||
+                record["senescence-intensity"].length === 0) &&
                 record["senescence"] === "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["senescence-intensity"] != null && record["senescence-intensity"].length > 0 && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
+            } else if (record["senescence-intensity"] != null && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence').addClass("invalidField");
                 invalid = true;
             }
-            if ((record["flowering-intensity"] === 0 ||
-                    record["flowering-intensity"] == null ||
-                    record["flowering-intensity"].length === 0) &&
+            if ((isNaN(record["flowering-intensity"]) ||
+                record["flowering-intensity"] == null ||
+                record["flowering-intensity"] === 0 ||
+                record["flowering-intensity"].length === 0) &&
                 record["flowers-opening"] === "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowering-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["flowering-intensity"] != null && record["flowering-intensity"].length > 0 && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
+            } else if (record["flowering-intensity"] != null && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowers-opening').addClass("invalidField");
                 invalid = true;
