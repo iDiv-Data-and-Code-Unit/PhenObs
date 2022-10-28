@@ -1,0 +1,79 @@
+{% load static %}
+
+<h1 class="mt-4" id="collection_import"><strong>Collection import</strong></h1>
+<h2 id="create_plants_csv">Importing collections from a CSV file</h2>
+<p>
+  If you would like to import an already collected data, no matter old or new, you have the option to do so.
+  By creating a CSV file that fits the below template, you could import all the collection and records data:
+</p>
+<ul class="" style="font-size: 14pt">
+  <li>1st column named “Garden” indicating the plant’s main garden's name.</li>
+  <li>2nd column named “Subgarden” indicating plant’s subgarden's name.</li>
+  <li>3rd column named “Day” indicating on which day of the month data was collected for the plant.</li>
+  <li>4th column named “Month” indicating on which month of the year data was collected for the plant.</li>
+  <li>5th column named “Year” indicating in which year data was collected for the plant.</li>
+  <li>6th column named “Species” indicating the plant’s name.</li>
+</ul>
+
+<p>Next column names indicate the what data was collected and acceptable values are: yes, no, unsure, missed</p>
+
+<ul class="" style="font-size: 14pt">
+  <li>7th column named “Initial vegetative growth”.</li>
+  <li>8th column named “Young leaves unfolding”.</li>
+  <li>9th column named “Flowers opening”.</li>
+  <li>10th column named “Peak flowering”.</li>
+  <li>12th column named “Ripe fruits”.</li>
+  <li>13th column named “Senescence”.</li>
+</ul>
+
+<p>Next column names indicate the intensity and acceptable values are: 5%, 10%, 15% ... 95%, 100%</p>
+
+<ul class="" style="font-size: 14pt">
+  <li>11th column named “Flowering intensity”.</li>
+  <li>14th column named “Senescence intensity”.</li>
+</ul>
+
+<p>Remaining 2 columns accept the indicated respective values.</p>
+
+<ul class="" style="font-size: 14pt">
+  <li>15th column named “Maintenance” indicating what maintenance options were noted for the plant. Acceptable values are comma seperated combination of options below:
+    <ul>
+      <li>cut_partly</li>
+      <li>cut_total</li>
+      <li>covered_natural</li>
+      <li>covered_artificial</li>
+      <li>transplanted</li>
+      <li>removed</li>
+    </ul>
+
+    <em>Example value: cut_partly, covered_natural</em>
+  </li>
+  <li>16th column named “Remarks” which is a text for collector's note on the plant for the collection.</li>
+</ul>
+
+<p>We advise you to use data entry template for Excel which gives you acceptable options for some of the fields and runs checks on values.
+However, it is not perfect and is prone to human error. Please double check the entered values, names and dates. Typos may result in corrupt data.
+Additional checks are run on the server too, nevertheless wrong data entry that fits the above guidelines will be saved and may end up corrupting the data.</p>
+
+<p><a href="{% static "DataEntryTemplate.xlsx" %}" download>You may download the template by clicking on this link.</a></p>
+
+<p>After the data is entered in Excel, please export the file as CSV before uploading. Make sure to save it as UTF-8 CSV.</p>
+<p>
+  Be aware, each subgarden needs to be created prior to uploading the CSV file, hence the plants.
+  If the mentioned subgardens or plants are not found in the system, you will get an error.
+</p>
+<p>After you have the full list of plants fitting the above template, please follow the below steps:</p>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="observations_module_import" text="Please locate the 'OBSERVATIONS' module and click on 'Records'." %}
+    {% include "help/admin/partials/observations_module.html" with id="observations_module_import"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="import_data_from_csv" text="Click on 'Import data from CSV' located on top of the search bar." %}
+    {% include "help/admin/partials/import_data_from_csv.html" with id="import_data_from_csv"%}
+  </li>
+  <li>
+    {% include "help/admin/partials/helper_link.html" with id="import_data_from_csv_details" text="Fill in CSV details and upload." %}
+    {% include "help/admin/partials/import_data_from_csv_details.html" with id="import_data_from_csv_details"%}
+  </li>
+</ol>

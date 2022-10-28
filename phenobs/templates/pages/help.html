@@ -38,6 +38,7 @@
               <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#plant_creation">Plant creation</a>
               <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#plant_deactivate">Plant deactivation</a>
               <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#collection_deletion">Collection deletion</a>
+          <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#collection_import">Import collections</a>
           </div>
         {% endif %}
       </div>
@@ -79,6 +80,8 @@
               {% include 'help/admin/deactivating_plant.html' %}
               <br />
               {% include 'help/admin/collection_deletion.html' %}
+              <br />
+              {% include 'help/admin/collection_import.html' %}
               <br />
             {% endif %}
           </div>

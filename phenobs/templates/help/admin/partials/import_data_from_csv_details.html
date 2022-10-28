@@ -1,0 +1,19 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/help/import_records_upload.png" %}{% endblock %}
+
+{% block title %}Filling in the "Import data from CSV" form{% endblock %}
+
+{% block content %}
+  <ol>
+    <li>Choose your CSV file by clicking on the “Choose file” button.</li>
+    <li>Choose the delimiter used in the document.</li>
+    <li>
+      Click on “Upload” button to upload the file and
+      import all the data. This process may take a while if the list has too many rows.
+    </li>
+  </ol>
+{% endblock %}

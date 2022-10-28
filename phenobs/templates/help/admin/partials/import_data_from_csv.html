@@ -1,0 +1,15 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/help/import_records_csv.png" %}{% endblock %}
+
+{% block title %}Locating Import data from CSV page{% endblock %}
+
+{% block content %}
+  <p>
+    On the Records page, on top of the records table and its search bar,
+    you will find the anchor link to the "Import data from CSV" page.
+  </p>
+{% endblock %}
