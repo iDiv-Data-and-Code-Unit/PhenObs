@@ -1,10 +1,11 @@
 import csv
 import io
 import json
+from typing import List, Union
 
 import xlsxwriter
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -16,7 +17,19 @@ from .schemas import collections_schema
 
 @csrf_exempt
 @login_required(login_url="/accounts/login/")
-def download(request, filetype):
+def download(
+    request: HttpRequest, filetype: str
+) -> Union[HttpResponse, StreamingHttpResponse]:
+    """Generates a CSV or XLSX file to download for the selected collections
+
+    Args:
+        request: The received request with collection information as json
+        filetype: a string defining which file type is requested (CSV or XLSX)
+
+    Returns:
+        HttpResponse or StreamingHttpResponse. Latter for a file and the other for error messages.
+
+    """
     if request.method == "POST":
         try:
             collections = []
@@ -71,11 +84,26 @@ def download(request, filetype):
 
 
 class Echo(object):
+    """A buffer to create and serve CSV file in memory"""
+
     def write(self, value):
+        """Return the encoded string to write."""
         return value.encode("utf-8")
 
 
-def return_xlsx(columns, collections):
+def return_xlsx(
+    columns: List[str], collections: List[Collection]
+) -> Union[HttpResponse, StreamingHttpResponse]:
+    """Generates an XLSX file from the passed columns and collections
+
+    Args:
+        columns: A list of required columns' names for the spreadsheet
+        collections: A list of requested collections to generate the spreadsheet from
+
+    Returns:
+        HttpResponse for error messages and StreamingHttpResponse for the generated file
+
+    """
     if type(collections) is not list:
         return HttpResponse("Invalid argument received.", status=500)
 
@@ -141,7 +169,19 @@ def return_xlsx(columns, collections):
     return response
 
 
-def return_csv(columns, collections):
+def return_csv(
+    columns: List[str], collections: List
+) -> Union[HttpResponse, StreamingHttpResponse]:
+    """Generates a CSV file from the passed columns and collections
+
+    Args:
+        columns: A list of required columns' names for the spreadsheet
+        collections: A list of requested collections to generate the spreadsheet from
+
+    Returns:
+        HttpResponse for error messages and StreamingHttpResponse for the generated file
+
+    """
     if type(collections) is not list:
         return HttpResponse("Invalid argument received.", status=500)
 

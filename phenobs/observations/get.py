@@ -1,5 +1,6 @@
 import datetime
 import json
+from typing import Dict, List, Optional, Tuple, Union
 
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
@@ -8,6 +9,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
+from multiselectfield import MultiSelectField
 
 from ..gardens.models import Garden
 from .models import Collection, Record
@@ -106,7 +108,17 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
 
 
 @csrf_exempt
-def get_collections(request, id):
+def get_collections(request: HttpRequest, id: str) -> HttpResponse:
+    """Gets all the collections in the specified garden with the specified date range, if available
+
+    Args:
+        request: The received request with json data
+        id: a specific garden or subgarden id or "all" for all available choices
+
+    Returns:
+        Content of all the collections available in the given date range for the specified garden option
+
+    """
     try:
         start_date_json = None
         end_date_json = None
@@ -289,7 +301,17 @@ def get_collections(request, id):
         return render(request, "error.html", context, status=500)
 
 
-def json_date_formatter(json_date):
+def json_date_formatter(json_date: Dict[str, str]) -> Tuple[datetime.date, str]:
+    """Generates a date object and string for the passed JSON object
+
+    Args:
+        json_date: The received json object
+
+    Returns:
+        date_object: A date object generated from the passed argument
+        date_string: A string to set HTML date input element
+
+    """
     date_string = ""
     date_object = None
 
@@ -308,7 +330,17 @@ def json_date_formatter(json_date):
 
 
 @login_required
-def edit_collection_content(request, id):
+def edit_collection_content(request: HttpRequest, id: str) -> HttpResponse:
+    """Contents of the records in the specified collection with editable values
+
+    Args:
+        request: The received request
+        id: ID of the collection to be displayed
+
+    Returns:
+        Contents of the records and respective input fields to edit the values
+
+    """
     try:
         context = collection_content(id)
         context["collection_id"] = id
@@ -326,7 +358,17 @@ def edit_collection_content(request, id):
 
 
 @login_required
-def view_collection_content(request, id):
+def view_collection_content(request: HttpRequest, id: str) -> HttpResponse:
+    """Contents of the records in the specified collection as text
+
+    Args:
+        request: The received request
+        id: ID of the collection to be displayed
+
+    Returns:
+        Contents of the records as text
+
+    """
     try:
         context = collection_content(id)
         return render(request, "observations/view_records.html", context)
@@ -342,7 +384,16 @@ def view_collection_content(request, id):
         return response
 
 
-def collection_content(collection_id):
+def collection_content(collection_id: int) -> Dict[str, Union[List, range]]:
+    """Generates all the records' values for the given collection and returns as the page context
+
+    Args:
+        collection_id: ID of the collection
+
+    Returns:
+        context: records' values and ranges for the intensity dropdowns
+
+    """
     collection = Collection.objects.get(id=collection_id)
     records = Record.objects.filter(collection=collection)
     records_values = []
@@ -462,7 +513,16 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
     )
 
 
-def get_older(collection):
+def get_older(collection: Collection) -> Dict:
+    """Returns the previous collection as a dictionary for the specified collection
+
+    Args:
+        collection: specified collection
+
+    Returns:
+        a dictionary with all the necessary information about the previous collection
+
+    """
     if type(collection) is not Collection:
         raise Collection.DoesNotExist("Collection is not valid.")
 
@@ -496,7 +556,16 @@ def get_older(collection):
 
 @csrf_exempt
 @login_required(login_url="/accounts/login/")
-def last(request):
+def last(request: HttpRequest) -> JsonResponse:
+    """Returns the previous collection for the requested collection and date
+
+    Args:
+        request: request with the collection date and id
+
+    Returns:
+        a JSON object of the previous collection
+
+    """
     try:
         data = json.loads(request.body)
         validate(instance=data, schema=collection_schema)
@@ -580,7 +649,16 @@ def format_records(collection_records: QuerySet):
     return records
 
 
-def check_no_observation(record):
+def check_no_observation(record: Record) -> bool:
+    """Checks if the no_observation value is True or False for the given records
+
+    Args:
+        record: the record to be checked
+
+    Returns:
+        True or False depending on if the no_observation case for the record
+
+    """
     if (
         record.initial_vegetative_growth is None
         and record.young_leaves_unfolding is None
@@ -595,7 +673,20 @@ def check_no_observation(record):
     return False
 
 
-def check_maintenance_option(maintenance, option):
+def check_maintenance_option(
+    maintenance: MultiSelectField, option: str
+) -> Optional[bool]:
+    """Checks if the specified option was checked in maintenance
+
+    Args:
+        maintenance: a record's maintenance field and its value
+        option: the option to be checked if exists in the maintenance or not
+
+    Returns:
+        True or False depending on the existence of option in maintenance
+        None if the maintenance is empty
+
+    """
     if maintenance is None:
         return None
     else:

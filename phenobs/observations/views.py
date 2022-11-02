@@ -347,15 +347,13 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
 
 @login_required(login_url="/accounts/login/")
 def edit(request: HttpRequest, id: int) -> HttpResponse:
-    """Edit page where the collection is received to be modified
+    """The page showing all local and online collections
 
     Args:
         request: The received request with metadata
-        id: Collection ID
 
     Returns:
-        context: JSON object consisting of all the necessary IDs and
-                 labels for JS functions to fill in with data received
+        context: Empty context object for the front-end
 
     """
     try:

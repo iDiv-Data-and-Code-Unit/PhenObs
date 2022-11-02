@@ -1,12 +1,14 @@
 from datetime import date, datetime, timedelta
+from typing import Dict, Optional, Tuple
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
-from pandas import read_csv
+from pandas import DataFrame, read_csv
 
 from ..gardens.models import Garden
 from ..observations.models import Collection, Record
@@ -14,13 +16,24 @@ from ..plants.models import Plant
 
 
 class CsvImportForm(forms.Form):
+    """Custom form to upload CSV files"""
+
     csv_upload = forms.FileField()
     DELIMITER_CHOICES = [("1", "Semicolon (;)"), ("2", "Comma (,)")]
     delimiter = forms.ChoiceField(widget=forms.RadioSelect, choices=DELIMITER_CHOICES)
 
 
 @login_required(login_url="/accounts/login/")
-def import_from_csv(request):
+def import_from_csv(request: HttpRequest) -> HttpResponse:
+    """Checks and validates the request and passes the data to be imported
+
+    Args:
+        request: Request with the necessary data
+
+    Returns:
+        Response that redirects to the same page with messages informing the error, warning or success
+
+    """
     add_data_status = 200
     added = 0
     total = 0
@@ -175,7 +188,22 @@ def import_from_csv(request):
     return render(request, "admin/import_from_csv.html", context, status=status)
 
 
-def format_data(request, file_data):
+def format_data(
+    request: HttpRequest, file_data: DataFrame
+) -> Tuple[int, int, int, Dict]:
+    """Checks the CSV file columns and data to be imported and prepares payload for import
+
+    Args:
+        request: Request with the necessary data
+        file_data: CSV file read from the request
+
+    Returns:
+        status: Status code (200 for success, 404 for not found etc.)
+        formatted: Number of successfully formatted records
+        total: Total number of records to be imported
+        subgardens: A dictionary organizing all the records into their respective subgardens and collections
+
+    """
     formatted = 0
     total = 0
     status = 200
@@ -359,7 +387,18 @@ def format_data(request, file_data):
     return status, formatted, total, subgardens
 
 
-def add_data(request, data):
+def add_data(request: HttpRequest, data: Dict) -> Tuple[int, int]:
+    """Checks the data against DB instances and uploads
+
+    Args:
+        request: Request with the necessary data
+        data: A dictionary with organized subgarden, collection and records information
+
+    Returns:
+        status: Status code (200 for success, 404 for not found etc.)
+        added: Number of successfully imported records
+
+    """
     status = 200
     added = 0
 
@@ -549,13 +588,20 @@ def add_data(request, data):
                 )
                 status = 500
 
-    print("**********************")
-    print(status, added)
-    print("**********************")
     return status, added
 
 
-def map_values(value, key):
+def map_values(value: str, key: str) -> Optional[str, int, None]:
+    """Maps the value read to the accepted value in DB
+
+    Args:
+        value: Data read from the CSV
+        key: Name of the field
+
+    Returns:
+        Corresponding value in DB
+
+    """
     options = {
         "yes": "y",
         "unsure": "u",
@@ -596,7 +642,19 @@ def map_values(value, key):
         return None
 
 
-def map_record_values(request, record):
+def map_record_values(request: HttpRequest, record: Dict) -> Tuple[int, bool, Dict]:
+    """Checks the required fields, values and verifies
+
+    Args:
+        request: Request with the necessary data
+        record: Dictionary for the record
+
+    Returns:
+        status: Status code (200 for success, 404 for not found etc.)
+        no_observation: Flag if the no observation is the case
+        record: Formatted record dictionary with the correct values
+
+    """
     status = 200
     no_observation = False
     null_fields = []
