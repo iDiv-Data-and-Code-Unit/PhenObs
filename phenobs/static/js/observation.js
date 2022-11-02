@@ -1,6 +1,19 @@
-import {fillInOldData, fillInModalDates, fillInButtons, toggleButtons, confirmModal, alertModal, formatDate} from "./modals.js";
-import {setCollections, setCollection, getCollections, getCollection, fetchCollection, markEdited} from "./collection.js";
+import {
+    alertModal,
+    confirmModal,
+    fillInButtons,
+    fillInModalDates,
+    fillInOldData,
+    formatDate,
+    toggleButtons
+} from "./modals.js";
+import {fetchCollection, getCollection, setCollection} from "./collection.js";
 
+/**
+ * Returns the available fields for data collection
+ * @param {boolean} isOld - Whether to get the fields for a previous collection or not
+ * @return {Object} An object with all the available fields organized by field types
+ */
 export function getFields(isOld=false) {
     return {
         "dropdowns": $('select')
@@ -19,6 +32,12 @@ export function getFields(isOld=false) {
     };
 }
 
+/**
+ * Populates plant selection dropdown
+ * @param {number} id - ID of the current collection
+ * @param {boolean} orderedList - Whether the plants to be ordered in alphabetical order or numerical
+ * @param {boolean} fillCall - Whether the function was called to setup plants or change the order and select current plant in the dropdown
+ */
 export async function setupPlants(id, orderedList=false, fillCall=false) {
     const collection = await getCollection(id);
 
@@ -68,8 +87,6 @@ export async function setupPlants(id, orderedList=false, fillCall=false) {
         $("#orderedList").attr("name", "alpha");
         $("#orderedList").addClass("bi-sort-alpha-down");
         $("#orderedList").removeClass("bi-sort-numeric-down");
-        // $("#next-btn").removeClass("d-none");
-        // $("#prev-btn").removeClass("d-none");
     }
 
     for (let key in ordered) {
@@ -94,11 +111,15 @@ export async function setupPlants(id, orderedList=false, fillCall=false) {
         $("#done-btn").text("Done");
     } else
         $("#emptyOption").remove();
+
     $("#done-btn").prop("disabled", "disabled");
-    $("#next-btn").addClass("d-none");
-    $("#prev-btn").addClass("d-none");
 }
 
+/**
+ * Returns the index of the plant with the given order in the plants dropdown
+ * @param {number} order - Order of the current plant
+ * @return {number} Index of the plant in the dropdown (-1 if not found)
+ */
 function findOptionIndex(order) {
     let plants = document.getElementById('plant');
     for (let i = 0; i < plants.length; i++)
@@ -107,7 +128,12 @@ function findOptionIndex(order) {
     return -1;
 }
 
-// Fills in the form fields for a particular plant
+/**
+ * Fills in the form fields for a particular plant
+ * @param {number} id - ID of the collection
+ * @param {number} order - Order of the current plant
+ * @param {number, null} lastCollectionId - ID of the previous collection to populate previous collection buttons
+ */
 export async function fillInFields(id, order, lastCollectionId=null) {
     let collection = await getCollection(id);
     let currentCollection = null;
@@ -174,6 +200,11 @@ export async function fillInFields(id, order, lastCollectionId=null) {
     noObservationPossible(plant["no-observation"]);
 }
 
+/**
+ * Selects the plant in the dropdown and fills in fields with its data
+ * @param {number} id - ID of the collection
+ * @param {number} order - Order of the plant to be chosen
+ */
 export async function selectPlant(id, order) {
     let collection = await getCollection(id);
     if (order in collection['records']) {
@@ -181,21 +212,10 @@ export async function selectPlant(id, order) {
 
         $("#emptyOption").remove();
 
-        // Display/Hide "Previous" button
-        if (order === Math.min.apply(null, Object.keys(collection["records"]))) {
-            $('#prev-btn').addClass("d-none");
-        } else {
-            $('#prev-btn').removeClass("d-none");
-        }
-
-        // Display/Rename "Next" button
+        // Display "finish" button
         if (collection['remaining'].length === 1 && collection['remaining'][0] === order && !collection["finished"]) {
             $('#finish-btn').removeClass("d-none");
-            // $('#next-btn').removeClass("d-none");
-        // } else if (order == Math.max.apply(null, Object.keys(collection["records"]))) {
-            // $('#next-btn').addClass("d-none");
         } else {
-            // $('#next-btn').removeClass("d-none");
             $('#finish-btn').addClass("d-none");
         }
 
@@ -204,6 +224,10 @@ export async function selectPlant(id, order) {
     }
 }
 
+/**
+ * Checks if all the required fields are filled
+ * @return {boolean} Whether the all the fields are filled and valid
+ */
 export function checkValid() {
     const elements = $('[required]');
     for (let i = 0; i < elements.length; i++)
@@ -214,13 +238,18 @@ export function checkValid() {
     return true;
 }
 
+/**
+ * @deprecated Next and Previous buttons were abandoned for dropdown selection
+ *
+ * Checks if all the required fields are filled, updates local storage then selects the next plant in line
+ * @param {number} id - ID of the collection
+ * @param {number} order - Order of the current plant
+ */
 export async function selectNextPlant(id, order) {
     if (!checkValid())
-        // alert("Please fill all fields!");
         alertModal("Please fill all fields!");
     else {
         let collection = await getCollection(id);
-        // console.log(collection);
         await cacheRecord(id, order, true);
         // Select the next plant
         const next = parseInt(Object.keys(collection["records"]).find(num => num > order));
@@ -229,9 +258,15 @@ export async function selectNextPlant(id, order) {
     }
 }
 
+/**
+ * @deprecated Next and Previous buttons were abandoned for dropdown selection
+ *
+ * Checks if all the required fields are filled, updates local storage then selects the previous plant in line
+ * @param {number} id - ID of the collection
+ * @param {number} order - Order of the current plant
+ */
 export async function selectPreviousPlant(id, order) {
     if (!checkValid())
-        // alert("Please fill all fields!");
         alertModal("Please fill all fields!");
     else {
         let collection = await getCollection(id);
@@ -239,11 +274,14 @@ export async function selectPreviousPlant(id, order) {
         // Select the previous plant
         const prev = parseInt(Object.keys(collection["records"]).reverse().find(num => num < order));
 
-
         await selectPlant(id, prev);
     }
 }
 
+/**
+ * Marks the collection as finished and ready for upload
+ * @param {number} id - ID of the collection
+ */
 export async function markDone(id) {
     let collection = await getCollection(id);
     for (let record in collection["records"]) {
@@ -256,6 +294,14 @@ export async function markDone(id) {
     }
 }
 
+/**
+ * Checks if none of the required fields were filled and still has the default values
+ * and displays a confirm modal to verify
+ * @param {number} id - ID of the collection
+ * @param {boolean} nextFlag - Whether the function was called by the next or previous button
+ * @param {boolean} manual - Whether the function was called from dropdown selection
+ * @return {boolean} Whether the data is valid and user is able to continue with their data collection
+ */
 export async function checkDefault(id, nextFlag, manual=false) {
     let collection = await getCollection(id);
     let plants = document.getElementById('plant');
@@ -266,7 +312,6 @@ export async function checkDefault(id, nextFlag, manual=false) {
     let current = await collection["records"][parseInt(plants.selectedOptions[0].id)];
     let defaultFlag = true;
 
-    // console.log(current["done"]);
     // Check the values
     for (let key in current) {
         if (current[key] === 'y' ||
@@ -292,6 +337,15 @@ export async function checkDefault(id, nextFlag, manual=false) {
     }
 }
 
+/**
+ * Runs checks on the current record and if the user is able to continue to the next plant
+ * @param {boolean} manual - Whether the function was called from dropdown selection
+ * @param {boolean} nextFlag - Whether the function was called by the next or previous button
+ * @param {boolean} isValid - Result of checkValid() function and if all the required fields are filled or not
+ * @param {number} id - ID of the collection
+ * @param {number} order - Order of the current plant
+ * @return {boolean} Whether the data is valid and user is able to continue with their data collection
+ */
 async function checkManual(manual, nextFlag, isValid, id, order) {
     if (!manual) {
         if (nextFlag)
@@ -307,6 +361,14 @@ async function checkManual(manual, nextFlag, isValid, id, order) {
     }
 }
 
+/**
+ * Updates the local storage values for the current collection and plant
+ * @param {number} id - ID of the collection
+ * @param {number, string} order - Order of the current plant
+ * @param {boolean} isDone - Whether the plant was marked as finished
+ * @param {boolean} isOld - Whether the collection is marked as finished
+ * @return {boolean} Whether the data is valid and user is able to continue with their data collection
+ */
 export async function cacheRecord(id, order, isDone, isOld=false) {
     let collection = await getCollection(id);
     // Current record to be cached
@@ -323,7 +385,6 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
             "flowering-intensity",
             "senescence-intensity",
             "remarks",
-            // "peak-flowering-estimation"
         ], "checked": [
             "cut-partly",
             "cut-total",
@@ -397,11 +458,14 @@ export async function cacheRecord(id, order, isDone, isOld=false) {
     }
 
     collection["records"][record["order"]] = record;
-    // Update the collections
-    let updatedCollection = await setCollection(collection);
-    return updatedCollection;
+    // Update the collections and return
+    return await setCollection(collection);
 }
 
+/**
+ * Disables all the fields if no observation was possible and vice versa
+ * @param {boolean} flag - True if no-observation was checked and all fields need to disabled
+ */
 export function noObservationPossible(flag) {
     let fields = getFields();
     // Disabled/Enable the fields if the flag is True/False
@@ -422,6 +486,10 @@ export function noObservationPossible(flag) {
     requireIntensities();
 }
 
+/**
+ * If the either one of or both of the senescence and flowers-opening fields are set to true, requires respective
+ * intensity fields, otherwise, disables them
+ */
 export function requireIntensities() {
     let senescence = $('#senescence');
     let senescenceIntensity = $('#senescence-intensity');

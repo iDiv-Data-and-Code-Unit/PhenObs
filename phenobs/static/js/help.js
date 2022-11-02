@@ -1,5 +1,5 @@
+// Controls sidebar
 window.addEventListener('DOMContentLoaded', event => {
-
     // Toggle the side navigation
     const sidebarToggle = document.body.querySelector('#sidebarToggle');
     const sidebarToggle2 = document.body.querySelector('#sidebarToggle2');
