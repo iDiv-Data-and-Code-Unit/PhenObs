@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple, Union
 
 from django import forms
 from django.contrib import messages
@@ -591,7 +591,7 @@ def add_data(request: HttpRequest, data: Dict) -> Tuple[int, int]:
     return status, added
 
 
-def map_values(value: str, key: str) -> Optional[str, int, None]:
+def map_values(value: str, key: str) -> Union[str, int, None]:
     """Maps the value read to the accepted value in DB
 
     Args:
