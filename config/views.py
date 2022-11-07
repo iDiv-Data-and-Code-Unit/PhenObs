@@ -6,7 +6,7 @@ from django.utils.timezone import datetime
 from phenobs.gardens.models import Garden
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def home(request: HttpRequest) -> HttpResponse:
     """Home page showing garden, date and user information
 

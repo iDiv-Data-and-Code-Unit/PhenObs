@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 
 from ..gardens.models import Garden
 from ..plants.models import Plant
@@ -13,7 +12,7 @@ from .get import get
 from .models import Collection, Record
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def all(request: HttpRequest) -> HttpResponse:
     """The page showing all local and online collections
 
@@ -69,7 +68,7 @@ def all(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=500)
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def overview(request: HttpRequest) -> HttpResponse:
     """The page showing all local and online collections
 
@@ -158,7 +157,7 @@ def overview(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=500)
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def add(request: HttpRequest) -> HttpResponse:
     """The page for adding a new collection
 
@@ -239,8 +238,7 @@ def add(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=500)
 
 
-@csrf_exempt
-@login_required(login_url="/accounts/login/")
+@login_required
 def new(request: HttpRequest, garden_id: int) -> JsonResponse:
     """Creates a new entry in the DB and returns data
 
@@ -345,7 +343,7 @@ def new(request: HttpRequest, garden_id: int) -> JsonResponse:
         return response
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def edit(request: HttpRequest, id: int) -> HttpResponse:
     """The page showing all local and online collections
 

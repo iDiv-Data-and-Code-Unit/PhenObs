@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from multiselectfield import MultiSelectField
@@ -16,8 +15,7 @@ from .models import Collection, Record
 from .schemas import collection_schema, collections_schema, date_range_schema
 
 
-@csrf_exempt
-@login_required(login_url="/accounts/login/")
+@login_required
 def get_all_collections(request: HttpRequest) -> JsonResponse:
     """Fetches all the collections from database for the given garden
 
@@ -66,6 +64,7 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
                     "creator": collection.creator.username,
                     "finished": collection.finished,
                     "records": records,
+                    "main_garden": collection.garden.main_garden.id,
                     "garden": collection.garden.id,
                     "garden-name": collection.garden.name,
                     "last-collection-id": last_collection_id,
@@ -107,7 +106,6 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         return response
 
 
-@csrf_exempt
 def get_collections(request: HttpRequest, id: str) -> HttpResponse:
     """Gets all the collections in the specified garden with the specified date range, if available
 
@@ -475,7 +473,7 @@ def collection_content(collection_id: int) -> Dict[str, Union[List, range]]:
     return context
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def get(request: HttpRequest, id: int) -> JsonResponse:
     """Fetches the collections from database with the given ID
 
@@ -504,6 +502,7 @@ def get(request: HttpRequest, id: int) -> JsonResponse:
             "id": collection.id,
             "date": collection.date,
             "creator": collection.creator.username,
+            "main_garden": collection.garden.main_garden.id,
             "garden": collection.garden.id,
             "garden-name": collection.garden.name,
             "records": records,
@@ -543,6 +542,7 @@ def get_older(collection: Collection) -> Dict:
         prev_collection_json = {
             "id": prev_collection_db.id,
             "creator": prev_collection_db.creator.username,
+            "main_garden": prev_collection_db.garden.main_garden.id,
             "garden": prev_collection_db.garden.id,
             "garden-name": prev_collection_db.garden.name,
             "date": prev_collection_db.date,
@@ -554,8 +554,7 @@ def get_older(collection: Collection) -> Dict:
     return prev_collection_json
 
 
-@csrf_exempt
-@login_required(login_url="/accounts/login/")
+@login_required
 def last(request: HttpRequest) -> JsonResponse:
     """Returns the previous collection for the requested collection and date
 

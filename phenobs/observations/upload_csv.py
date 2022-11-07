@@ -23,7 +23,7 @@ class CsvImportForm(forms.Form):
     delimiter = forms.ChoiceField(widget=forms.RadioSelect, choices=DELIMITER_CHOICES)
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def import_from_csv(request: HttpRequest) -> HttpResponse:
     """Checks and validates the request and passes the data to be imported
 

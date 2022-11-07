@@ -1,11 +1,13 @@
-import {getCollections, deleteCollection, uploadCollection, insertCollection} from "./collection.js";
-import {confirmModal, alertModal, formatDate} from './modals.js';
+import { getCollections, deleteCollection, uploadCollection, insertCollection, setCollections } from "./collection.js";
+import { confirmModal, alertModal, formatDate } from './modals.js';
+import { getCookie } from "./project.js";
 
 /**
  * Populates the tables with not saved and saved collections depending on the passed tableName
  * @param {string} tableName - A string indicating what prefix to use to identify which table to modify
  */
 async function insertRows(tableName) {
+    const mainGardenId = parseInt(sessionStorage.getItem('mainGardenId'));
     let collections = await getCollections();
     let table = document.getElementById(tableName + '-collections-body');
     table.innerHTML = '';
@@ -20,6 +22,15 @@ async function insertRows(tableName) {
         } else {
             continue;
         }
+
+        // If there are collections from different main gardens, display only
+        // the collections that are in current session's main garden, otherwise, ignore
+        if ("main_garden" in collections[key] && parseInt(collections[key]["main_garden"]) !== mainGardenId) {
+            continue;
+        } else if (!("main_garden" in collections[key])) {
+            alertModal('Please update the local collections by clicking on "Get collections" button');
+        }
+
         let rowHTML =
             '<tr class="d-table-row">\n' +
             '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
@@ -178,6 +189,9 @@ async function getAllCollections() {
         url: "/observations/garden_collections/",
         method: "POST",
         data: JSON.stringify(ids),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },
@@ -188,7 +202,6 @@ async function getAllCollections() {
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            console.log(data)
             await addOnlineCollections(data);
             addEditLink();
             addRemoveLink();
@@ -212,7 +225,13 @@ async function addOnlineCollections(collections) {
         } else if (localCollections != null && (collections[i]["id"] in localCollections) &&
             !localCollections[collections[i]["id"]]["finished"] && collections[i]["finished"]) {
             await insertCollection(collections[i], true);
+        } else if (localCollections != null && (collections[i]["id"] in localCollections) &&
+            !localCollections[collections[i]["id"]]["finished"] && !collections[i]["finished"]) {
+            // Update unfinished collections' main_garden IDs
+            localCollections[collections[i]["id"]]["main_garden"] = collections[i]["main_garden"];
+            await setCollections(localCollections);
         }
+
     }
 
     localCollections = await getCollections();

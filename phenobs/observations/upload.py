@@ -5,7 +5,6 @@ from typing import Dict
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
@@ -16,8 +15,7 @@ from .models import Collection, Record
 from .schemas import collection_schema
 
 
-@csrf_exempt
-@login_required(login_url="/accounts/login/")
+@login_required
 def upload(request: HttpRequest) -> JsonResponse:
     """Uploads and edits the collection and its records
 
@@ -43,7 +41,6 @@ def upload(request: HttpRequest) -> JsonResponse:
         return response
 
 
-@csrf_exempt
 def upload_selected(request: HttpRequest) -> JsonResponse:
     """Uploads multiple collections
 

@@ -1,5 +1,6 @@
-import {fill} from "./edit.js";
-import {alertModal} from "./modals.js";
+import { fill } from "./edit.js";
+import { alertModal } from "./modals.js";
+import { getCookie } from "./project.js";
 
 /**
  * Returns collections object from local storage
@@ -93,6 +94,7 @@ export async function insertCollection(collection, isOnline, isOld=false) {
         'id': collection['id'],
         'date': collection['date'],
         'creator': collection['creator'],
+        'main_garden': collection['main_garden'],
         'garden': collection['garden'],
         'garden-name': collection['garden-name'],
         'last-collection-id': lastCollectionId,
@@ -155,6 +157,9 @@ export async function emptyCollection(id=null) {
     await $.ajax({
         url: "/observations/new/" + id,
         method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },
@@ -212,6 +217,9 @@ export async function uploadCollection(id) {
         url: "/observations/upload/",
         data: JSON.stringify(collection),
         method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },
@@ -241,6 +249,9 @@ export async function fetchCollection(id, isOnline) {
     try {
         await $.ajax({
             url: "/observations/get/" + id,
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 alertModal(jqXHR.responseJSON);
                 return null;

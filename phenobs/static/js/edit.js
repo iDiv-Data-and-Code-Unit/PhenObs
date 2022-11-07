@@ -26,6 +26,7 @@ import {
     formatDate,
     toggleButtons
 } from "./modals.js";
+import { getCookie } from "./project.js";
 
 // Check if the page is Edit page and get collection ID in case it is and fill in collection info
 if (location.href.indexOf('edit') !== -1 && location.href.indexOf('not found') === -1) {
@@ -153,6 +154,9 @@ async function getLast(id) {
     await $.ajax({
         url: "/observations/last/",
         data: JSON.stringify(collection),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         method: "POST",
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");

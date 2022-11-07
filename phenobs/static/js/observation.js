@@ -191,7 +191,7 @@ export async function fillInFields(id, order, lastCollectionId=null) {
         fillInButtons(lastCollection, plant["order"]);
     } else
         toggleButtons(true);
-    await cacheRecord(
+    cacheRecord(
         id, order,
         (currentCollection == null)
             ? plant['done']
@@ -250,7 +250,7 @@ export async function selectNextPlant(id, order) {
         alertModal("Please fill all fields!");
     else {
         let collection = await getCollection(id);
-        await cacheRecord(id, order, true);
+        cacheRecord(id, order, true);
         // Select the next plant
         const next = parseInt(Object.keys(collection["records"]).find(num => num > order));
 
@@ -270,7 +270,7 @@ export async function selectPreviousPlant(id, order) {
         alertModal("Please fill all fields!");
     else {
         let collection = await getCollection(id);
-        await cacheRecord(id, order, true);
+        cacheRecord(id, order, true);
         // Select the previous plant
         const prev = parseInt(Object.keys(collection["records"]).reverse().find(num => num < order));
 
@@ -329,11 +329,11 @@ export async function checkDefault(id, nextFlag, manual=false) {
     if (defaultFlag && !current["done"] && current["remarks"].length == 0) {
         confirmModal("You have not changed any default value. Are you sure you want to move on?");
         $('#confirm-yes').unbind().click(
-            async () => await checkManual(manual, nextFlag, checkValid(), id, order)
+            async () => checkManual(manual, nextFlag, checkValid(), id, order)
         );
         return true;
     } else {
-        return await checkManual(manual, nextFlag, checkValid(), id, order);
+        return checkManual(manual, nextFlag, checkValid(), id, order);
     }
 }
 
@@ -356,7 +356,7 @@ async function checkManual(manual, nextFlag, isValid, id, order) {
         alertModal("Please fill all fields!");
         return false;
     } else {
-        await cacheRecord(id, order, true);
+        cacheRecord(id, order, true);
         return true;
     }
 }

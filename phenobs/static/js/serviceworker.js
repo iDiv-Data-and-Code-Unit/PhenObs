@@ -1,5 +1,5 @@
 var today = new Date();
-const staticCacheName = "django-pwa-v123";
+const staticCacheName = "django-pwa-v126";
 var filesToCache = [
     '/observations/',
     '/offline/',
@@ -68,12 +68,10 @@ var filesToCache = [
     '/static/images/help/gardens_add_sub.png',
     '/static/images/help/gardens_table.png',
     '/static/images/help/get_collections.png',
-    '/static/images/help/get_names.py',
     '/static/images/help/import_plants_csv.png',
     '/static/images/help/import_plants_upload.png',
     '/static/images/help/import_records_csv.png',
     '/static/images/help/import_records_upload.png',
-    '/static/images/help/output.txt',
     '/static/images/help/plants.png',
     '/static/images/help/plants_add.png',
     '/static/images/help/plants_table.png',

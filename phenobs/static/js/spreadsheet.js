@@ -1,4 +1,5 @@
 import { alertModal } from "./modals.js";
+import { getCookie } from "./project.js";
 
 /**
  * Fills in rows for collections for the chosen garden and, if available, date range and attaches click
@@ -46,6 +47,9 @@ async function fillCollections(id, edit=false, reset=false) {
         url: `/observations/collections/${id}/`,
         method: "POST",
         data: JSON.stringify(date_range),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },
@@ -409,6 +413,9 @@ async function uploadSelected(collection=null) {
             type: "POST",
             data: JSON.stringify(collections),
             contentType: "application/json; charset=utf-8",
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 // alert("Could not establish a connection with database.");
                 alertModal(jqXHR.responseJSON);
@@ -478,6 +485,9 @@ async function createNewCollection() {
         await $.ajax({
             url: `/observations/new/${gardenSelected}`,
             method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 // alert(jqXHR.responseText);
                 alertModal(jqXHR.responseJSON);
@@ -576,6 +586,9 @@ async function fillInContent(id, edit=false) {
     await $.ajax({
         url: url,
         type: "GET",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },
