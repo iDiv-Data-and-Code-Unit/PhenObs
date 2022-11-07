@@ -54,12 +54,29 @@ test.describe.parallel('Add collection', () => {
     //     }
     // });
 
-    test.afterEach(async ({ page }) => {
+    test.afterEach(async ({ page, storageState }) => {
         // Delete all the created collections
         console.log(created);
+
+        let csrftoken = null;
+        const contextStorage = await page.context().storageState();
+        for (let cookie of contextStorage.cookies) {
+            if (cookie.name === 'csrftoken') {
+                csrftoken = cookie.value;
+                break;
+            }
+        }
+
         for (let collectionID of created) {
             console.log(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
-            let response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+            let response = await page.request.delete(
+                `${process.env.E2E_INDEX}observations/delete/${collectionID}/`,
+                {
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    }
+                }
+            );
             // await page.waitForTimeout(500);
             let text = await response.json();
             await expect(text).toStrictEqual("OK");
@@ -68,6 +85,10 @@ test.describe.parallel('Add collection', () => {
         created = [];
         // Reset the local storage for the window
         await page.evaluate(() => window.localStorage.setItem("collections", "{}"));
+    });
+
+    test.afterAll(async ({ page }) => {
+        await page.close();
     });
 
     test('Before choosing a subgarden', async ({ page }) => {

@@ -13,17 +13,37 @@ test.describe.serial('Edit collection', () => {
     });
 
     test.afterAll(async ({ page }) => {
-        // Delete all the created collections
+        let csrftoken = null;
+        const contextStorage = await page.context().storageState();
+        for (let cookie of contextStorage.cookies) {
+            if (cookie.name === 'csrftoken') {
+                csrftoken = cookie.value;
+                break;
+            }
+        }
+
         for (let collectionID of created) {
-            let response = await page.request.delete(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+            console.log(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
+            let response = await page.request.delete(
+                `${process.env.E2E_INDEX}observations/delete/${collectionID}/`,
+                {
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    }
+                }
+            );
             // await page.waitForTimeout(500);
             let text = await response.json();
             await expect(text).toStrictEqual("OK");
         }
+
         // Reset the created array
         created = [];
         // Reset the local storage for the window
         await page.evaluate(() => window.localStorage.setItem("collections", "{}"));
+    });
+
+    test.afterAll(async ({ page }) => {
         await page.close();
     });
 
