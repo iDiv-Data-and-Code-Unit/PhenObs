@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import download, get, upload, views
+from . import download, get, upload, views, delete
 
 app_name = "observations"
 
@@ -64,6 +64,11 @@ urlpatterns = [
         "view_collection/<int:id>/",
         get.view_collection_content,
         name="view_collection_content",
+    ),
+    path(
+        "delete/<int:id>/",
+        delete.delete_collection,
+        name="delete_collection",
     ),
     path("download/<str:filetype>/", download.download, name="download"),
     path("save/", upload.upload_selected, name="save"),

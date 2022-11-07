@@ -307,6 +307,7 @@ async function downloadFile(filetype){
             }
         };
         request.open("POST", `/observations/download/${filetype}/`, true);
+        request.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
         request.send(data);
     }
     else
