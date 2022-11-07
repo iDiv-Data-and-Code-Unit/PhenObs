@@ -1,5 +1,13 @@
 import { alertModal } from "./modals.js";
+import { getCookie } from "./project.js";
 
+/**
+ * Fills in rows for collections for the chosen garden and, if available, date range and attaches click
+ * listeners to fetch the collection info when clicked
+ * @param {string} id - ID of the garden
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ * @param {boolean} reset - Whether to filter by date range or not
+ */
 async function fillCollections(id, edit=false, reset=false) {
     const prefix = (edit) ? "#edit" : "#view";
 
@@ -39,8 +47,10 @@ async function fillCollections(id, edit=false, reset=false) {
         url: `/observations/collections/${id}/`,
         method: "POST",
         data: JSON.stringify(date_range),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
-            // alert("Could not establish a connection with database.");
             alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
@@ -100,6 +110,10 @@ async function fillCollections(id, edit=false, reset=false) {
     });
 }
 
+/**
+ * Checks if the date range is valid
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ */
 async function checkDateRange(edit=false) {
     const prefix = (edit) ? "#edit" : "#view";
 
@@ -119,6 +133,10 @@ async function checkDateRange(edit=false) {
     }
 }
 
+/**
+ * Sets a lower limit for the datepicker
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ */
 function lowerLimitDate(edit=false) {
     const prefix = (edit) ? "edit" : "view";
 
@@ -128,6 +146,10 @@ function lowerLimitDate(edit=false) {
     end_date.min = start_date_val;
 }
 
+/**
+ * Sets an upper limit for the datepicker
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ */
 function upperLimitDate(edit=false) {
     const prefix = (edit) ? "edit" : "view";
 
@@ -137,11 +159,17 @@ function upperLimitDate(edit=false) {
     start_date.max = end_date_val;
 }
 
+// Adds a click listener to fetch respective collections when garden choice has changed
 $("#gardens").change(async (e) => {
     if (e.target.selectedOptions[0].id.length)
         await fillCollections(e.target.selectedOptions[0].id, false, true);
 });
 
+/**
+ * Gathers records' information for the collection with the provided ID and returns upload-ready object
+ * @param {number} collectionId - ID of the collection
+ * @return {Object} Formatted collection object with all the records' data
+ */
 function formatCollection(collectionId) {
     console.log(collectionId)
     let collection = {
@@ -186,6 +214,11 @@ function formatCollection(collectionId) {
     return collection;
 }
 
+/**
+ * Returns a list of all the available collections' IDs
+ * @param {boolean} view - Whether the call was made from view tab or edit tab
+ * @return {Array} Array of available collections' IDs
+ */
 function selectAll(view=false) {
     const ids = "selected" + ((view) ? "view-" : "-");
     const checkboxes = $('input[id*="' + ids + '"]');
@@ -193,10 +226,15 @@ function selectAll(view=false) {
     for (let i = 0; i < checkboxes.length; i++)
         if (checkboxes[i].checked)
             collections.push(parseInt(checkboxes[i].id.substr((view) ? 13 : 9)))
-    console.log(collections)
+
     return collections;
 }
 
+/**
+ * Checks/unchecks all the available collections
+ * @param {boolean} checked - Whether to check or uncheck
+ * @param {boolean} view - Whether the call was made from view tab or edit tab
+ */
 function checkAll(checked=true, view=false) {
     const ids = "selected" + ((view) ? "view-" : "-");
     const checkboxes = $('input[id*="' + ids + '"]');
@@ -207,6 +245,10 @@ function checkAll(checked=true, view=false) {
     }
 }
 
+/**
+ * Sends a request to download selected collections as a file (CSV or XLSX) and saves it
+ * @param {string} filetype - File type of the requested file to be downloaded
+ */
 async function downloadFile(filetype){
     const collections = selectAll(true);
     if (collections.length) {
@@ -216,7 +258,6 @@ async function downloadFile(filetype){
         request.onreadystatechange = function() {
             if(request.readyState === 4) {
                 if (request.status === 200) {
-                    // console.log(typeof request.response); // should be a blob
                     let filename = "";
                     let disposition = request.getResponseHeader('Content-Disposition');
                     if (disposition && disposition.indexOf('attachment') !== -1) {
@@ -266,12 +307,16 @@ async function downloadFile(filetype){
             }
         };
         request.open("POST", `/observations/download/${filetype}/`, true);
+        request.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
         request.send(data);
     }
     else
         alertModal("You have not selected any collection.");
 }
 
+/**
+ * Unbinds previous and attached click listeners for all the buttons in the navigation bar
+ */
 function initNav() {
     $("#downloadCSV").unbind().click(async () => await downloadFile('csv'));
     $("#downloadXLSX").unbind().click(async () => await downloadFile('xlsx'));
@@ -283,6 +328,12 @@ function initNav() {
     document.getElementById("uploadSelected").addEventListener("click", async () => await uploadSelected());
 }
 
+/**
+ * Checks all the selected collections to be uploaded, highlights missing or invalid input
+ * If all valid, uploads all the chosen collections
+ * @param {string, int, null} collection - ID of the single collection to be uploaded. If null, then upload all selected
+ * @return {Array} An array of the uploaded collections
+ */
 async function uploadSelected(collection=null) {
     let selected = (
         collection == null ||
@@ -313,26 +364,28 @@ async function uploadSelected(collection=null) {
                 fields[k].classList.remove("invalidField");
             }
 
-            if ((record["senescence-intensity"] === 0 ||
-                    record["senescence-intensity"] == null ||
-                    record["senescence-intensity"].length === 0) &&
+            if ((isNaN(record["senescence-intensity"]) ||
+                record["senescence-intensity"] == null ||
+                record["senescence-intensity"] === 0 ||
+                record["senescence-intensity"].length === 0) &&
                 record["senescence"] === "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["senescence-intensity"] != null && record["senescence-intensity"].length > 0 && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
+            } else if (record["senescence-intensity"] != null && parseInt(record["senescence-intensity"]) > 0 && record["senescence"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-senescence').addClass("invalidField");
                 invalid = true;
             }
-            if ((record["flowering-intensity"] === 0 ||
-                    record["flowering-intensity"] == null ||
-                    record["flowering-intensity"].length === 0) &&
+            if ((isNaN(record["flowering-intensity"]) ||
+                record["flowering-intensity"] == null ||
+                record["flowering-intensity"] === 0 ||
+                record["flowering-intensity"].length === 0) &&
                 record["flowers-opening"] === "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowering-intensity').addClass("invalidField");
                 invalid = true;
-            } else if (record["flowering-intensity"] != null && record["flowering-intensity"].length > 0 && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
+            } else if (record["flowering-intensity"] != null && parseInt(record["flowering-intensity"]) > 0 && record["flowers-opening"] !== "y") {
                 alertModal("Fill in all the required fields.")
                 $('#' + record["id"] + '-flowers-opening').addClass("invalidField");
                 invalid = true;
@@ -361,6 +414,9 @@ async function uploadSelected(collection=null) {
             type: "POST",
             data: JSON.stringify(collections),
             contentType: "application/json; charset=utf-8",
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 // alert("Could not establish a connection with database.");
                 alertModal(jqXHR.responseJSON);
@@ -386,6 +442,12 @@ async function uploadSelected(collection=null) {
     return collections;
 }
 
+/**
+ * Attaches listeners to every collection to fetch its data or simply collapse it
+ * and adds functionality to cancel and save buttons
+ * @param {Object} cards - ID of the collection to be returned from the local storage
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ */
 async function assignListeners(cards, edit=false) {
     for (let i = 0; i < cards.length; i++) {
         const idSplit = cards[i].id.split('-');
@@ -412,6 +474,9 @@ async function assignListeners(cards, edit=false) {
     }
 }
 
+/**
+ * Sends a request to gather data for new collection creation for a chosen subgarden, then updates the page
+ */
 async function createNewCollection() {
     const createBtn = document.getElementById("create-new");
     const garden = document.getElementById("new-subgarden");
@@ -421,6 +486,9 @@ async function createNewCollection() {
         await $.ajax({
             url: `/observations/new/${gardenSelected}`,
             method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 // alert(jqXHR.responseText);
                 alertModal(jqXHR.responseJSON);
@@ -469,6 +537,10 @@ async function createNewCollection() {
     }
 }
 
+/**
+ * Attaches listeners to cancel and save buttons for the given collection
+ * @param {string, int} collectionId - ID of the collection to add cancel and saving functionality
+ */
 async function cancelAndSaveButtons(collectionId) {
     document.getElementById(`${collectionId}-save`).addEventListener(
         'click',
@@ -502,6 +574,11 @@ async function cancelAndSaveButtons(collectionId) {
     )
 }
 
+/**
+ * Fetches records' for the collection and populates its body with the received content
+ * @param {number} id - ID of the collection
+ * @param {boolean} edit - Whether the call was made from edit tab or view tab
+ */
 async function fillInContent(id, edit=false) {
     const url = (edit) ?
         `/observations/edit_collection/${id}/` :
@@ -510,6 +587,9 @@ async function fillInContent(id, edit=false) {
     await $.ajax({
         url: url,
         type: "GET",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
             alertModal(jqXHR.responseJSON);
         },

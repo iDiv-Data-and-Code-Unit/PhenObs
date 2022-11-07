@@ -23,9 +23,12 @@ import {
     fillInOldData,
     confirmModal,
     alertModal,
-    formatDate
+    formatDate,
+    toggleButtons
 } from "./modals.js";
+import { getCookie } from "./project.js";
 
+// Check if the page is Edit page and get collection ID in case it is and fill in collection info
 if (location.href.indexOf('edit') !== -1 && location.href.indexOf('not found') === -1) {
     (async () => {
         const id = parseInt(getEditId());
@@ -33,6 +36,13 @@ if (location.href.indexOf('edit') !== -1 && location.href.indexOf('not found') =
     })();
 }
 
+/**
+ * Fills in the data for the collection, populates buttons, dropdowns, change listeners etc.
+ * @param {number} id - Collection ID
+ * @param {boolean} isOnline - Whether the collection is a saved finished collection or not
+ * @param {boolean} isOrdered - Whether to sort in alphabetical order or numerical
+ * @param {boolean} orderedListCall - Whether the function was called because of a sorting change
+ */
 export async function fill(id, isOnline, isOrdered=false, orderedListCall=false) {
     window.onbeforeunload = function() {
         return confirm("Do you want the page to be reloaded?");
@@ -40,7 +50,8 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
 
     let collection = await getCollection(id);
 
-    if (isOnline && (collection === undefined || collection == null || !("last-collection-id" in collection))) {
+    // If the collection does not exist locally, fetch it from DB
+    if (isOnline && (collection === undefined || collection == null)) {
         await fetchCollection(id, isOnline);
         collection = await getCollection(id);
         if (!"no-observation" in collection)
@@ -57,15 +68,10 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
             await fill(id, isOnline, false, true);
     })
     await setupPlants(parseInt(collection["id"]), isOrdered, !orderedListCall);
-    // await selectPlant(parseInt(collection["id"]), Math.min.apply(null,Object.keys(collection["records"])));
     await changeListeners(getFields(), parseInt(collection["id"]), isOnline);
     await markDone(parseInt(collection["id"]));
 
-    if (collection["last-collection-id"] == null) {
-        await getLast(parseInt(collection["id"]));
-        collection = await getCollection(id);
-    }
-
+    // If there exists a previous collection attached to this one, populate the previous collection buttons
     if (collection["last-collection-id"] != null) {
         await oldClickListeners(parseInt(collection["last-collection-id"]));
     }
@@ -73,14 +79,23 @@ export async function fill(id, isOnline, isOrdered=false, orderedListCall=false)
     await cachingListeners(parseInt(collection["id"]));
 }
 
+/**
+ * Returns the collection ID from the URL
+ * @return {string} Collection ID in the URL
+ */
 function getEditId() {
     const url = location.href;
     const split = url.split('/');
     return split[split.length - 1];
 }
 
+/**
+ * Adds change listeners to every field, dropdown to update the collection in local storage
+ * @param {Object} fields - Fields to add change listeners
+ * @param {number} id - ID of the collection
+ * @param {boolean} editFlag - Whether to mark edited after every change
+ */
 export async function changeListeners(fields, id, editFlag) {
-    // console.log(id);
     for (let key in fields) {
         for (let i = 0; i < fields[key].length; i++) {
             $(fields[key][i]).unbind().change(async function() {
@@ -96,6 +111,10 @@ export async function changeListeners(fields, id, editFlag) {
     }
 }
 
+/**
+ * Adds click listeners to the save buttons in editing previous collection values in modals
+ * @param {number} id - ID of the collection, which is a previous collection to the current one
+ */
 export async function oldClickListeners(id) {
     let saveButtons = $('[id*="-save"]');
 
@@ -103,9 +122,10 @@ export async function oldClickListeners(id) {
         $(saveButtons[i]).unbind().click(async function () {
             let order = parseInt(document.getElementById("plant").selectedOptions[0].id);
 
+            // Update the data in local storage for the chosen plant
             await cacheRecord(id, order, true, true);
             let collection = await getCollection(id);
-
+            // Fill in modals and buttons
             fillInOldData(collection, order);
             fillInModalDates(collection);
             fillInButtons(collection, order);
@@ -113,8 +133,11 @@ export async function oldClickListeners(id) {
     }
 }
 
+/**
+ * Sets collection date
+ * @param {Date} dateToSet - Passed date object to set the collection-date element's value
+ */
 export function setDate(dateToSet) {
-    // Set #collection-date today
     const collectionDate = document.getElementById('collection-date');
     collectionDate.value =
         `${dateToSet.getFullYear()}-` +
@@ -122,11 +145,18 @@ export function setDate(dateToSet) {
         `${String(dateToSet.getDate()).padStart(2, '0')}`;
 }
 
+/**
+ * Gets a previous collection for the current collection
+ * @param {number} id - ID of the current collection
+ */
 async function getLast(id) {
     let collection = await getCollection(id);
     await $.ajax({
         url: "/observations/last/",
         data: JSON.stringify(collection),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         method: "POST",
         error: function (jqXHR) {
             // alert("Could not establish a connection with database.");
@@ -139,35 +169,56 @@ async function getLast(id) {
             $("body").removeClass("loading");
         },
         success: async function (lastCollection) {
-            collection['last-collection-id'] = lastCollection["id"]
-            await insertCollection(lastCollection, true)
-            await setCollection(collection);
-            await fillInFields(
-                id,
-                document.getElementById("plant").selectedOptions[0].id,
-                collection["last-collection-id"]
-            );
-            let lastCollectionDate = document.getElementById('last-obs-date');
-            lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+            // Check if a previous collection exists
+            if (lastCollection) {
+                // Update the current collection and attach this collection's ID to it
+                collection['last-collection-id'] = lastCollection["id"]
+                // Insert the collection into the local storage
+                await insertCollection(lastCollection, true)
+                await setCollection(collection);
+                const order = parseInt(document.getElementById('plant').selectedOptions[0].id);
+                // Populate the previous collection buttons for the chosen plant if a plant is chosen
+                if (order) {
+                    fillInOldData(lastCollection, order);
+                    fillInModalDates(lastCollection);
+                    fillInButtons(lastCollection, order);
+                }
+                // Add click listeners to the buttons
+                await oldClickListeners(parseInt(collection["last-collection-id"]));
+                let lastCollectionDate = document.getElementById('last-obs-date');
+                // Add the collection date for the copy-older button
+                lastCollectionDate.innerText = formatDate(new Date(lastCollection["date"]), false).toString();
+            } else {
+                // If no previous collection was available, mark last collection id null for the current collection
+                collection['last-collection-id'] = null;
+                await setCollection(collection);
+                // Hide previous collection buttons
+                toggleButtons(true);
+            }
         }
     });
 }
 
-// Add event listeners
-// Unbind first to remove event listeners if we change subgardens
+/**
+ * Unbinds previous listeners and adds new listeners to sync changes with the local storage
+ * @param {number} id - ID of the collection
+ */
 export function cachingListeners(id) {
     $("#collection-date").unbind().change(async (e) => {
         if (e.target.value.length > 0) {
             await updateCollection(id);
             await getLast(id);
+            let collection = await getCollection(id);
+
+            if (collection["last-collection-id"] != null) {
+                await oldClickListeners(parseInt(collection["last-collection-id"]));
+            }
         } else {
             alertModal("Please choose a valid date");
         }
     });
 
-    // Add event listener for next and previous buttons
-    // $("#next-btn").unbind().click(async () => await checkDefault(id, true));
-    // $("#prev-btn").unbind().click(async () => await checkDefault(id, false));
+    // Add event listener for finish button
     $("#finish-btn").unbind().click(async () => await checkDefault(id, null, true));
 
     // Add event listener for #no-observation

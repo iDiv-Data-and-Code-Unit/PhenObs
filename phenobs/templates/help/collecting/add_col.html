@@ -1,5 +1,7 @@
 <h1 class="mt-4" id="add_col">Adding a collection</h1>
-<p>To add a new collection, please follow these steps: </p>
+<p>You may add a collection in either “Local Observations” view or “Overview”
+  view. You will find instructions for both options below.</p>
+<p>Please follow the below steps for adding a collection in the <strong>Local Observations</strong> view:</p>
 <ol class="" style="font-size: 14pt">
   <li>
     {% include "help/collecting/partials/helper_link.html" with id="check_connection" text="Check connectivity status and verify 'Online' state." %}
@@ -29,5 +31,32 @@
   <li>
     {% include "help/collecting/partials/helper_link.html" with id="saving_local_obs" text="Save the collection to the database." %}
     {% include "help/collecting/partials/saving_local.html" with id="saving_local_obs"%}
+  </li>
+</ol>
+
+<br />
+<p>Please follow the below steps for adding a collection in the <strong>Overview</strong> view:</p>
+<ol class="" style="font-size: 14pt">
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="check_connection_add" text="Check connectivity status and verify 'Online' state." %}
+    {% include "help/collecting/partials/check_connection.html" with id="check_connection_add"%}
+  </li>
+  <li>Proceed to <strong>Overview</strong> page.</li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="garden_selection_overview_add" text="Select the garden(s)." %}
+    {% include "help/collecting/partials/garden_selection_overview.html" with id="garden_selection_overview_add"%}
+  </li>
+  <li>Select “Edit” view.</li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="overview_add" text="Click on 'Add a new collection'" %}
+    {% include "help/collecting/partials/add_overview.html" with id="overview_add"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="filling_values_overview_add" text="Fill in values." %}
+    {% include "help/collecting/partials/filling_values_overview.html" with id="filling_values_overview_add"%}
+  </li>
+  <li>
+    {% include "help/collecting/partials/helper_link.html" with id="saving_overview_add" text="Save the collection." %}
+    {% include "help/collecting/partials/saving_overview.html" with id="saving_overview_add"%}
   </li>
 </ol>

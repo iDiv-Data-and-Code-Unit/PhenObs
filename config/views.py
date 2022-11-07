@@ -6,7 +6,7 @@ from django.utils.timezone import datetime
 from phenobs.gardens.models import Garden
 
 
-@login_required(login_url="/accounts/login/")
+@login_required
 def home(request: HttpRequest) -> HttpResponse:
     """Home page showing garden, date and user information
 
@@ -27,7 +27,6 @@ def home(request: HttpRequest) -> HttpResponse:
 
     except Garden.DoesNotExist:
         context = {
-            "exception_title": "No subgarden assigned",
             "exception": Exception(
                 "No subgarden has been assigned to the user. Please assign user to a subgarden."
             ),
@@ -35,11 +34,16 @@ def home(request: HttpRequest) -> HttpResponse:
         return render(request, "error.html", context, status=404)
 
     except Garden.MultipleObjectsReturned:
+        gardens = Garden.objects.filter(auth_users=request.user)
+
         context = {
             "exception": Exception(
-                "Multiple subgardens are assigned to the user. Please assign only one subgarden per user."
+                "Multiple gardens are assigned to the user. Please assign only one subgarden per user. "
+                "Assigned gardens are: %s"
+                % str([garden.name for garden in gardens])[1:-1]
             )
         }
+
         return render(request, "error.html", context, status=409)
 
     except Exception as e:

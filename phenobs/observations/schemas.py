@@ -9,6 +9,7 @@ collection_schema = {
         "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
         "edited": {"type": "boolean"},
         "finished": {"type": "boolean"},
+        "main_garden": {"type": "integer"},
         "garden": {"type": "integer"},
         "garden-name": {"type": "string"},
         "id": {"type": "integer"},

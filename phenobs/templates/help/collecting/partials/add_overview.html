@@ -1,0 +1,15 @@
+{% extends "help/collecting/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/help/add_overview2.png" %}{% endblock %}
+
+{% block title %}Adding a new collection in Overview{% endblock %}
+
+{% block content %}
+  <p>You may add a new collection in <strong>Overview</strong> page</p>
+  <p>On Edit tab in Overview page, click on 'Add a new collection' and choose subgarden and click on 'Create'.
+  It may take couple of seconds to retrieve all the details from the server for the chosen subgarden and a new collection.
+  </p>
+{% endblock %}

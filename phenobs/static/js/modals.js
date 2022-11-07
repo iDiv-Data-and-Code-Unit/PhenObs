@@ -1,3 +1,9 @@
+/**
+ * Returns a human readable date string
+ * @param {Date} dateToFormat - Date object to be formatted
+ * @param {boolean} includeYear - Whether to include year in the string
+ * @return {string} Generated string
+ */
 export function formatDate(dateToFormat, includeYear=true) {
     let options = {
         month: 'short',
@@ -10,6 +16,10 @@ export function formatDate(dateToFormat, includeYear=true) {
     return dateToFormat.toLocaleString('en-US', options);
 }
 
+/**
+ * Fills in date of the last collection into modals
+ * @param {Object} lastCollection - Collection object
+ */
 export function fillInModalDates(lastCollection) {
     // Get all the spans with date values in the modal titles
     let modals = $('span[id*="-date"]');
@@ -19,6 +29,11 @@ export function fillInModalDates(lastCollection) {
     }
 }
 
+/**
+ * Fills in text for the previous collection dropdowns, textareas and requires intensities, if necessary
+ * @param {Object} lastCollection - Previous collection object
+ * @param {number} plant - Order of the plant
+ */
 export function fillInOldData(lastCollection, plant) {
     let old_record = null;
     // Check if the record exists for the plant
@@ -105,6 +120,11 @@ export function fillInOldData(lastCollection, plant) {
     old_textarea[0].innerText = old_record["remarks"];
 }
 
+/**
+ * Fills in text for the previous collection buttons
+ * @param {Object} lastCollection - Previous collection object
+ * @param {number} plant - Order of the plant
+ */
 export function fillInButtons(lastCollection, plant) {
     let old_record = null;
 
@@ -134,6 +154,19 @@ export function fillInButtons(lastCollection, plant) {
     }
 
     for (let i = 0; i < buttons.length; i++) {
+        $(buttons[i]).unbind().click(function() {
+            const elementId = buttons[i].id.slice(0, buttons[i].id.length - 7);
+            if (elementId.includes("remarks")) {
+                $(`#remarks-old`).val(old_record["remarks"]);
+            } else if (elementId === "maintenance") {
+                for (let j = 0; j < old_checkboxes.length; j++) {
+                    const checkboxId = old_checkboxes[j].id.slice(0, old_checkboxes[j].id.length - 4);
+                    document.getElementById(old_checkboxes[j].id).checked = old_record[checkboxId];
+                }
+            } else {
+                document.getElementById(elementId + '-old').value = old_record[elementId];
+            }
+        });
         // Remarks button on small screens
         if (buttons[i].id.includes("small")) {
             buttons[i].innerHTML = old_record["remarks"];
@@ -182,8 +215,10 @@ export function fillInButtons(lastCollection, plant) {
     }
 }
 
-// Hide buttons if no last collection is available
-// Show buttons if the last collection is available
+/**
+ * Hides the previous collection buttons if no previous collection exists
+ * @param {boolean} hideFlag - Hide flag, if true means the buttons should not be displayed
+ */
 export function toggleButtons(hideFlag) {
     let buttons = $('button[id*="-button"]');
     for (let i = 0; i < buttons.length; i++) {
@@ -210,11 +245,19 @@ export function toggleButtons(hideFlag) {
     }
 }
 
+/**
+ * Creates an alert modal with the given message to warn the user or display an error message
+ * @param {string} message - The message to be displayed
+ */
 export function alertModal(message) {
     $('#alert-body').text(message);
     $('#alert').modal('show');
 }
 
+/**
+ * Creates a confirm modal with the given message to verify user's action
+ * @param {string} message - The message to be displayed
+ */
 export function confirmModal(message) {
     $('#confirm-body').text(message);
     $('#confirm').modal('show');

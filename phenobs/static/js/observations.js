@@ -1,14 +1,18 @@
-import {getCollections, deleteCollection, uploadCollection, insertCollection} from "./collection.js";
-import {confirmModal, alertModal, formatDate} from './modals.js';
-// import {isReachable} from "./project.js";
+import { getCollections, deleteCollection, uploadCollection, insertCollection, setCollections } from "./collection.js";
+import { confirmModal, alertModal, formatDate } from './modals.js';
+import { getCookie } from "./project.js";
 
+/**
+ * Populates the tables with not saved and saved collections depending on the passed tableName
+ * @param {string} tableName - A string indicating what prefix to use to identify which table to modify
+ */
 async function insertRows(tableName) {
+    const mainGardenId = parseInt(sessionStorage.getItem('mainGardenId'));
     let collections = await getCollections();
     let table = document.getElementById(tableName + '-collections-body');
     table.innerHTML = '';
 
     for (let key in collections) {
-        // console.log(collections[key], key)
         if (tableName === "saved") {
             if (!collections[key]["uploaded"] || !collections[key]["finished"])
                 continue;
@@ -16,15 +20,19 @@ async function insertRows(tableName) {
             if (collections[key]["finished"] && collections[key]["uploaded"])
                 continue;
         } else {
-            // if (!(!collections[key]["uploaded"] && collections[key]["finished"] && !collections[key]["edited"]) &&
-            //     !(collections[key]["edited"] && !collections[key]["uploaded"] && collections[key]["finished"]))
             continue;
         }
-        // console.log('-----------------------')
-        // console.log(collections[key], key)
+
+        // If there are collections from different main gardens, display only
+        // the collections that are in current session's main garden, otherwise, ignore
+        if ("main_garden" in collections[key] && parseInt(collections[key]["main_garden"]) !== mainGardenId) {
+            continue;
+        } else if (!("main_garden" in collections[key])) {
+            alertModal('Please update the local collections by clicking on "Get collections" button');
+        }
+
         let rowHTML =
             '<tr class="d-table-row">\n' +
-            // '<th class="text-left d-table-cell">' + collections[key]["id"].toString() + '</th>' +
             '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[key]["date"])).toString() + '</th>\n' +
             '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[key]["creator"] + '</td>\n' +
             '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[key]["garden-name"] + '</td>\n' +
@@ -40,7 +48,6 @@ async function insertRows(tableName) {
             rowHTML +=
                 '<div class="d-flex align-items-center text-success">' +
                 '  <i class="bi bi-hdd-fill" style="font-size: 1.5rem;  border: 0" id="' + key + '-local"></i>\n' +
-                // '  <i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + key + '-online"></i>\n' +
                 '   <img class="ml-2" src="/static/images/db_check_success.png" style="display: table-cell; vertical-align: middle; " height="23"  id="' + key + '-online">\n' +
                 '</div>' +
             '</td>\n';
@@ -54,7 +61,6 @@ async function insertRows(tableName) {
             rowHTML +=
                 '<td class="d-table-cell icon-table-cell" style="vertical-align: middle">\n' +
                 '  <a onclick="" class="">\n' +
-                // '    <i class="bi bi-cloud-arrow-up-fill" style="font-size: 1.5rem; color: blue;" id="' + key + '-upload"></i>\n' +
                 '    <img class="bi" src="/static/images/save_db_primary.png" style="" width="21"  id="' + key + '-upload">\n' +
                 '  </a>\n' +
                 '</div>\n';
@@ -66,7 +72,6 @@ async function insertRows(tableName) {
 
         rowHTML +=
             '<td class="text-left d-table-cell icon-table-cell" style="vertical-align: middle">\n' +
-            // '  <a href="edit/' + key + '">\n' +
             '    <i class="bi bi-pencil-fill text-primary" style="font-size: 1.5rem;" id="' + key + '-edit"></i>\n' +
             '  </a>\n' +
             '</td>\n';
@@ -83,10 +88,14 @@ async function insertRows(tableName) {
     }
 }
 
+// Fills tables when a user lands on the Local Observations page
 (async () => {
     await fillTables();
 })();
 
+/**
+ * Calls necessary functions to populate tables and add functionality to upload, delete and edit
+ */
 async function fillTables() {
     await insertRows("notsaved");
     await insertRows("saved");
@@ -95,6 +104,9 @@ async function fillTables() {
     addEditLink();
 }
 
+/**
+ * Attaches click listeners to saved collections to be saved, if available
+ */
 function addUploadLink() {
     let allButtons = $('[id*="-upload"]');
 
@@ -111,6 +123,9 @@ function addUploadLink() {
     }
 }
 
+/**
+ * Attaches click listeners to all collections to edit them
+ */
 function addEditLink() {
     let editButtons = $('[id*="-edit"]');
 
@@ -119,32 +134,22 @@ function addEditLink() {
         editButtons[i].parentElement.addEventListener(
             'click',
             () => {
-                // isReachable('/200').then(function(onLine) {
-                    if (navigator.onLine) {
-                        location.href = '/observations/edit/' + id;
-                    } else {
-                        // alert('Edit functionality is not available in offline mode');
-                        alertModal('Edit functionality is not available in offline mode');
-                    }
-                // });
+                if (navigator.onLine) {
+                    location.href = '/observations/edit/' + id;
+                } else {
+                    alertModal('Edit functionality is not available in offline mode');
+                }
             }
         );
         editButtons[i].parentElement.style.cursor = 'pointer';
     }
 }
 
-function addRemoveLink(collections=null) {
+/**
+ * Attaches click listeners to local collections to delete them from local device storage
+ */
+function addRemoveLink() {
     let allButtons = $('[id*="-cancel"]');
-
-    // if (collections != null) {
-    //     allButtons = [];
-    //     for (let i = 0; i < collections.length; i++)
-    //         if (
-    //             !$('[id="' + collections[i]["id"] + '-upload"]').length &&
-    //             !$('[id="' + collections[i]["id"] + '-unfinished"]').length
-    //         )
-    //             allButtons.push($('[id="' + collections[i]["id"] + '-cancel"]')[0])
-    // }
 
     for (let i = 0; i < allButtons.length; i++) {
         if (allButtons[i] !== undefined) {
@@ -152,10 +157,6 @@ function addRemoveLink(collections=null) {
             allButtons[i].parentElement.addEventListener(
                 'click',
                 async () => {
-                    // if (confirm("Are you sure you want to delete the collection from device?")) {
-                    //     await deleteCollection(id);
-                    //     await initTables();
-                    // }
                     confirmModal("Are you sure you want to delete the collection from device?");
                     $('#confirm-yes').unbind().click(
                         async function() {
@@ -171,7 +172,13 @@ function addRemoveLink(collections=null) {
     }
 }
 
+/**
+ * Fetches all possible collections for user's main garden
+ */
 async function getAllCollections() {
+    if (!navigator.onLine)
+        alertModal("Get collections functionality is not available offline.");
+
     const collections = await getCollections();
     let ids = [];
     for (let collection in collections) {
@@ -182,12 +189,11 @@ async function getAllCollections() {
         url: "/observations/garden_collections/",
         method: "POST",
         data: JSON.stringify(ids),
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
-            // alert("Could not establish a connection with database.");
-            if (!navigator.onLine)
-                alertModal("'Get collections' functionality is not available offline.");
-            else
-                alertModal(jqXHR.responseJSON);
+            alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
@@ -196,16 +202,18 @@ async function getAllCollections() {
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            console.log(data)
             await addOnlineCollections(data);
             addEditLink();
-            addRemoveLink(data);
+            addRemoveLink();
         }
     });
 }
 
+/**
+ * Updates local finished, unedited collections and populates saved table with collections available on database
+ * @param {Object} collections - All collections for user's main garden
+ */
 async function addOnlineCollections(collections) {
-    // await insertRows("uploaded");
     await insertRows("saved");
     let localCollections = await getCollections();
 
@@ -217,13 +225,18 @@ async function addOnlineCollections(collections) {
         } else if (localCollections != null && (collections[i]["id"] in localCollections) &&
             !localCollections[collections[i]["id"]]["finished"] && collections[i]["finished"]) {
             await insertCollection(collections[i], true);
+        } else if (localCollections != null && (collections[i]["id"] in localCollections) &&
+            !localCollections[collections[i]["id"]]["finished"] && !collections[i]["finished"]) {
+            // Update unfinished collections' main_garden IDs
+            localCollections[collections[i]["id"]]["main_garden"] = collections[i]["main_garden"];
+            await setCollections(localCollections);
         }
+
     }
 
     localCollections = await getCollections();
     await fillTables();
 
-    // let table = document.getElementById('uploaded-collections-body');
     let table = document.getElementById('saved-collections-body');
     let rowHTML = '';
 
@@ -231,7 +244,6 @@ async function addOnlineCollections(collections) {
         if (localCollections == null || Object.keys(localCollections).length === 0 || !(parseInt(collections[i]['id']) in localCollections)) {
             rowHTML =
                 '<tr class="d-table-row">' +
-                // '<th class="text-left d-table-cell">' + collections[i]["id"].toString() + '</th>' +
                 '<th class="text-left d-table-cell date-table-cell">' + formatDate(new Date(collections[i]["date"])).toString() + '</th>' +
                 '<td class="text-left d-table-cell text-truncate creator-table-cell">' + collections[i]['creator'] + '</td>' +
                 '<td class="text-left d-table-cell text-truncate garden-table-cell">' + collections[i]['garden-name'] + '</td>' +
@@ -239,7 +251,6 @@ async function addOnlineCollections(collections) {
 
             if (collections[i]["finished"] == true)
                 rowHTML +=
-                    // '<i class="bi bi-cloud-check-fill" style="font-size: 1.5rem; color: green;" id="' + collections[i]['id'] + '-online"></i>\n' +
                     '<img src="/static/images/db_check_success.png" style="display: table-cell; vertical-align: middle;" height="23"  id="' + collections[i]['id'] + '-online">\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';
@@ -249,7 +260,6 @@ async function addOnlineCollections(collections) {
                     '<i class="bi bi-exclamation-circle-fill ml-2" style="  font-size: 1.5rem; color: red;" id="' + collections[i]['id'] + '-unfinished"></i>\n' +
                     '</td>' +
                     '<td class="text-left d-table-cell icon-table-cell">\n';
-                // '<a href="edit/' + collections[i]['id'] + '">\n' +
             rowHTML +=
                 '</td>\n' +
                 '<td class="text-left d-table-cell icon-table-cell">\n';

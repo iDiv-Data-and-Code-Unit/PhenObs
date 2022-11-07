@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib import admin, messages
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.datastructures import MultiValueDictKeyError
-from pandas import read_csv
+from pandas import DataFrame, read_csv
 
 from ..gardens.models import Garden
 from ..species.models import Species
@@ -11,6 +12,8 @@ from .models import Plant
 
 
 class CsvImportForm(forms.Form):
+    """Custom form to upload CSV files"""
+
     garden = forms.ModelChoiceField(
         queryset=Garden.objects.filter(main_garden=None).all()
     )
@@ -29,13 +32,24 @@ class PlantAdmin(admin.ModelAdmin):
     list_per_page = 10
 
     def get_urls(self):
+        """Attaches the URL for the form to the list of all URLs"""
         urls = super().get_urls()
         new_urls = [
             path("upload-csv/", self.upload_csv),
         ]
         return new_urls + urls
 
-    def upload_csv(self, request):
+    def upload_csv(self, request: HttpRequest) -> HttpResponse:
+        """Runs checks on the request for required fields and data
+
+        Args:
+            request: The received request with metadata
+
+        Returns:
+            Redirects to the same page with the set of error messages or returns the previous page
+            with success and warning messages
+
+        """
         add_plants_status = 200
         status = 200
 
@@ -114,7 +128,17 @@ class PlantAdmin(admin.ModelAdmin):
         return render(request, "admin/csv_upload.html", context, status=status)
 
 
-def add_plants(request, file_data):
+def add_plants(request: HttpRequest, file_data: DataFrame) -> int:
+    """Verifies the data and imports new plants
+
+    Args:
+        request: The received request with necessary POST data
+        file_data: CSV file with the necessary data
+
+    Returns:
+        Returns the status code and add messages to the request to display error, success and warning info
+
+    """
     added = 0
     total = 0
     status = 200

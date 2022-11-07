@@ -1,10 +1,10 @@
 import json
 from datetime import date, datetime, timedelta
+from typing import Dict
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
@@ -15,8 +15,7 @@ from .models import Collection, Record
 from .schemas import collection_schema
 
 
-@csrf_exempt
-@login_required(login_url="/accounts/login/")
+@login_required
 def upload(request: HttpRequest) -> JsonResponse:
     """Uploads and edits the collection and its records
 
@@ -24,7 +23,7 @@ def upload(request: HttpRequest) -> JsonResponse:
         request: The received request with metadata
 
     Returns:
-        {}: "OK" if the object was saved correctly
+        "OK" if the object was saved correctly
 
     """
     if request.method == "POST":
@@ -42,8 +41,16 @@ def upload(request: HttpRequest) -> JsonResponse:
         return response
 
 
-@csrf_exempt
-def upload_selected(request):
+def upload_selected(request: HttpRequest) -> JsonResponse:
+    """Uploads multiple collections
+
+    Args:
+        request: The received request with collection data as json payload
+
+    Returns:
+        "OK" if the object was saved correctly
+
+    """
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -63,7 +70,16 @@ def upload_selected(request):
         return response
 
 
-def normalize_record(record):
+def normalize_record(record: Dict) -> Dict:
+    """Checks and normalizes record's values
+
+    Args:
+        record: Record to be normalized
+
+    Returns:
+        record: Normalized and edited record
+
+    """
     if record["no-observation"] is True:
         record["initial-vegetative-growth"] = None
         record["young-leaves-unfolding"] = None
@@ -105,7 +121,17 @@ def normalize_record(record):
     return record
 
 
-def update_collection(data, username):
+def update_collection(data: Dict, username: str) -> JsonResponse:
+    """Edits and updates the collection
+
+    Args:
+        data: Sent json data with the necessary collection and record information
+        username: Username of the user who uploaded the edited collection
+
+    Returns:
+        "OK" if the object was saved correctly
+
+    """
     print(data)
     try:
         try:

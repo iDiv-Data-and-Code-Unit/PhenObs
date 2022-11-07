@@ -1,32 +1,41 @@
-import {fill} from "./edit.js";
-import {alertModal} from "./modals.js";
+import { fill } from "./edit.js";
+import { alertModal } from "./modals.js";
+import { getCookie } from "./project.js";
 
-let collectionId = null;
-
-export function getCollectionId() {
-    return collectionId;
-}
-
-// Gets the locally stored collections
+/**
+ * Returns collections object from local storage
+ * @return {Object} Collections object containing all the collections and records' info in local storage
+ */
 export async function getCollections() {
     return await JSON.parse(
         localStorage.getItem("collections")
     );
 }
 
-// Get collection from local storage
+/**
+ * Returns the collection object with the given id from local storage
+ * @param {number} id - ID of the collection to be returned from the local storage
+ * @return {Object} Collection object containing all the records' info for the collection with the given ID
+ */
 export async function getCollection(id) {
     let collections = await getCollections();
     if (collections != null)
         return collections[id];
+    // Returns null if the collection does not exist in the local storage
     return null;
 }
 
+/**
+ * Edits the collections object stored in local storage and inserts a new collection
+ * if the collection is unfinished, assigns default values, else the saved values for fields
+ * @param {Object} collections - Collections object in the local storage
+ * @param {Object} collection - Collection to be inserted into the local storage
+ * @return {Object} Collections object to be updated in the local storage
+ */
 function formatRecords(collections, collection) {
     for (let key in collection['records']) {
         const current = collection['records'][key];
 
-        // Create a new instance for the given plant in the local storage
         collections[collection['id']]['records'][current['order']] = {
             "id": current['id'],
             "name": current['name'],
@@ -56,6 +65,13 @@ function formatRecords(collections, collection) {
     return collections;
 }
 
+/**
+ * Inserts the collection into the collections object in local storage
+ * @param {Object} collection - Collection to be imported into the local storage
+ * @param {boolean} isOnline - Whether the collection is saved in the database (false for newly created unfinished collections)
+ * @param {boolean} isOld - Whether the collection to be imported is a previous collection for another collection
+ * @return {Object} Stored collection object
+ */
 export async function insertCollection(collection, isOnline, isOld=false) {
     let collections = await getCollections();
     let remaining = [];
@@ -78,6 +94,7 @@ export async function insertCollection(collection, isOnline, isOld=false) {
         'id': collection['id'],
         'date': collection['date'],
         'creator': collection['creator'],
+        'main_garden': collection['main_garden'],
         'garden': collection['garden'],
         'garden-name': collection['garden-name'],
         'last-collection-id': lastCollectionId,
@@ -100,15 +117,16 @@ export async function insertCollection(collection, isOnline, isOld=false) {
         collections[collection['last-collection']['id']]['uploaded'] = true;
     }
 
-    /*
-    Add remaining indices
-    Create default records
-     */
+    // Format records, import collection into the collections object then save it to local storage
     await setCollections(formatRecords(collections, collection));
     return collections[collection["id"]];
 }
 
-// Sets a single collection in local storage
+/**
+ * Sets a single collection in local storage
+ * @param {Object} collection - Collection to be updated in the local storage
+ * @return {Object} Same collection object
+ */
 export async function setCollection(collection) {
     let collections = await getCollections();
     collections[collection["id"]] = collection;
@@ -116,7 +134,11 @@ export async function setCollection(collection) {
     return collection;
 }
 
-// Sets all collections in local storage
+/**
+ * Sets all collections in local storage
+ * @param {Object} collections - Collections object to be updated in the local storage
+ * @return {Object} Same collections object
+ */
 export async function setCollections(collections) {
     await localStorage.setItem(
         "collections", JSON.stringify(collections)
@@ -124,70 +146,81 @@ export async function setCollections(collections) {
     return collections;
 }
 
-// Get necessary information from the server and create an empty collection
+/**
+ * Get necessary information from the server and create an empty collection
+ * @param {string, null} id - ID of the subgarden the new collection will be created for. null if the garden info is not available
+ */
 export async function emptyCollection(id=null) {
+    // If no garden ID is provided, read from session storage
     if (id == null)
         id = sessionStorage.getItem("gardenId");
     await $.ajax({
         url: "/observations/new/" + id,
         method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
-            // alert(jqXHR.responseText);
             alertModal(jqXHR.responseJSON);
         },
         beforeSend: function(){
             $("body").addClass("loading");
         },
-        complete: function(data){
-            // console.log(data["id"]);
+        complete: function(){
             $("body").removeClass("loading");
         },
         success: async function (data) {
-            // const newCollection = await createEmptyCollection(data, await getCollections());
-            // await setCollection(newCollection);
+            // Add the id of the collection to the subgarden choice in the subgardens dropdown
             document.getElementById('subgarden').selectedOptions[0].id = data["id"];
+            // Insert the new collection into the local storage
             await insertCollection(data, false);
+            // Fill in the records' data for the chosen plant into the form fields
             await fill(parseInt(data["id"]), false);
         }
     });
-
-    // const collection = await getCollection(getCollectionId());
-    // await setupPlants(getCollectionId());
-    // await selectPlant(parseInt(getCollectionId()), Math.min.apply(null,Object.keys(collection["records"])));
-    // await change(fields(), parseInt(getCollectionId()), false);
-
-    // if (collection["last-collection-id"] != null) {
-    //     await oldClickListeners(parseInt(collection["last-collection-id"]));
-    // } else {
-    //     console.log(collection);
-    // }
-
-    // await caching(parseInt(getCollectionId()));
 }
 
-
-// Update a collection if the date (or any other value) is changed
+/**
+ * Update a collection if the date is changed
+ * @param {number} id - ID of the collection to updated
+ * @return {Object} Updated collection object with the new date
+ */
 export async function updateCollection(id) {
     await markEdited(id);
     let collection = await getCollection(id);
     collection["date"] = document.getElementById("collection-date").value;
     return await setCollection(collection);
 }
-// Delete a collection from local storage
+
+/**
+ * Delete a collection from local storage
+ * @param {number} id - ID of the collection to be deleted
+ * @return {Object} Collections object after deletion is completed
+ */
 export async function deleteCollection(id) {
     const collections = await getCollections();
     delete collections[id];
     return await setCollections(collections);
 }
-// Upload a collection
+
+/**
+ * Uploads a collection
+ * @param {number} id - ID of the collection to be uploaded
+ */
 export async function uploadCollection(id) {
+    if (!navigator.onLine) {
+        alertModal("Saving is not available in offline mode");
+        return;
+    }
     const collection = await getCollection(id);
     await $.ajax({
         url: "/observations/upload/",
         data: JSON.stringify(collection),
         method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+        },
         error: function (jqXHR) {
-            // alert("Could not establish a connection with database.");
             alertModal(jqXHR.responseJSON);
         },
         beforeSend: function() {
@@ -196,44 +229,29 @@ export async function uploadCollection(id) {
         complete: function(){
             $("body").removeClass("loading");
         },
-        success: async function (data) {
+        success: async function () {
             collection['uploaded'] = true;
             collection['finished'] = true;
             collection['edited'] = false;
+
             await setCollection(collection);
-            // alert("Collection successfully uploaded!");
-            console.log(data);
-            alertModal("Collection successfully uploaded!");
+            alertModal("Collection successfully saved to database!");
         }
     });
 }
 
-export async function uploadSelectedCollections(collections) {
-    await $.ajax({
-        url: "/observations/upload/",
-        data: JSON.stringify(collections),
-        method: "POST",
-        error: function (jqXHR) {
-            // alert("Could not establish a connection with database.");
-            alertModal(jqXHR.responseJSON);
-        },
-        beforeSend: function(){
-            $("body").addClass("loading");
-        },
-        complete: function(){
-            $("body").removeClass("loading");
-        },
-        success: async function (data) {
-            // alert("Collection successfully uploaded!");
-            alertModal("Collections successfully saved");
-        }
-    });
-}
-
-export async function fetchCollection(id, isOnline, isOld=false) {
+/**
+ * Gets the collection with the given ID from the database
+ * @param {number} id - ID of the collection to be fetched
+ * @param {boolean} isOnline - Whether the collection is saved in the database
+ */
+export async function fetchCollection(id, isOnline) {
     try {
         await $.ajax({
             url: "/observations/get/" + id,
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
             error: function (jqXHR) {
                 alertModal(jqXHR.responseJSON);
                 return null;
@@ -254,6 +272,11 @@ export async function fetchCollection(id, isOnline, isOld=false) {
     }
 }
 
+/**
+ * Updated edited field to true and marks the collection as edited
+ * @param {number} id - ID of the collection to be marked as edited
+ * @return {Object} Collection object after marked edited
+ */
 export async function markEdited(id) {
     let collection = await getCollection(id);
     collection['edited'] = true;

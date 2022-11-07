@@ -282,7 +282,6 @@ config/settings/production.py
 config/settings/production.py.old
 config/settings/local.py
 .idea/
-*.xlsx
 phenobs/observations/tmp.py
 /test-results/
 /playwright-report/
