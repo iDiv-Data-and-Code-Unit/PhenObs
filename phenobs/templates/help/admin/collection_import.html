@@ -3,19 +3,21 @@
 <h1 class="mt-4" id="collection_import"><strong>Collection import</strong></h1>
 <h2 id="create_plants_csv">Importing collections from a CSV file</h2>
 <p>
-  If you would like to import an already collected data, no matter old or new, you have the option to do so.
-  By creating a CSV file that fits the below template, you could import all the collection and records data:
+  If you would like to import data that has already been collected, no matter old or new, you have the option to do so.
+  By creating a CSV file that fits the below template, you could import all the collection and records. Next 6 columns <u>cannot be left empty</u> and should not contain any typos:
 </p>
 <ul class="" style="font-size: 14pt">
   <li>1st column named “Garden” indicating the plant’s main garden's name.</li>
   <li>2nd column named “Subgarden” indicating plant’s subgarden's name.</li>
-  <li>3rd column named “Day” indicating on which day of the month data was collected for the plant.</li>
-  <li>4th column named “Month” indicating on which month of the year data was collected for the plant.</li>
-  <li>5th column named “Year” indicating in which year data was collected for the plant.</li>
+  <li>3rd column named “Day” indicating on which day of the month data was collected for the plant. It should be an <strong>integer</strong> in the range of [1, 31].</li>
+  <li>4th column named “Month” indicating on which month of the year data was collected for the plant. It should be an <strong>integer</strong> in the range of [1, 12].</li>
+  <li>5th column named “Year” indicating in which year data was collected for the plant. It should be a 4-digit <strong>integer</strong> indicating year such as 2022, 2023...</li>
   <li>6th column named “Species” indicating the plant’s name.</li>
 </ul>
 
-<p>Next column names indicate the what data was collected and acceptable values are: yes, no, unsure, missed</p>
+<hr />
+
+<p>Next column names indicate what data was collected. These fields <u>cannot be left empty</u> and acceptable values are: yes, no, unsure, missed</p>
 
 <ul class="" style="font-size: 14pt">
   <li>7th column named “Initial vegetative growth”.</li>
@@ -26,17 +28,21 @@
   <li>13th column named “Senescence”.</li>
 </ul>
 
+<hr />
+
 <p>Next column names indicate the intensity and acceptable values are: 5%, 10%, 15% ... 95%, 100%</p>
 
 <ul class="" style="font-size: 14pt">
-  <li>11th column named “Flowering intensity”.</li>
-  <li>14th column named “Senescence intensity”.</li>
+  <li>11th column named “Flowering intensity”. If the value for "Flowers opening" column is <u>not <strong>yes</strong></u>, then this field should be left empty.</li>
+  <li>14th column named “Senescence intensity”. If the value for "Senescence" column is <u>not <strong>yes</strong></u>, then this field should be left empty.</li>
 </ul>
+
+<hr/>
 
 <p>Remaining 2 columns accept the indicated respective values.</p>
 
 <ul class="" style="font-size: 14pt">
-  <li>15th column named “Maintenance” indicating what maintenance options were noted for the plant. Acceptable values are comma seperated combination of options below:
+  <li>15th column named “Maintenance” indicating what maintenance options were noted for the plant. Acceptable values are either empty, a single option or comma separated combination of options below:
     <ul>
       <li>cut_partly</li>
       <li>cut_total</li>
@@ -45,19 +51,30 @@
       <li>transplanted</li>
       <li>removed</li>
     </ul>
-
+    <br />
     <em>Example value: cut_partly, covered_natural</em>
+    <br />
+    <em>Example value: covered_artificial</em>
   </li>
-  <li>16th column named “Remarks” which is a text for collector's note on the plant for the collection.</li>
+  <li class="mt-4">16th column named “Remarks” which can be empty or text for collector's note on the plant for the collection.</li>
 </ul>
 
+<hr />
+
 <p>We advise you to use data entry template for Excel which gives you acceptable options for some of the fields and runs checks on values.
-However, it is not perfect and is prone to human error. Please double check the entered values, names and dates. Typos may result in corrupt data.
+However, it is not perfect and is prone to human error. Please double check the entered values, names and dates. Typos and whitespace characters may result in corrupt data.
 Additional checks are run on the server too, nevertheless wrong data entry that fits the above guidelines will be saved and may end up corrupting the data.</p>
 
-<p><a href="{% static "DataEntryTemplate.xlsx" %}" download>You may download the template by clicking on this link.</a></p>
+<p>
+  You may download the template by clicking on <a href="{% static "DataEntryTemplate.xlsx" %}" download>this link.</a>
+  For some guidelines and example rows, you may download <a href="{% static "explanations_and_examples.csv" %}" download>this CSV file.</a>
+</p>
 
-<p>After the data is entered in Excel, please export the file as CSV before uploading. Make sure to save it as UTF-8 CSV.</p>
+<p>
+  After the data is entered in Excel, please export the file as CSV before uploading.
+  {% include "help/admin/partials/helper_link.html" with id="utf8_csv" text="<strong>Make sure to save it as UTF-8 CSV. You might also encounter some problems while saving as UTF-8 CSV in Excel.</strong>" %}
+  {% include "help/admin/partials/utf8_csv.html" with id="utf8_csv"%}
+</p>
 <p>
   Be aware, each subgarden needs to be created prior to uploading the CSV file, hence the plants.
   If the mentioned subgardens or plants are not found in the system, you will get an error.
@@ -77,3 +94,39 @@ Additional checks are run on the server too, nevertheless wrong data entry that 
     {% include "help/admin/partials/import_data_from_csv_details.html" with id="import_data_from_csv_details"%}
   </li>
 </ol>
+
+<hr />
+
+<p>The administration panel should give enough explanation to find the exact problem in your file. However, for some not
+  as obvious errors you might like to check the below examples: </p>
+
+<div class="card mb-5">
+  <div class="card-header alert alert-danger">
+    Upload failed. Garden 'nan' does not exist. Please check for typos.
+  </div>
+  <div class="card-body">
+    <p>
+      If an error mentions <em>nan</em>, it means the field has an incorrect or empty value. The problematic field is
+      stated in the error itself (in this case, it is Garden).</p>
+    <p>
+      This error is also encountered if a row is not deleted properly. If you have trailing rows with empty values,
+      system will recognize it as a column with an empty value. To solve it, you may <kbd>right click</kbd> on the last
+      row and select <strong>Delete</strong> to properly erase the row.
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header alert alert-danger">
+    Upload failed. There are unrecognized columns in the uploaded CSV file. These columns are: ['Garden\tSubgarden\tDay
+    \tMonth\tYear\tSpecies\tInitial vegetative growth\tYoung leaves unfolding\tFlowers opening\tPeak flowering\t
+    Flowering intensity\tRipe fruits\tSenescence\tSenescence intensity\tMaintenance\tRemarks'] Please use the data
+    entry template to avoid typos and errors.
+  </div>
+  <div class="card-body">
+    <p>The problem stated above refers to the wrong choice of delimiter. In the above case, the columns are delimited
+      with tabs. But the system only accepts comma seperated or semicolon seperated columns. In that case, you need to
+      save the file again by choosing commas or semicolons as the delimiter. You can do so in Excel by saving as UTF-8
+      CSV. By default it will be delimited by commas.</p>
+  </div>
+</div>

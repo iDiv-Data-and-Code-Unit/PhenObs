@@ -1,0 +1,22 @@
+{% extends "help/admin/partials/helper.html" %}
+{% load static %}
+
+{% block id %}{{ id }}{% endblock %}
+
+{% block src %}{% static "images/help/utf8_csv.png" %}{% endblock %}
+
+{% block title %}Saving as UTF-8 CSV{% endblock %}
+
+{% block content %}
+  <p>
+    To make sure data is saved and stored as intended, all the characters same as collected you need to save your CSV
+    files as UTF-8. UTF-8 is a standard that support many characters, letters, digits and signs. Therefore it is
+    important that you save your CSV files as UTF-8.
+  </p>
+  <p>
+    <strong>Older versions of Excel lack the feature to save as UTF-8 CSV and you may also run into some other problems
+      while saving as UTF-8 CSV.</strong> In that case, please follow
+    <a href="https://www.webtoffee.com/how-to-save-csv-excel-file-as-utf-8-encoded/">this link</a> for
+    a tutorial that fits your configuration.
+  </p>
+{% endblock %}
