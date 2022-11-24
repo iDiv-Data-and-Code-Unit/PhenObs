@@ -90,6 +90,7 @@ var filesToCache = [
     '/static/images/help/users_permissions_admin.png',
     '/static/images/help/users_table.png',
     '/static/images/help/value_fields.png',
+    '/static/images/help/utf8_csv.png',
 ];
 
 // Cache on install
