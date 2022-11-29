@@ -122,7 +122,7 @@ const config = {
         ...devices['Desktop Safari'],
       },
       retries: 1,
-      timeout: 60 * 1000,
+      timeout: 100 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.
@@ -138,7 +138,7 @@ const config = {
         ...devices['iPhone 12'],
       },
       retries: 1,
-      timeout: 60 * 1000,
+      timeout: 100 * 1000,
       expect: {
         /**
          * Maximum time expect() should wait for the condition to be met.

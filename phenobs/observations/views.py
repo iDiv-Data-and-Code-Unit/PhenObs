@@ -8,7 +8,7 @@ from django.utils import timezone
 from ..gardens.models import Garden
 from ..plants.models import Plant
 from ..users.models import User
-from .get import get
+from .get import get, get_subgarden_options
 from .models import Collection, Record
 
 
@@ -128,6 +128,7 @@ def overview(request: HttpRequest) -> HttpResponse:
                 garden_dict["subgardens"].append(subgarden_dict)
             context["gardens"].append(garden_dict)
 
+        _, context["subgarden_options"] = get_subgarden_options(request)
         return render(request, "observations/overview.html", context)
 
     except Garden.DoesNotExist:

@@ -54,14 +54,6 @@ test.describe('Overview => Admin', () => {
     });
 
     test('Add a new collection', async ({ page }) => {
-        // Choose All
-        await page.locator('#gardens').click();
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').selectOption('All');
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
-
         // Open edit tab
         await page.locator('#edit-tab').click();
 
@@ -220,6 +212,12 @@ test.describe('Overview => Admin', () => {
         await page.locator(`[id="${collectionID}-save"]`).click();
         await page.waitForTimeout(300);
 
+        // Expect a modal dialog for success
+        await page.waitForSelector('div.modal.fade.show .modal-dialog');
+        await expect(page.locator('div.modal.fade.show .modal-dialog .modal-title')).toHaveText('Alert');
+        await expect(page.locator('div.modal.fade.show .modal-dialog .modal-body')).toHaveText('Successfully saved!');
+        await page.locator('div.modal.fade.show .modal-dialog #alert-okay').click();
+
         // Check if the collection shows up in the view
         await page.locator('#view-tab').click();
         await page.waitForTimeout(300);
@@ -309,11 +307,17 @@ test.describe('Overview => Admin', () => {
 
         // Check if the collection shows up in its own garden
         await page.locator('#gardens').click();
-        await page.waitForTimeout(100);
         await page.locator('#gardens').selectOption('EditMainGarden');
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+
+        // Choose date range
+        const startDate = new Date(2022, 8, 29);  // September 29, 2022
+        const endDate = new Date(2022, 9, 3); // October 3, 2022
+        await page.locator('#edit-start-date').fill(startDate.toLocaleDateString('en-CA'));
+        await page.locator('#edit-end-date').fill(endDate.toLocaleDateString('en-CA'));
+
+        // Load collections
+        await page.locator('#edit-in-range').click();
+        await page.waitForTimeout(300);
 
         // Check view tab
         await page.locator('#view-tab').click();
@@ -331,11 +335,17 @@ test.describe('Overview => Admin', () => {
     test('Choose "all" option and verify collections shown', async ({ page }) => {
         // Choose All
         await page.locator('#gardens').click();
-        await page.waitForTimeout(100);
         await page.locator('#gardens').selectOption('All');
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+
+        // Choose date range
+        const startDate = new Date(2022, 8, 29);  // September 29, 2022
+        const endDate = new Date(2022, 9, 3); // October 3, 2022
+        await page.locator('#view-start-date').fill(startDate.toLocaleDateString('en-CA'));
+        await page.locator('#view-end-date').fill(endDate.toLocaleDateString('en-CA'));
+
+        // Load collections
+        await page.locator('#view-in-range').click();
+        await page.waitForTimeout(300);
 
         // Click on View tab
         await page.locator('#view-tab').click();
@@ -372,11 +382,17 @@ test.describe('Overview => Admin', () => {
     test('Edit multiple collections from different gardens', async ({ page }) => {
         // Choose All
         await page.locator('#gardens').click();
-        await page.waitForTimeout(100);
         await page.locator('#gardens').selectOption('All');
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+
+        // Choose date range
+        const startDate = new Date(2022, 8, 29);  // September 29, 2022
+        const endDate = new Date(2022, 9, 3); // October 3, 2022
+        await page.locator('#view-start-date').fill(startDate.toLocaleDateString('en-CA'));
+        await page.locator('#view-end-date').fill(endDate.toLocaleDateString('en-CA'));
+
+        // Load collections
+        await page.locator('#view-in-range').click();
+        await page.waitForTimeout(300);
 
         // Click on Edit tab
         await page.locator('#edit-tab').click();
@@ -403,6 +419,12 @@ test.describe('Overview => Admin', () => {
         await page.locator('[id="selected-1"]').check();
         await page.locator('#uploadSelected').click();
         await page.waitForTimeout(300);
+
+        // Expect a modal dialog for success
+        await page.waitForSelector('div.modal.fade.show .modal-dialog');
+        await expect(page.locator('div.modal.fade.show .modal-dialog .modal-title')).toHaveText('Alert');
+        await expect(page.locator('div.modal.fade.show .modal-dialog .modal-body')).toHaveText('Successfully saved!');
+        await page.locator('div.modal.fade.show .modal-dialog #alert-okay').click();
 
         // Click on Edit tab
         await page.locator('#edit-tab').click();
@@ -432,11 +454,17 @@ test.describe('Overview => Admin', () => {
     test('Download as XLSX', async({ page }) => {
         // Choose All
         await page.locator('#gardens').click();
-        await page.waitForTimeout(100);
         await page.locator('#gardens').selectOption('All');
-        await page.waitForTimeout(100);
-        await page.locator('#gardens').evaluate(e => e.blur());
-        await page.waitForTimeout(100);
+
+        // Choose date range
+        const startDate = new Date(2022, 8, 29);  // September 29, 2022
+        const endDate = new Date(2022, 9, 3); // October 3, 2022
+        await page.locator('#view-start-date').fill(startDate.toLocaleDateString('en-CA'));
+        await page.locator('#view-end-date').fill(endDate.toLocaleDateString('en-CA'));
+
+        // Load collections
+        await page.locator('#view-in-range').click();
+        await page.waitForTimeout(300);
 
         // Click on View tab
         await page.locator('#view-tab').click();
