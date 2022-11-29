@@ -6,9 +6,8 @@ import { getCookie } from "./project.js";
  * listeners to fetch the collection info when clicked
  * @param {string} id - ID of the garden
  * @param {boolean} edit - Whether the call was made from edit tab or view tab
- * @param {boolean} reset - Whether to filter by date range or not
  */
-async function fillCollections(id, edit=false, reset=false) {
+async function fillCollections(id, edit=false) {
     const prefix = (edit) ? "#edit" : "#view";
 
     const start_date_e = $(prefix + "-start-date");
@@ -16,25 +15,23 @@ async function fillCollections(id, edit=false, reset=false) {
     let start_date = null;
     let end_date = null;
 
-    if (!reset) {
-        if (start_date_e) {
-            const start_date_object = new Date(start_date_e.val());
-            start_date = {
-                year: start_date_object.getFullYear(),
-                month: start_date_object.getMonth() + 1,
-                day: start_date_object.getDate(),
-                string: start_date_e.val()
-            }
+    if (start_date_e) {
+        const start_date_object = new Date(start_date_e.val());
+        start_date = {
+            year: start_date_object.getFullYear(),
+            month: start_date_object.getMonth() + 1,
+            day: start_date_object.getDate(),
+            string: start_date_e.val()
         }
+    }
 
-        if (end_date_e) {
-            const end_date_object = new Date(end_date_e.val());
-            end_date = {
-                year: end_date_object.getFullYear(),
-                month: end_date_object.getMonth() + 1,
-                day: end_date_object.getDate(),
-                string: end_date_e.val()
-            }
+    if (end_date_e) {
+        const end_date_object = new Date(end_date_e.val());
+        end_date = {
+            year: end_date_object.getFullYear(),
+            month: end_date_object.getMonth() + 1,
+            day: end_date_object.getDate(),
+            string: end_date_e.val()
         }
     }
 
@@ -122,9 +119,12 @@ async function checkDateRange(edit=false) {
 
     if (start_date_val.length && end_date_val.length) {
         if (start_date_val <= end_date_val) {
-            const gardenId = $("#gardens")[0].selectedOptions[0].id;
-
-            await fillCollections(gardenId, edit);
+            if ($('#gardens').val() === '') {
+                alertModal("Please select a garden");
+            } else {
+                const gardenId = $("#gardens")[0].selectedOptions[0].id;
+                await fillCollections(gardenId, edit);
+            }
         } else {
             alertModal("The end date should be later than the start date.")
         }
@@ -159,10 +159,20 @@ function upperLimitDate(edit=false) {
     start_date.max = end_date_val;
 }
 
-// Adds a click listener to fetch respective collections when garden choice has changed
-$("#gardens").change(async (e) => {
-    if (e.target.selectedOptions[0].id.length)
-        await fillCollections(e.target.selectedOptions[0].id, false, true);
+// Adds functionality to the navbar buttons and create new collection on 'Edit' tab button
+$(document).ready(() => {
+    document.getElementById("edit-in-range").addEventListener(
+    "click",
+    async () => await checkDateRange(true)
+    );
+    document.getElementById("view-in-range").addEventListener(
+        "click",
+        async () => await checkDateRange()
+    );
+    document.getElementById("create-new").addEventListener(
+        "click",
+        async() => await createNewCollection()
+    );
 });
 
 /**
@@ -332,9 +342,10 @@ function initNav() {
  * Checks all the selected collections to be uploaded, highlights missing or invalid input
  * If all valid, uploads all the chosen collections
  * @param {string, int, null} collection - ID of the single collection to be uploaded. If null, then upload all selected
+ * @param {boolean} addCollection - Boolean indicating if the collection to be saved is a newly created one
  * @return {Array} An array of the uploaded collections
  */
-async function uploadSelected(collection=null) {
+async function uploadSelected(collection=null, addCollection=false) {
     let selected = (
         collection == null ||
         (
@@ -428,11 +439,19 @@ async function uploadSelected(collection=null) {
                 $("body").removeClass("loading");
             },
             success: async function (data) {
+                alertModal("Successfully saved!");
+                // Check if it is save call from Add collection or not
+                if (addCollection) {
+                    // Set garden option as new collection's garden
 
-                // const response = data.split("<nav");
-                // initNav();
-                // $("#uploadSelected").unbind().click(uploadSelected);
-               await fillCollections(document.getElementById("gardens").selectedOptions[0].id,true, true)
+                    // Set date range for the date of the collection
+                    $("#edit-start-date").val(collections[0]['date']);
+                    $("#edit-end-date").val(collections[0]['date']);
+                    // Call fillCollections with new collection's garden
+                    await fillCollections(collections[0]['garden'], true);
+                } else {
+                    await fillCollections(document.getElementById("gardens").selectedOptions[0].id, true);
+                }
             }
         });
     } else {
@@ -520,7 +539,7 @@ async function createNewCollection() {
                 $(collectionDateLabel).prop("for", collectionDate.id);
                 $(garden).prop("disabled", true);
 
-                createBtn.remove();
+                createBtn.classList.add('d-none');
                 collectionDate.classList.remove("d-none");
                 collectionDate.value = data["date"];
                 collectionContent.classList.remove("d-none");
@@ -529,7 +548,7 @@ async function createNewCollection() {
                 collectionToggle.dataset["target"] = `#collection-${collectionId}`;
 
                 await fillInContent(parseInt(collectionId), true);
-                await cancelAndSaveButtons(parseInt(collectionId));
+                await cancelAndSaveButtons(parseInt(collectionId), true);
             }
         });
     } else {
@@ -540,11 +559,13 @@ async function createNewCollection() {
 /**
  * Attaches listeners to cancel and save buttons for the given collection
  * @param {string, int} collectionId - ID of the collection to add cancel and saving functionality
+ * @param {boolean} addCollection - Boolean indicating if the collection to add cancel and saving functionality is a
+ * newly added collection
  */
-async function cancelAndSaveButtons(collectionId) {
+async function cancelAndSaveButtons(collectionId, addCollection=false) {
     document.getElementById(`${collectionId}-save`).addEventListener(
         'click',
-        async () => await uploadSelected(collectionId)
+        async () => await uploadSelected(collectionId, addCollection)
     );
 
     const oldValues = formatCollection(collectionId);

@@ -32,11 +32,11 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         if garden.is_subgarden():
             collections = Collection.objects.filter(
                 garden__main_garden=garden.main_garden
-            ).order_by("date")
+            ).order_by("date")[:50]
         else:
             collections = Collection.objects.filter(
                 garden__main_garden=garden
-            ).order_by("date")
+            ).order_by("date")[:50]
 
         collections_json = []
 
@@ -106,6 +106,45 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         return response
 
 
+@login_required()
+def get_subgarden_options(request: HttpRequest) -> Tuple[bool, List]:
+    """Fetches all available subgarden options for the requesting user to add a new collection in overview page.
+
+    Args:
+        request: The received request with metadata
+
+    Returns:
+        is_admin: A boolean indicating if the user is in the "Admins" user group or not
+        subgarden_options: A list of all available subgarden options
+
+    """
+    is_admin = False
+    subgarden_options = []
+    auth_garden = Garden.objects.get(auth_users=request.user)
+
+    if request.user.groups.filter(name="Admins").exists():
+        is_admin = True
+        for subgarden in Garden.objects.all().exclude(main_garden=None):
+            subgarden_options.append(
+                {
+                    "main_garden": subgarden.main_garden.name,
+                    "name": subgarden.name,
+                    "id": subgarden.id,
+                }
+            )
+    else:
+        for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
+            subgarden_options.append(
+                {
+                    "main_garden": subgarden.main_garden.name,
+                    "name": subgarden.name,
+                    "id": subgarden.id,
+                }
+            )
+
+    return is_admin, subgarden_options
+
+
 def get_collections(request: HttpRequest, id: str) -> HttpResponse:
     """Gets all the collections in the specified garden with the specified date range, if available
 
@@ -157,29 +196,7 @@ def get_collections(request: HttpRequest, id: str) -> HttpResponse:
             "range": range(5, 105, 5),
         }
 
-        is_admin = False
-        context["subgarden_options"] = []
-        auth_garden = Garden.objects.get(auth_users=request.user)
-
-        if request.user.groups.filter(name="Admins").exists():
-            is_admin = True
-            for subgarden in Garden.objects.all().exclude(main_garden=None):
-                context["subgarden_options"].append(
-                    {
-                        "main_garden": subgarden.main_garden.name,
-                        "name": subgarden.name,
-                        "id": subgarden.id,
-                    }
-                )
-        else:
-            for subgarden in Garden.objects.filter(main_garden=auth_garden.main_garden):
-                context["subgarden_options"].append(
-                    {
-                        "main_garden": subgarden.main_garden.name,
-                        "name": subgarden.name,
-                        "id": subgarden.id,
-                    }
-                )
+        is_admin, context["subgarden_options"] = get_subgarden_options(request)
 
         if id == "all":
             if is_admin:
@@ -238,30 +255,32 @@ def get_collections(request: HttpRequest, id: str) -> HttpResponse:
 
                 context["gardens"].append(garden_dict)
 
-        for garden in context["gardens"]:
-            for subgarden in garden["subgardens"]:
-                collections = Collection.objects.filter(
-                    garden_id=subgarden["id"]
-                ).order_by("date")
-                if start_date is not None and end_date is not None:
-                    collections = collections.filter(
-                        date__gte=start_date, date__lte=end_date
-                    )
-                for collection in collections:
-                    collection_dict = {
-                        "id": collection.id,
-                        "date_full": collection.date,
-                        "date": collection.date.strftime("%Y-%m-%d"),
-                        "creator": collection.creator.username,
-                        "garden": collection.garden.name,
-                        "records": [],
-                        "finished": collection.finished,
-                    }
+        # Get collections' info only if it is a POST request, otherwise skip
+        if request.method == "POST":
+            for garden in context["gardens"]:
+                for subgarden in garden["subgardens"]:
+                    collections = Collection.objects.filter(
+                        garden_id=subgarden["id"]
+                    ).order_by("date")
+                    if start_date is not None and end_date is not None:
+                        collections = collections.filter(
+                            date__gte=start_date, date__lte=end_date
+                        )
+                    for collection in collections:
+                        collection_dict = {
+                            "id": collection.id,
+                            "date_full": collection.date,
+                            "date": collection.date.strftime("%Y-%m-%d"),
+                            "creator": collection.creator.username,
+                            "garden": collection.garden.name,
+                            "records": [],
+                            "finished": collection.finished,
+                        }
 
-                    if collection.finished:
-                        subgarden["finished"] = subgarden["finished"] + 1
+                        if collection.finished:
+                            subgarden["finished"] = subgarden["finished"] + 1
 
-                    subgarden["collections"].append(collection_dict)
+                        subgarden["collections"].append(collection_dict)
 
         return render(request, "observations/views_content.html", context)
 
