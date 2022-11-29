@@ -32,11 +32,11 @@ def get_all_collections(request: HttpRequest) -> JsonResponse:
         if garden.is_subgarden():
             collections = Collection.objects.filter(
                 garden__main_garden=garden.main_garden
-            ).order_by("date")[:50]
+            ).order_by("-date")[:50]
         else:
             collections = Collection.objects.filter(
                 garden__main_garden=garden
-            ).order_by("date")[:50]
+            ).order_by("-date")[:50]
 
         collections_json = []
 
