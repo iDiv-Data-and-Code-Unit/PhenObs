@@ -10,7 +10,7 @@ test.describe('Home page', () => {
         await login(page, admin);
     });
 
-    test('Navbar | Brand', async () => {
+    test('Navbar | Brand', async ({ page }) => {
         // Expect to have "PhenObs | " in the brand
         await expect(page.locator('#brand')).toContainText('PhenObs | ');
         // Expect brand to have home page URL

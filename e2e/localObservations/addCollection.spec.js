@@ -1,5 +1,10 @@
-const { test, expect } = require('@playwright/test');
-const { add_user } = require('../helpers/login/userEnvironments.js');
+const {
+    test,
+    expect
+} = require('@playwright/test');
+const {
+    add_user
+} = require('../helpers/login/userEnvironments.js');
 const login = require('../helpers/login/login.js');
 
 test.describe.parallel('Add collection', () => {
@@ -30,7 +35,9 @@ test.describe.parallel('Add collection', () => {
     //     isMobileBrowser = isMobile;
     // });
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({
+        page
+    }) => {
         await login(page, add_user);
         await page.goto(process.env.E2E_INDEX + 'observations/');
         await page.waitForTimeout(100);
@@ -54,7 +61,10 @@ test.describe.parallel('Add collection', () => {
     //     }
     // });
 
-    test.afterEach(async ({ page, storageState }) => {
+    test.afterEach(async ({
+        page,
+        storageState
+    }) => {
         // Delete all the created collections
         console.log(created);
 
@@ -70,8 +80,7 @@ test.describe.parallel('Add collection', () => {
         for (let collectionID of created) {
             console.log(`${process.env.E2E_INDEX}observations/delete/${collectionID}/`);
             let response = await page.request.delete(
-                `${process.env.E2E_INDEX}observations/delete/${collectionID}/`,
-                {
+                `${process.env.E2E_INDEX}observations/delete/${collectionID}/`, {
                     headers: {
                         'X-CSRFToken': csrftoken,
                     }
@@ -87,11 +96,15 @@ test.describe.parallel('Add collection', () => {
         await page.evaluate(() => window.localStorage.setItem("collections", "{}"));
     });
 
-    test.afterAll(async ({ page }) => {
+    test.afterAll(async ({
+        page
+    }) => {
         await page.close();
     });
 
-    test('Before choosing a subgarden', async ({ page }) => {
+    test('Before choosing a subgarden', async ({
+        page
+    }) => {
         // Verify URL
         await expect(page).toHaveURL(process.env.E2E_INDEX + 'observations/add/');
 
@@ -148,7 +161,10 @@ test.describe.parallel('Add collection', () => {
         await expect(page.locator('#done-btn')).toHaveText('Done');
     });
 
-    test('Choosing gardens', async ({ page, context }) => {
+    test('Choosing gardens', async ({
+        page,
+        context
+    }) => {
         // Verify 3 garden options are being displayed with empty option being selected
         await expect(page.locator('#subgarden option')).toHaveCount(3);
         await expect(page.locator('#subgarden #empty')).toHaveCount(1);
@@ -280,7 +296,10 @@ test.describe.parallel('Add collection', () => {
         await page.goto(process.env.E2E_INDEX + 'observations/');
     });
 
-    test('Form controls', async ({ page, context }) => {
+    test('Form controls', async ({
+        page,
+        context
+    }) => {
         // Choose subgarden AddSubgarden1
         const collectionID = await selectSubgarden(page, 'AddSubgarden1');
         // await page.locator('#subgarden').click();
@@ -477,7 +496,10 @@ test.describe.parallel('Add collection', () => {
         await page.locator('div.modal.fade.show .modal-dialog #confirm-yes').click();
     });
 
-    test('Previous collection', async ({ page, isMobile }) => {
+    test('Previous collection', async ({
+        page,
+        isMobile
+    }) => {
         // Set the dates for the collections
         const today = new Date();
         const tomorrow = new Date(today);
@@ -705,7 +727,10 @@ test.describe.parallel('Add collection', () => {
         }
 
         // Check the date shown for the previous collection
-        const dateString = today.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+        const dateString = today.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+        });
         await expect(page.locator('#last-obs-date')).toHaveText(dateString);
 
         // Check the displayed values for the previous collection
@@ -908,15 +933,15 @@ test.describe.parallel('Add collection', () => {
         await expect(page.locator('#remarks-large-button')).toHaveText('missed');
         await expect(page.locator('#remarks-small-button')).toHaveText('missed');
 
-         // Change senescence value to yes
-         await page.locator('#senescence-button').click();
-         await page.locator('#senescence-modal').waitFor();
+        // Change senescence value to yes
+        await page.locator('#senescence-button').click();
+        await page.locator('#senescence-modal').waitFor();
 
-         // Change the value to unsure
-         await page.locator('#senescence-old').selectOption('u');
+        // Change the value to unsure
+        await page.locator('#senescence-old').selectOption('u');
 
-         // Save the value
-         await page.locator('#senescence-save').click();
+        // Save the value
+        await page.locator('#senescence-save').click();
 
         // Finish the collection
         await page.locator('#finish-btn').click();
