@@ -23,10 +23,22 @@ class Collection(models.Model):
         default=timezone.localdate(),
         help_text="Date and time of collection",
     )
-    doy = models.IntegerField(help_text="Day of year")
+    doy = models.IntegerField(help_text="Day of year", default=timezone.localdate().timetuple().tm_yday)
 
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     finished = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        self.doy = self.date.timetuple().tm_yday
+        super(Collection, self).save(*args, **kwargs)
+
+    def get_records(self):
+        # Returns all related records
+        return Record.objects.filter(collection=self)
+
+    def get_plants(self):
+        # Returns all related plants for a record
+        return Plant.objects.filter(garden=self.garden)
 
     def __str__(self) -> str:
         """Returns the garden, date and time information for the collection."""
@@ -57,7 +69,7 @@ class Record(models.Model):
 
     """
 
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='records')
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
     timestamp_entry = models.DateTimeField(
         default=timezone.now, help_text="Date and time of record entry"
@@ -86,23 +98,23 @@ class Record(models.Model):
     ]
 
     initial_vegetative_growth = models.CharField(
-        max_length=2, choices=all_observation_choices, null=True, blank=True
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     young_leaves_unfolding = models.CharField(
-        max_length=2, choices=all_observation_choices, null=True, blank=True
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     flowers_open = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True
+        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
     )
     peak_flowering = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True
+        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
     )
     flowering_intensity = models.IntegerField(blank=True, null=True)
     ripe_fruits = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True
+        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
     )
     senescence = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True
+        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
     )
     senescence_intensity = models.IntegerField(null=True, blank=True)
     maintenance = MultiSelectField(
@@ -110,10 +122,11 @@ class Record(models.Model):
     )
     remarks = models.TextField(blank=True)
     peak_flowering_estimation = models.CharField(
-        max_length=2, choices=min_observation_choices, null=True, blank=True
+        max_length=2, choices=min_observation_choices, null=True, blank=True, default='no'
     )
+    no_observation = models.BooleanField(default=False)
 
-    done = models.BooleanField()
+    done = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         """Returns the collection, plant, editing and editor information for the record."""

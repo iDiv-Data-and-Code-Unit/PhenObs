@@ -48,3 +48,10 @@ class Garden(models.Model):
         if self.main_garden is None:
             return False
         return True
+
+    def has_access(self, user):
+        """ Checks user's access to the subgarden """
+        subgarden = Garden.objects.get(auth_users=user)
+        if subgarden.main_garden == self.main_garden:
+            return True
+        return False

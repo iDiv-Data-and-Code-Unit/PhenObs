@@ -73,6 +73,7 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "pwa",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
@@ -306,3 +307,12 @@ PWA_APP_SPLASH_SCREEN = [
 ]
 PWA_APP_DIR = "ltr"
 PWA_APP_LANG = "en-US"
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ]
+}

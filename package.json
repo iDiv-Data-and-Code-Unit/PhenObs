@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/zxyctn/PhenObs#readme",
   "devDependencies": {
-    "@playwright/test": "^1.25.2"
+    "@playwright/test": "^1.31.1"
   },
   "dependencies": {
     "csv": "^6.2.1",
