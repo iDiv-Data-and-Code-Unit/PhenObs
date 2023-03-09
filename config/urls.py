@@ -12,33 +12,33 @@ admin.site.site_title = "PhenObs App Admin"
 admin.site.index_title = "PhenObs App Admin"
 
 urlpatterns = [
-    path("", include("pwa.urls")),
-    path("", views.home, name="home"),
-    path(
-        "observations/", include("phenobs.observations.urls", namespace="observations")
-    ),
-    path(
-        "imprint/",
-        TemplateView.as_view(template_name="pages/imprint.html"),
-        name="imprint",
-    ),
-    path(
-        "help/",
-        TemplateView.as_view(template_name="pages/help.html"),
-        name="help",
-    ),
-    # Django Admin, use {% url 'admin:index' %}
-    path(settings.ADMIN_URL, admin.site.urls),
-    # User management
-    path("users/", include("phenobs.users.urls", namespace="users")),
-    path("200/", TemplateView.as_view(template_name="200.html"), name="ok"),
-    path(
-        "offline/", TemplateView.as_view(template_name="offline.html"), name="offline"
-    ),
-    path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+                  path("", include("pwa.urls")),
+                  path("", views.home, name="home"),
+                  path(
+                      "observations/", include("phenobs.observations.urls", namespace="observations")
+                  ),
+                  path(
+                      "imprint/",
+                      TemplateView.as_view(template_name="pages/imprint.html"),
+                      name="imprint",
+                  ),
+                  path(
+                      "help/",
+                      TemplateView.as_view(template_name="pages/help.html"),
+                      name="help",
+                  ),
+                  # Django Admin, use {% url 'admin:index' %}
+                  path(settings.ADMIN_URL, admin.site.urls),
+                  # User management
+                  path("users/", include("phenobs.users.urls", namespace="users")),
+                  path("200/", TemplateView.as_view(template_name="200.html"), name="ok"),
+                  path(
+                      "offline/", TemplateView.as_view(template_name="offline.html"), name="offline"
+                  ),
+                  path("accounts/", include("allauth.urls")),
+                  path("auth/", include("dj_rest_auth.urls"))
+                  # Your stuff: custom urls includes go here
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

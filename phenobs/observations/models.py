@@ -32,12 +32,8 @@ class Collection(models.Model):
         self.doy = self.date.timetuple().tm_yday
         super(Collection, self).save(*args, **kwargs)
 
-    def get_records(self):
-        # Returns all related records
-        return Record.objects.filter(collection=self)
-
     def get_plants(self):
-        # Returns all related plants for a record
+        """Returns all related plants for a record"""
         return Plant.objects.filter(garden=self.garden)
 
     def __str__(self) -> str:

@@ -15,10 +15,17 @@ class RecordSerializer(serializers.ModelSerializer):
 class CollectionSerializer(serializers.ModelSerializer):
     id = fields.IntegerField(read_only=False, required=False)
     records = RecordSerializer(many=True, required=False)
+    includeRecords = fields.BooleanField(required=False, write_only=True)
 
     class Meta:
         model = Collection
         fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context.get('thin', False):
+            data.pop('records', None)
+        return data
 
     def create(self, validated_data):
         collection = Collection.objects.create(**validated_data)
