@@ -36,7 +36,8 @@ urlpatterns = [
                       "offline/", TemplateView.as_view(template_name="offline.html"), name="offline"
                   ),
                   path("accounts/", include("allauth.urls")),
-                  path("auth/", include("dj_rest_auth.urls"))
+                  path("auth/", include("dj_rest_auth.urls")),
+
                   # Your stuff: custom urls includes go here
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -74,7 +74,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "pwa",
     "rest_framework",
-    "dj_rest_auth"
+    "dj_rest_auth",
 ]
 
 LOCAL_APPS = [
@@ -215,7 +215,7 @@ FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 # https://docs.djangoproject.com/en/dev/ref/settings/#session-cookie-httponly
 SESSION_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
-CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = ["localhost", "127.0.0.1"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#secure-browser-xss-filter
 SECURE_BROWSER_XSS_FILTER = True
@@ -307,6 +307,11 @@ PWA_APP_SPLASH_SCREEN = [
 ]
 PWA_APP_DIR = "ltr"
 PWA_APP_LANG = "en-US"
+
+REST_AUTH = {
+    'TOKEN_MODEL': None,
+    'SESSION_LOGIN': True
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
