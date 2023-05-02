@@ -45,7 +45,7 @@ MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware",
                "corsheaders.middleware.CorsMiddleware",
                "django.middleware.common.CommonMiddleware"]  # noqa F405
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:4173"]
 CORS_ALLOW_CREDENTIALS = True
 
 # https://django-debug-toolbar.readthedocs.io/en/latest/configuration.html#debug-toolbar-config
