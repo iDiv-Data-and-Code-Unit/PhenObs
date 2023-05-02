@@ -100,17 +100,17 @@ class Record(models.Model):
         max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     flowers_open = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     peak_flowering = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     flowering_intensity = models.IntegerField(blank=True, null=True)
     ripe_fruits = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     senescence = models.CharField(
-        max_length=2, choices=unmissed_observation_choices, null=True, blank=True, default='no'
+        max_length=2, choices=all_observation_choices, null=True, blank=True, default='no'
     )
     senescence_intensity = models.IntegerField(null=True, blank=True)
     maintenance = MultiSelectField(
@@ -123,6 +123,10 @@ class Record(models.Model):
     no_observation = models.BooleanField(default=False)
 
     done = models.BooleanField(default=False)
+
+    def plant_name(self):
+        """Returns all related plants for a record"""
+        return self.plant.garden_name
 
     def __str__(self) -> str:
         """Returns the collection, plant, editing and editor information for the record."""
