@@ -26,7 +26,7 @@ class Garden(models.Model):
     auth_groups = models.ManyToManyField(
         Group, blank=True, verbose_name="Access groups"
     )
-    auth_users = models.ManyToManyField(User, blank=True, verbose_name="Access users")
+    auth_users = models.ManyToManyField(User, blank=True, verbose_name="Access users", related_name="subgarden")
     # If main != null, then it is a subgarden. Else, it is a main garden that has subgardens.
     main_garden = models.ForeignKey(
         "self", on_delete=models.DO_NOTHING, blank=True, null=True
