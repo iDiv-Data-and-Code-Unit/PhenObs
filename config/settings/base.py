@@ -216,7 +216,7 @@ FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 SESSION_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
 CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ["localhost", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["localhost", "127.0.0.1", "http://127.0.0.1:5173"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#secure-browser-xss-filter
 SECURE_BROWSER_XSS_FILTER = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
@@ -309,8 +309,7 @@ PWA_APP_DIR = "ltr"
 PWA_APP_LANG = "en-US"
 
 REST_AUTH = {
-    'TOKEN_MODEL': None,
-    'SESSION_LOGIN': True
+    'TOKEN_MODEL': None
 }
 
 REST_FRAMEWORK = {
