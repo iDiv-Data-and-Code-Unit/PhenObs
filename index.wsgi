@@ -28,7 +28,7 @@ ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent
 sys.path.append(str(ROOT_DIR / "phenobs"))
 
 # Add the site-packages of the chosen virtualenv to work with
-site.addsitedir(os.path.join(application_path, 'venv/lib/python3.8/site-packages'))
+site.addsitedir(os.path.join(application_path, 'venv3.10/lib/python3.10/site-packages'))
 
 # Activate your virtual env
 activate_env=os.path.expanduser(os.path.join(application_path, 'venv/bin/activate'))
