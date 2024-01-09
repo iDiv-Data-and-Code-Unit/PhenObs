@@ -6,9 +6,9 @@ from django.urls import path
 from django.utils.datastructures import MultiValueDictKeyError
 from pandas import DataFrame, read_csv
 
+from .models import Plant
 from ..gardens.models import Garden
 from ..species.models import Species
-from .models import Plant
 
 
 class CsvImportForm(forms.Form):
@@ -28,7 +28,8 @@ class PlantAdmin(admin.ModelAdmin):
 
     list_display = ("id", "garden", "order", "species", "garden_name", "active")
     list_display_links = ("id", "garden_name", "species")
-    search_fields = ("id", "garden", "species", "garden_name", "order", "active")
+    search_fields = (
+    "id", "garden__name", "garden__main_garden__name", "species__reference_name", "garden_name", "order")
     list_per_page = 10
 
     def get_urls(self):
