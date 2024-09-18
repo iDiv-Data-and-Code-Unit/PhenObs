@@ -34,5 +34,5 @@ class GardenAdmin(admin.ModelAdmin):
         ),
     )
 
-    search_fields = ("id", "name")
+    search_fields = ("id", "name", "main_garden__name")
     list_per_page = 10

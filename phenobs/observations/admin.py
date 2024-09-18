@@ -11,7 +11,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
     list_display = ("id", "garden", "date", "creator", "finished")
     list_display_links = ("id", "date")
-    search_fields = ("id", "garden", "user")
+    search_fields = ("id", "garden__name", "garden__main_garden__name", "creator__username")
     list_per_page = 10
 
 
@@ -28,7 +28,9 @@ class RecordAdmin(admin.ModelAdmin):
         "done",
     )
     list_display_links = ("id", "collection", "timestamp_edit")
-    search_fields = ("id", "collection", "editor", "maintenance", "remarks", "done")
+    search_fields = (
+        "id", "collection__garden__name", "collection__garden__main_garden__name", "editor__username", "maintenance",
+        "remarks", "plant__garden_name")
     list_per_page = 10
 
     def get_urls(self):
